@@ -15,7 +15,7 @@ Further products will be added as this app evolves.
 
 The usage of this New Relic App is quite simple. Follow the Getting Started guide to publish, deploy and subscribe your account to this Nerdpack. If you want the app to be able to see sub-accounts, deploy at the master account level. It will only show data from accounts that a user is named/permitted on, so users of a sub-account B won't be able to see sub-account A if they are not named users on that account. 
 
-![screenshot of this project](assets/Maturity.png)
+![screenshot of this project](screenshots/Maturity.png)
 
 ### Open Source License
 
