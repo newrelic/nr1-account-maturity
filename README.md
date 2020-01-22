@@ -17,8 +17,6 @@ The usage of this New Relic App is quite simple. Follow the Getting Started guid
 
 ![screenshot of this project](screenshots/Maturity.png)
 
-### Open source license
-=======
 Once the loading swirls appear as above it means the Nerdlet has began attempting to check for all accounts in your account structure and gather some useful data for your usage.
 
 This latest version collates data about your accounts usage for APM and Browser. In the future we want to add all New Relic products to the Account Maturity Nerdpack.
