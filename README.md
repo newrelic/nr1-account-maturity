@@ -21,7 +21,7 @@ Once the loading swirls appear as above it means the Nerdlet has began attemptin
 
 This latest version collates data about your accounts usage for APM and Browser. In the future we want to add all New Relic products to the Account Maturity Nerdpack.
 
-![screenshot of this project](screenshots/account-maturity.png)
+![screenshot of this project](screenshots/acount-maturity.png)
 
 As you can see in the above screenshot, this shows a single account and breaks down feature usage to a score. 0-29 will be coloured red. 30-69 will be coloured orange and 70-100 will be green. 
 
