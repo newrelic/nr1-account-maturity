@@ -13,32 +13,30 @@ Further products will be added as this app evolves. Synthetics, Mobile, Alerts, 
 
 ## Usage
 
-The usage of this New Relic App is quite simple. Follow the Getting Started guide to publish, deploy, and subscribe your account to this Nerdpack. If you want the app to be able to see sub-accounts, deploy at the master account level. It will only show data from accounts that a user is named/permitted on, so users of a sub-account B won't be able to see sub-account A if they are not named users on that account. 
+The usage of this New Relic App is quite simple. Follow the **Getting Started** guide to publish, deploy, and subscribe your account to this Nerdpack. If you want the app to be able to see sub-accounts, deploy at the master account level. It will only show data from accounts that a user is named/permitted on, so users of a sub-account B won't be able to see sub-account A if they are not named users on that account. 
 
 ![screenshot of this project](screenshots/Maturity.png)
 
-Once the loading swirls appear as above it means the Nerdlet has began attempting to check for all accounts in your account structure and gather some useful data for your usage.
+When the loading swirls appear as above, it means the Nerdlet has begun to check for all accounts in your account structure and to gather some useful data for your usage.
 
-This latest version collates data about your accounts usage for APM and Browser. In the future we want to add all New Relic products to the Account Maturity Nerdpack.
+This latest version collates data about your accounts usage for APM and Browser. Eventually, we want to add all New Relic products to the Account Maturity Nerdpack.
 
 ![screenshot of this project](screenshots/acount-maturity.png)
 
-As you can see in the above screenshot, this shows a single account and breaks down feature usage to a score. 0-29 will be coloured red. 30-69 will be coloured orange and 70-100 will be green. 
+The above screenshot shows a single account and breaks down feature usage to a score. 0-29 is colored red. 30-69 is colored orange, and 70-100 is green. 
 
-The aim of the Account Maturity Nerdpack is to highlight opporunities to get further value from your account and ensure that across multiple accounts and applications that key features are enabled and in use by your teams.
+The aim of the Account Maturity Nerdpack is to highlight opporunities to get further value from your account and ensure that across multiple accounts and applications, key features are enabled and in use by your teams.
 
 ![screenshot of this project](screenshots/BrowserMaturity.png)
 
-The Browser metrics are similar to APM with a guidance on some elements of the Browser product with the same level of scoring.
+The Browser metrics are similar to APM metrics, providing red, orange, and green scores on Browser features.
 
 ![screenshot of this project](screenshots/DataView.png)
 
-When you click on any of the rows which are score summaries for an entire account, you will get a breakdown view. This helps you quickly understand which apps are contributing to a poor score.
+When you click on any of the rows that are score summaries for an entire account, you get a breakdown view that quickly shows which apps are contributing to a poor score. This makes your life so much easier if you have multiple sub-accounts and need to keep an eye on how different teams are using New Relic and enabling key features.
 
-So this means if you have multiple sub-accounts and need to keep an eye on how different teams are using New Relic and enabling key features, this makes your life so much easier.
-
-**Should I Aim For 100 score**
-Yes and No. It's a guideline not a requirement. Some of the metrics may be features that for your particular project are not specifically useful, but where you want your teams using these key features it's an instant guideliine if they have been configured and reporting to the account.
+**Should I aim for a 100 score?**
+The scores are a guideline, not a requirement. Some of the metrics might be for features that aren't as necessary for your particular project. However, for key features you want your team to use, the app shows you if they've been configured and are reporting to the account.
 
 ### Open Source License
 This project is distributed under the [Apache 2 license](LICENSE).
