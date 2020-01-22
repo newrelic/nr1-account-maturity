@@ -9,7 +9,7 @@ The goal of this app is not to critique your account usage, but to highlight unu
 - APM feature usage
 - Browser feature usage
 
-Further products will be added as this app evolves.
+Further products will be added as this app evolves. Synthetics, Mobile, Alerts, Insights, Infrastructure we hope to add metrics which capture the usage of key features in each product to ensure maximum value from your New Relic account.
 
 ## Usage
 
@@ -18,7 +18,31 @@ The usage of this New Relic App is quite simple. Follow the Getting Started guid
 ![screenshot of this project](screenshots/Maturity.png)
 
 ### Open source license
+=======
+Once the loading swirls appear as above it means the Nerdlet has began attempting to check for all accounts in your account structure and gather some useful data for your usage.
 
+This latest version collates data about your accounts usage for APM and Browser. In the future we want to add all New Relic products to the Account Maturity Nerdpack.
+
+![screenshot of this project](screenshots/acount-maturity.png)
+
+As you can see in the above screenshot, this shows a single account and breaks down feature usage to a score. 0-29 will be coloured red. 30-69 will be coloured orange and 70-100 will be green. 
+
+The aim of the Account Maturity Nerdpack is to highlight opporunities to get further value from your account and ensure that across multiple accounts and applications that key features are enabled and in use by your teams.
+
+![screenshot of this project](screenshots/BrowserMaturity.png)
+
+The Browser metrics are similar to APM with a guidance on some elements of the Browser product with the same level of scoring.
+
+![screenshot of this project](screenshots/DataView.png)
+
+When you click on any of the rows which are score summaries for an entire account, you will get a breakdown view. This helps you quickly understand which apps are contributing to a poor score.
+
+So this means if you have multiple sub-accounts and need to keep an eye on how different teams are using New Relic and enabling key features, this makes your life so much easier.
+
+**Should I Aim For 100 score**
+Yes and No. It's a guideline not a requirement. Some of the metrics may be features that for your particular project are not specifically useful, but where you want your teams using these key features it's an instant guideliine if they have been configured and reporting to the account.
+
+### Open Source License
 This project is distributed under the [Apache 2 license](LICENSE).
 
 ### What do you need to make this work?
@@ -34,12 +58,14 @@ npm -v
 3. Run the following command to clone this repository and run the code locally against your New Relic data:
 
 ```bash
-nr1 nerdpack:clone -r https://github.com/newrelic/nr1-nerdpack-layout-standard.git
+nr1 nerdpack:clone -r https://github.com/newrelic/nr1-account-maturity.git
 cd nr1-nerdpack-layout-standard
 nr1 nerdpack:serve
 ```
 
 Visit [https://one.newrelic.com/?nerdpacks=local](https://one.newrelic.com/?nerdpacks=local), navigate to the Nerdpack, and :sparkles:
+
+Remember that when serving a Nerdpack it will default load for the account you set as your default profile. If you are handling multiple accounts through your NR1 CLI you can use `nr1 profiles:default` and select a different profile to be your default.
 
 ### Deploying this Nerdpack
 
