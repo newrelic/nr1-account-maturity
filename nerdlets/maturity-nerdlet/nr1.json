@@ -1,0 +1,6 @@
+{
+    "schemaType": "NERDLET",
+    "id": "maturity-nerdlet",
+    "description": "Evaluates maturity score for New Relic Products",
+    "displayName": "Account Maturity"
+}

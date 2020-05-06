@@ -1,0 +1,42 @@
+{
+  "private": true,
+  "name": "nr1-maturity",
+  "description": "New Relic Account Maturity App",
+  "version": "0.5.1",
+  "scripts": {
+    "start": "nr1 nerdpack:serve",
+    "test": "exit 0",
+    "eslint-check": "eslint nerdlets/",
+    "eslint-fix": "eslint nerdlets/ --fix",
+    "snyk-protect": "snyk protect",
+    "prepare": "npm run snyk-protect"
+  },
+  "bugs": {
+    "email": "opensource+maturity@newrelic.com"
+  },
+  "dependencies": {
+    "maturity-products": "git+ssh://git@github.com:newrelic-experimental/nr1-account-maturity-products.git",
+    "react": "^16.6.3",
+    "react-dom": "^16.6.3",
+    "react-tabs": "^3.1.0",
+    "snyk": "^1.319.0"
+  },
+  "browserslist": [
+    "last 2 versions",
+    "not ie < 11",
+    "not dead"
+  ],
+  "devDependencies": {
+    "@newrelic/eslint-plugin-newrelic": "^0.3.0",
+    "@semantic-release/changelog": "^3.0.6",
+    "@semantic-release/git": "^7.0.18",
+    "babel-eslint": "^10.0.3",
+    "babel-runtime": "^6.26.0",
+    "eslint": "^6.7.2",
+    "eslint-config-prettier": "^6.7.0",
+    "eslint-plugin-prettier": "^3.1.2",
+    "file-loader": "^5.0.2",
+    "prettier": "^1.19.1"
+  },
+  "snyk": true
+}

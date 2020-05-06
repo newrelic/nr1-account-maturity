@@ -1,0 +1,10 @@
+.nos
+.idea
+dist
+node_modules
+coverage
+tmp
+dump*
+.DS_Store
+yarn.lock
+*.tar.gz
