@@ -7,7 +7,9 @@
     "start": "nr1 nerdpack:serve",
     "test": "exit 0",
     "eslint-check": "eslint nerdlets/",
-    "eslint-fix": "eslint nerdlets/ --fix"
+    "eslint-fix": "eslint nerdlets/ --fix",
+    "snyk-protect": "snyk protect",
+    "prepare": "npm run snyk-protect"
   },
   "bugs": {
     "email": "opensource+maturity@newrelic.com"
@@ -16,7 +18,8 @@
     "maturity-products": "git+ssh://git@source.datanerd.us:CSE/maturity-products",
     "react": "^16.6.3",
     "react-dom": "^16.6.3",
-    "react-tabs": "^3.1.0"
+    "react-tabs": "^3.1.0",
+    "snyk": "^1.319.0"
   },
   "browserslist": [
     "last 2 versions",
@@ -34,5 +37,6 @@
     "eslint-plugin-prettier": "^3.1.2",
     "file-loader": "^5.0.2",
     "prettier": "^1.19.1"
-  }
+  },
+  "snyk": true
 }
