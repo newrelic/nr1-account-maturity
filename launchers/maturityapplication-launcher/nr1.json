@@ -1,7 +1,0 @@
-{
-    "schemaType": "LAUNCHER",
-    "id": "maturityapplication-launcher",
-    "description": "Describe me",
-    "displayName": "Account Maturity",
-    "rootNerdletId": "maturityapplication-nerdlet"
-}

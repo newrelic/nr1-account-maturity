@@ -1,0 +1,7 @@
+{
+    "schemaType": "LAUNCHER",
+    "id": "maturity-launcher",
+    "description": "Evaluates maturity of accounts within New Relic",
+    "displayName": "Account Maturity Modular",
+    "rootNerdletId": "maturity-nerdlet"
+}

@@ -1,9 +1,10 @@
-node_modules
-.idea
 .nos
-coverage
+.idea
 dist
+node_modules
+coverage
 tmp
-yarn.lock
+dump*
 .DS_Store
+yarn.lock
 *.tar.gz

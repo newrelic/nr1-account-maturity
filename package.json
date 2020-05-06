@@ -9,22 +9,14 @@
     "eslint-check": "eslint nerdlets/",
     "eslint-fix": "eslint nerdlets/ --fix"
   },
-  "nr1": {
-    "uuid": "9c9701e6-249d-4e4e-b3da-d4edbe332893"
-  },
   "bugs": {
     "email": "opensource+maturity@newrelic.com"
   },
   "dependencies": {
-    "graphql": "^14.5.8",
-    "graphql-tag": "^2.10.1",
-    "prop-types": "^15.6.2",
+    "maturity-products": "git+ssh://git@source.datanerd.us:CSE/maturity-products",
     "react": "^16.6.3",
     "react-dom": "^16.6.3",
-    "react-spinners": "^0.6.1",
-    "react-table": "^6.10.3",
-    "reactjs-popup": "^1.5.0",
-    "semver": "^6.3.0"
+    "react-tabs": "^3.1.0"
   },
   "browserslist": [
     "last 2 versions",
