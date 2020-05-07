@@ -1,0 +1,17 @@
+{
+  "tagline": "Capture the full value from your New Relic Account",
+  "repository": "https://github.com/newrelic/nr1-account-maturity.git",
+  "details": "Account Maturity gives a simple overview of some features and functionalities of your New Relic account to highlight where you may have missed a key feature, forgotten to enable a setting or config and generally ensure across our platform that you're making the most of the connected aspects",
+  "support": {
+    "issues": {
+      "url": "https://github.com/newrelic/nr1-account-maturity/issues"
+    },
+    "email": {
+      "address": "opensource+maturity@newrelic.com"
+    },
+    "community": {
+      "url": "https://discuss.newrelic.com/t/new-relic-account-maturity-nerdpack/101542"
+    }
+  },
+  "whatsNew": "- New: Brand New Release - See feature function view for 8 products."
+}
