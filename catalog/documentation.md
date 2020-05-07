@@ -19,15 +19,9 @@ As this app evolves and more data is exposed through NerdGraph, we will be addin
 
 The Overview helps you see quickly where improvements could potentially be made across the product sets you might be using. With that information perhaps we might click into APM to learn a bit more.
 
-![Overview](screenshots/nr1-account-maturity-overview.png)
-
 Each tab lets you see a breakdown of how the score is calculated. We've weighted the features based on our opinion of importance out of the box. In the future we aim at exposing the weightings to allow you to change or omit metrics that may not be relevant to your organisation.
 
-![APM](screenshots/nr1-account-maturity-APM.png)
-
 Each column on the table containes a metric and the evaluation we gave it for that account. To identify areas for improvement, click on the row of an account. The resulting drilldown is available for APM, Browser, and Synthetics, and we will add this to Mobile and to specific metrics on demand where the metric has a breakdown (some metrics are at account level and cannot be split any lower).
-
-![Drilldown](screenshots/nr1-account-maturity-drilldown.png)
 
 Within the drilldown there's lots of useful and actionable information. This now shows you the entity within that account and whether it was using the feature or function we are calculating in the metric. You can quickly sort your entities by that column and find which entities are dragging your score down.
 
