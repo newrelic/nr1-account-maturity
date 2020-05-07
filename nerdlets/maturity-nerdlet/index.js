@@ -1,5 +1,4 @@
 import React from 'react';
-import 'react-tabs/style/react-tabs.css';
 import { NerdGraphQuery } from 'nr1';
 
 import { Tab, Tabs, TabList, TabPanel } from 'react-tabs';
