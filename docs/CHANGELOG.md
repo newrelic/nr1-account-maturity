@@ -1,3 +1,19 @@
+## [0.5.1](https://github.com/newrelic/nr1-account-maturity/compare/v0.5.0...v0.5.1) (2020-06-02)
+
+
+### Bug Fixes
+
+* modified only release name to `v0.5.0` in attempt to get semantic-release to recognize existing release and increment appropriately ([fee4e33](https://github.com/newrelic/nr1-account-maturity/commit/fee4e332ae9df445b474b7d5e94890a0489a74a7))
+* reverting semantic-release changes and triggering new patch release ([5538db0](https://github.com/newrelic/nr1-account-maturity/commit/5538db02946da73193628adb6fa99c93cea1e521))
+* Switch CI to GitHub Actions ([#13](https://github.com/newrelic/nr1-account-maturity/issues/13)) ([ded8d04](https://github.com/newrelic/nr1-account-maturity/commit/ded8d0495b78909711e9d0031b0ed04dbe021353))
+
+
+### Reverts
+
+* Revert "chore: update third-party manifest and notices [skip ci]" ([c8b6ca5](https://github.com/newrelic/nr1-account-maturity/commit/c8b6ca5fafc162f23069a39cf1903c0f811eead8))
+* Revert "chore: update third-party manifest and notices [skip ci]" ([5c1530e](https://github.com/newrelic/nr1-account-maturity/commit/5c1530ef76d74649cd252fe4bfa79f5b06610a25))
+* Revert "chore(release): 1.0.0 [skip ci]" ([8ec34cf](https://github.com/newrelic/nr1-account-maturity/commit/8ec34cf2a5920a0981d2562ce0e27d6f8a5f4b3c))
+
 # [0.5.0](https://github.com/newrelic/nr1-datalyzer/compare/v0.4.0...v0.5.0) (2020-04-01)
 
 
