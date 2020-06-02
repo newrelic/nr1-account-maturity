@@ -1,3 +1,16 @@
+# 1.0.0 (2020-06-02)
+
+
+### Bug Fixes
+
+* package-lock.json should be commited to repo ([f44b58c](https://github.com/newrelic/nr1-account-maturity/commit/f44b58c2fda9baa81a107b3a8e02fb31a6179275))
+* Switch CI to GitHub Actions ([#13](https://github.com/newrelic/nr1-account-maturity/issues/13)) ([ded8d04](https://github.com/newrelic/nr1-account-maturity/commit/ded8d0495b78909711e9d0031b0ed04dbe021353))
+
+
+### Features
+
+* improve catalog screenshots ([1442cce](https://github.com/newrelic/nr1-account-maturity/commit/1442ccebadd7842a76029f16eeb8b1ef16ce337a))
+
 # [0.5.0](https://github.com/newrelic/nr1-datalyzer/compare/v0.4.0...v0.5.0) (2020-04-01)
 
 
