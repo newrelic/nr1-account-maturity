@@ -1,3 +1,10 @@
+## [0.5.3](https://github.com/newrelic/nr1-account-maturity/compare/v0.5.2...v0.5.3) (2020-06-15)
+
+
+### Bug Fixes
+
+* upgrade react-tabs from 3.1.0 to 3.1.1 ([3ab4522](https://github.com/newrelic/nr1-account-maturity/commit/3ab45223eabf58b9cd2e11310d3e6e268c467831))
+
 ## [0.5.2](https://github.com/newrelic/nr1-account-maturity/compare/v0.5.1...v0.5.2) (2020-06-15)
 
 
