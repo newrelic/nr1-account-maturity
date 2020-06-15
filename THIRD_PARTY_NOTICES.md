@@ -66,7 +66,7 @@ SOFTWARE.
 
 ### react-tabs
 
-This product includes source derived from [react-tabs](https://github.com/reactjs/react-tabs) ([v3.1.0](https://github.com/reactjs/react-tabs/tree/v3.1.0)), distributed under the [MIT License](https://github.com/reactjs/react-tabs/blob/v3.1.0/LICENSE):
+This product includes source derived from [react-tabs](https://github.com/reactjs/react-tabs) ([v3.1.1](https://github.com/reactjs/react-tabs/tree/v3.1.1)), distributed under the [MIT License](https://github.com/reactjs/react-tabs/blob/v3.1.1/LICENSE):
 
 ```
 Copyright (c) 2015-2019 by Matt Zabriskie
