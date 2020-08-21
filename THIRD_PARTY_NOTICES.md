@@ -122,7 +122,7 @@ SOFTWARE.
 
 ### snyk
 
-This product includes source derived from [snyk](https://github.com/snyk/snyk) ([v1.320.2](https://github.com/snyk/snyk/tree/v1.320.2)), distributed under the [Apache-2.0 License](https://github.com/snyk/snyk/blob/v1.320.2/LICENSE):
+This product includes source derived from [snyk](https://github.com/snyk/snyk) ([v1.327.0](https://github.com/snyk/snyk/tree/v1.327.0)), distributed under the [Apache-2.0 License](https://github.com/snyk/snyk/blob/v1.327.0/LICENSE):
 
 ```
 Copyright 2015 Snyk Ltd.
