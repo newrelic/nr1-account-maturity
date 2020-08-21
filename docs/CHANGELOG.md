@@ -1,3 +1,10 @@
+## [0.5.4](https://github.com/newrelic/nr1-account-maturity/compare/v0.5.3...v0.5.4) (2020-08-21)
+
+
+### Bug Fixes
+
+* upgrade snyk from 1.320.2 to 1.327.0 ([9fdc3e2](https://github.com/newrelic/nr1-account-maturity/commit/9fdc3e249a242fa5199dda375e4e923cbd9c2fff))
+
 ## [0.5.3](https://github.com/newrelic/nr1-account-maturity/compare/v0.5.2...v0.5.3) (2020-06-15)
 
 
