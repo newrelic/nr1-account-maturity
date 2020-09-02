@@ -1,4 +1,4 @@
-[![New Relic One Catalog Project header](https://github.com/newrelic/open-source-office/raw/master/examples/categories/images/New_Relic_One_Catalog_Project.png)](https://github.com/newrelic/open-source-office/blob/master/examples/categories/index.md#nr1-catalog)
+[![New Relic One Catalog Project header](https://github.com/newrelic/opensource-website/raw/master/src/images/categories/New_Relic_One_Catalog_Project.png)](https://opensource.newrelic.com/oss-category/#new-relic-one-catalog-project)
 
 # New Relic One - Account Maturity
 
@@ -39,19 +39,22 @@ nr1 nerdpack:serve
 ```
 4. Visit [https://one.newrelic.com/?nerdpacks=local](https://one.newrelic.com/?nerdpacks=local), navigate to the application, and :sparkles: enjoy!
 
-## Deployment
+## Deploying this Nerdpack
 
-To deploy Account Maturity, open a terminal session in the application directory and run the following commands:
+Open a command prompt in the nerdpack's directory and run the following commands.
 
 ```bash
-# If you need to create a new uuid for the account to which you're deploying this Nerdpack, use the following
-# nr1 nerdpack:uuid -g [--profile=your_profile_name]
-# to see a list of APIkeys / profiles available in your development environment, run nr1 credentials:list
+# To create a new uuid for the nerdpack so that you can deploy it to your account:
+nr1 nerdpack:uuid -g [--profile=your_profile_name]
+
+# To see a list of APIkeys / profiles available in your development environment:
+# nr1 profiles:list
 nr1 nerdpack:publish [--profile=your_profile_name]
 nr1 nerdpack:deploy [-c [DEV|BETA|STABLE]] [--profile=your_profile_name]
 nr1 nerdpack:subscribe [-c [DEV|BETA|STABLE]] [--profile=your_profile_name]
 ```
-If you want the Account Maturity app to be able to see subaccounts, deploy at the master account level. It will only show data from accounts that a user is named/permitted on, so users of subaccount B won't be able to see sub-account A if they are not named users on that account. 
+
+If you want the Account Maturity app to be able to see subaccounts, deploy at the master account level. It will only show data from accounts that a user is named/permitted on, so users of subaccount B won't be able to see sub-account A if they are not named users on that account.
 
 ## Usage
 
@@ -69,28 +72,29 @@ Each column on the table containes a metric and the evaluation we gave it for th
 
 Within the drilldown there's lots of useful and actionable information. This now shows you the entity within that account and whether it was using the feature or function we are calculating in the metric. You can quickly sort your entities by that column and find which entities are dragging your score down.
 
-## Contributing
+## Open Source License
 
-Contributions are welcome (and if you submit a Enhancement Request, expect to be invited to contribute it yourself :grin:). Please review our [Contributors Guide](CONTRIBUTING.md).
+This project is distributed under the [Apache 2 license](LICENSE).
 
-Keep in mind that when you submit your pull request, you'll need to sign the CLA via the click-through using CLA-Assistant. If you'd like to execute our corporate CLA, or if you have any questions, please drop us an email at opensource+maturity@newrelic.com
+## Community Support
 
-## Support
-
-New Relic has open-sourced this project. This project is provided AS-IS WITHOUT WARRANTY OR DEDICATED SUPPORT. Issues and contributions should be reported to the project here on GitHub.
-
-We encourage you to bring your experiences and questions to the [Explorers Hub](https://discuss.newrelic.com) where our community members collaborate on solutions and new ideas.
-
-### Community
-
-New Relic hosts and moderates an online forum where customers can interact with New Relic employees as well as other customers to get help and share best practices. Like all official New Relic open source projects, there's a related Community topic in the New Relic Explorers Hub. You can find this project's topic/threads here:
+New Relic hosts and moderates an online forum where you can interact with New Relic employees as well as other customers to get help and share best practices. Like all New Relic open source community projects, there's a related topic in the New Relic Explorers Hub. You can find this project's topic/threads here:
 
 [https://discuss.newrelic.com/t/new-relic-account-maturity-nerdpack/101542](https://discuss.newrelic.com/t/new-relic-account-maturity-nerdpack/101542)
 
-### Issues / Enhancement Requests
+Please do not report issues with Account Maturity to New Relic Global Technical Support. Instead, visit the [`Explorers Hub`](https://discuss.newrelic.com/c/build-on-new-relic) for troubleshooting and best-practices.
 
-Issues and enhancement requests can be submitted in the [Issues tab of this repository](https://github.com/newrelic/nr1-account-maturity/issues). Please search for and review the existing open issues before submitting a new issue.
+## Issues / Enhancement Requests
 
-## <a name='License'></a>License
+Issues and enhancement requests can be submitted in the [Issues tab of this repository](../../issues). Please search for and review the existing open issues before submitting a new issue.
 
-The project is released under version 2.0 of the [Apache license](http://www.apache.org/licenses/LICENSE-2.0).
+## Security
+
+As noted in our [security policy](https://github.com/newrelic/nr1-account-maturity/security/policy), New Relic is committed to the privacy and security of our customers and their data. We believe that providing coordinated disclosure by security researchers and engaging with the security community are important means to achieve our security goals.
+If you believe you have found a security vulnerability in this project or any of New Relic's products or websites, we welcome and greatly appreciate you reporting it to New Relic through [HackerOne](https://hackerone.com/newrelic).
+
+## Contributing
+
+Contributions are encouraged! If you submit an enhancement request, we'll invite you to contribute the change yourself. Please review our [Contributors Guide](CONTRIBUTING.md).
+
+Keep in mind that when you submit your pull request, you'll need to sign the CLA via the click-through using CLA-Assistant. If you'd like to execute our corporate CLA, or if you have any questions, please drop us an email at opensource+nr1-account-maturity@newrelic.com
