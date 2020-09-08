@@ -13,5 +13,5 @@
       "url": "https://discuss.newrelic.com/t/new-relic-account-maturity-nerdpack/101542"
     }
   },
-  "whatsNew": "- New: Brand New Release -\n Feature: Understand Your Account Feature Function usage \n Feature: Drill down to see which apps are impacting or missing key features \n 8 Product Focus for Platform view"
+  "whatsNew": "- Drilldown views for Infrastructure and Mobile \n- Updates on score calculations for Infrastructure and Mobile \n- Bug fixes for Browser score calculation \n- Interstitial page while loading the Overview table"
 }
