@@ -140,7 +140,9 @@ export default class MaturityApplication extends React.Component {
   }
 
   render() {
+    let { selectedTag } = this.state;
     console.log(this.state);
+
     return (
       <>
       {this.renderTagFilter()}
@@ -157,7 +159,7 @@ export default class MaturityApplication extends React.Component {
           <Tab>Programmability</Tab>
           <Tab>Mobile</Tab>
         </TabList>
-        <ApplicationCtxProvider tag={this.state.selectedTag} nr1graph={NerdGraphQuery}>
+        <ApplicationCtxProvider tag={selectedTag} nr1graph={NerdGraphQuery}>
           <MaturityScoreCtxProvider>
             <TabPanel>
               <OverviewPanel />
