@@ -95,7 +95,9 @@ export default class Tags extends React.Component {
     let tagKey = null;
 
     if (tagVal == 'Default') { //reset to default
-      this.setState({ selectedTag: null, tagTitle: 'Tags' })
+      this.setState({ selectedTag: null, tagTitle: 'Tags' }, () => {
+        this.props.setTag(this.state.selectedTag);
+      })
       return;
     }
 
