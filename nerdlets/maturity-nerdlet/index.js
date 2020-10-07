@@ -128,7 +128,6 @@ export default class MaturityApplication extends React.Component {
 
   renderTagFilter() {
     let { allTags, searchText, tagTitle } = this.state;
-    console.log(allTags);
 
     if (searchText.length > 0) {
       const re = new RegExp(searchText, 'i');
