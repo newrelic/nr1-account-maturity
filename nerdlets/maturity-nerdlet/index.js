@@ -24,7 +24,8 @@ export default class MaturityApplication extends React.Component {
     this.state = {
       allTags: null,
       searchText: '',
-      selectedTag: null
+      selectedTag: null,
+      tagTitle: 'Tags'
     }
   }
 
@@ -62,9 +63,9 @@ export default class MaturityApplication extends React.Component {
       let flattend = resp.flat();
       let first = true;
 
-      let i = 0;
-      console.log("flat")
-      console.log(flattend);
+      allTags.push({title: 'Default', items: ['Default']}); //Default option
+
+      let i = 1;
       for (let entityTags of flattend) {
         if (first == true) {
           for (let aTag of entityTags.tags) {
@@ -99,7 +100,7 @@ export default class MaturityApplication extends React.Component {
   async queryTags(q) {
     let res = await NerdGraphQuery.query({query: q});
     if (res.errors) {
-      console.debug(res);
+      console.debug(res.errors);
     } else {
       let aSetOfTags = res.data.actor.entitySearch.results.entities;
       return aSetOfTags;
@@ -110,30 +111,56 @@ export default class MaturityApplication extends React.Component {
     const { allTags } = this.state;
     let tagKey = null;
 
+    if (tagVal == 'Default') { //reset to default
+      this.setState({ selectedTag: null, tagTitle: 'Tags' })
+      return;
+    }
+
     for (let tag of allTags) {
       if (tag.items.includes(tagVal)) {
         tagKey = tag.title;
+        break;
       }
     }
 
-    this.setState({ selectedTag: tagKey + ':' + tagVal });
+    this.setState({ selectedTag: tagKey + ':' + tagVal, tagTitle: tagVal });
   }
 
   renderTagFilter() {
-    const { allTags, searchText } = this.state;
+    let { allTags, searchText, tagTitle } = this.state;
+    console.log(allTags);
+
+    if (searchText.length > 0) {
+      const re = new RegExp(searchText, 'i');
+      allTags = allTags.filter(tag => {
+        var val = tag.items.find(v => v.includes(searchText));
+        return tag.title.match(re) || val;
+      })
+    }
 
     if (allTags == null) {
       return ''
     } else {
       return (
-        <Dropdown style={{float: 'right'}} title='Tags' items={allTags} sectioned search={searchText} onSearch={this.handleSearch}>
-        {({ item: section, index }) => (
-          <DropdownSection key={index} title={section.title} items={section.items}>
-          {({ item, index }) => (
-            <DropdownItem onClick={() => this.selected(item)}>{item}</DropdownItem>
-          )}
-          </DropdownSection>
-        )}
+        <Dropdown
+          style={{float: 'right'}}
+          title={tagTitle} items={allTags}
+          sectioned search={searchText}
+          onSearch={event => this.setState({ searchText: event.target.value })}
+        >
+        {
+          allTags.map((t,i) => {
+            return (
+              <DropdownSection key={i} title={t.title} items={t.items}>
+              {
+                t.items.map((item, k) => {
+                  return <DropdownItem key={k} onClick={() => this.selected(item)}>{item}</DropdownItem>
+                })
+              }
+              </DropdownSection>
+            )
+          })
+        }
         </Dropdown>
       )
     }
@@ -141,7 +168,6 @@ export default class MaturityApplication extends React.Component {
 
   render() {
     let { selectedTag } = this.state;
-    console.log(this.state);
 
     return (
       <>
