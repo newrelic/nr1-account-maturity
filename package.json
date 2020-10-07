@@ -15,7 +15,7 @@
     "email": "opensource+maturity@newrelic.com"
   },
   "dependencies": {
-    "maturity-products": "git+https://github.com/khpeet/nr1-account-maturity-products.git",
+    "maturity-products": "git+https://github.com/newrelic-experimental/nr1-account-maturity-products.git",
     "react-tabs": "^3.1.1",
     "snyk": "^1.369.2"
   },
