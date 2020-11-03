@@ -1,5 +1,5 @@
 {
-  "lastUpdated": "Tue Sep 08 2020 15:19:17 GMT+0000 (Coordinated Universal Time)",
+  "lastUpdated": "Tue Nov 03 2020 20:56:35 GMT+0000 (Coordinated Universal Time)",
   "projectName": "nr1-account-maturity",
   "projectUrl": "https://github.com/newrelic/nr1-account-maturity",
   "includeDev": true,
@@ -16,15 +16,15 @@
       "licenseTextSource": "file",
       "publisher": "Matt Zabriskie"
     },
-    "snyk@1.369.2": {
+    "snyk@1.424.0": {
       "name": "snyk",
-      "version": "1.369.2",
-      "range": "^1.369.2",
+      "version": "1.424.0",
+      "range": "^1.424.0",
       "licenses": "Apache-2.0",
       "repoUrl": "https://github.com/snyk/snyk",
-      "versionedRepoUrl": "https://github.com/snyk/snyk/tree/v1.369.2",
+      "versionedRepoUrl": "https://github.com/snyk/snyk/tree/v1.424.0",
       "licenseFile": "node_modules/snyk/LICENSE",
-      "licenseUrl": "https://github.com/snyk/snyk/blob/v1.369.2/LICENSE",
+      "licenseUrl": "https://github.com/snyk/snyk/blob/v1.424.0/LICENSE",
       "licenseTextSource": "file",
       "publisher": "snyk.io"
     }
