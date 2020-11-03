@@ -1,19 +1,16 @@
-## [0.5.5](https://github.com/newrelic/nr1-account-maturity/compare/v0.5.4...v0.5.5) (2020-11-03)
+# [0.6.0](https://github.com/newrelic/nr1-account-maturity/compare/v0.5.5...v0.6.0) (2020-09-08)
 
 
 ### Bug Fixes
 
-* package.json, package-lock.json & .snyk to reduce vulnerabilities ([135fecd](https://github.com/newrelic/nr1-account-maturity/commit/135fecd16812cbd263f234c2b051e13a17a4cbf2))
+* Browser bugs ([b6ddfb4](https://github.com/newrelic/nr1-account-maturity/commit/b6ddfb47cfe48d55587dca44dc90eeec75da34d5))
 * upgrade snyk from 1.327.0 to 1.369.2 ([f3b77be](https://github.com/newrelic/nr1-account-maturity/commit/f3b77be2b508ef4a264e1845075f55c6f6969279))
-* upgrade snyk from 1.369.2 to 1.378.0 ([a76563f](https://github.com/newrelic/nr1-account-maturity/commit/a76563fe3aca959ba8871208fc7428b3123e6c4b))
-
-## [0.5.5](https://github.com/newrelic/nr1-account-maturity/compare/v0.5.4...v0.5.5) (2020-11-03)
 
 
-### Bug Fixes
+### Features
 
-* upgrade snyk from 1.327.0 to 1.369.2 ([f3b77be](https://github.com/newrelic/nr1-account-maturity/commit/f3b77be2b508ef4a264e1845075f55c6f6969279))
-* upgrade snyk from 1.369.2 to 1.378.0 ([a76563f](https://github.com/newrelic/nr1-account-maturity/commit/a76563fe3aca959ba8871208fc7428b3123e6c4b))
+* drilldown views and updated logic for infra and mobile ([8034b0a](https://github.com/newrelic/nr1-account-maturity/commit/8034b0aabf0569ae145d8374020ed84fd6034246))
+* interstitial page while loading Overview table ([ac0e8d0](https://github.com/newrelic/nr1-account-maturity/commit/ac0e8d0ba7d1c58cee2c9207f4ded59c79c57355))
 
 ## [0.5.5](https://github.com/newrelic/nr1-account-maturity/compare/v0.5.4...v0.5.5) (2020-09-08)
 
@@ -21,6 +18,7 @@
 ### Bug Fixes
 
 * upgrade snyk from 1.327.0 to 1.369.2 ([f3b77be](https://github.com/newrelic/nr1-account-maturity/commit/f3b77be2b508ef4a264e1845075f55c6f6969279))
+* upgrade snyk from 1.369.2 to 1.378.0 ([a76563f](https://github.com/newrelic/nr1-account-maturity/commit/a76563fe3aca959ba8871208fc7428b3123e6c4b))
 * update default branch to main ([fa68d21](https://github.com/newrelic/nr1-account-maturity/commit/fa68d21a4e1e16b71cdd3e5cf95d32269788db84))
 
 ## [0.5.4](https://github.com/newrelic/nr1-account-maturity/compare/v0.5.3...v0.5.4) (2020-08-21)
