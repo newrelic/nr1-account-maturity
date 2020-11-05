@@ -1,4 +1,5 @@
 import React from 'react';
+import PropTypes from 'prop-types';
 import { Dropdown, DropdownSection, DropdownItem, NerdGraphQuery } from 'nr1';
 
 export default class Tags extends React.Component {
@@ -9,20 +10,19 @@ export default class Tags extends React.Component {
       searchText: '',
       selectedTag: null,
       tagTitle: 'Tags'
-    }
+    };
   }
 
   async componentDidMount() {
     await this.constructTags();
   }
 
-  async constructTags(){
-    let domains = ['APM', 'INFRA', 'SYNTH']; //start with these domains for sample set
-    let allTags = {};
-    let proms = [];
+  async constructTags() {
+    const domains = ['APM', 'INFRA', 'SYNTH']; // start with these domains for sample set
+    const proms = [];
 
-    for (let domain of domains) {
-      let q = `
+    for (const domain of domains) {
+      const q = `
       {
         actor {
           entitySearch(queryBuilder: {domain: ${domain}}) {
@@ -37,81 +37,89 @@ export default class Tags extends React.Component {
           }
         }
       }
-      `
+      `;
       proms.push(this.queryTags(q));
     }
 
     Promise.all(proms).then(resp => {
-      let allTags = [];
-      let flattend = resp.flat();
+      const allTags = [];
+      const flattend = resp.flat();
       let first = true;
 
-      allTags.push({title: 'Default', items: ['Default']}); //Default option
+      allTags.push({ title: 'Default', items: ['Default'] }); // Default option
 
       let i = 1;
-      for (let entityTags of flattend) {
-        if (first == true) {
-          for (let aTag of entityTags.tags) {
-            allTags.push({title: aTag.key, items: []});
+      for (const entityTags of flattend) {
+        if (first === true) {
+          for (const aTag of entityTags.tags) {
+            allTags.push({ title: aTag.key, items: [] });
             allTags[i].items.push(aTag.values[0]);
             i++;
           }
           first = false;
         } else {
-          for (let anotherTag of entityTags.tags) {
-            let obj = allTags.filter(o => {
-              return o.title == anotherTag.key;
-            })
+          for (const anotherTag of entityTags.tags) {
+            const obj = allTags.filter(o => {
+              return o.title === anotherTag.key;
+            });
             if (obj.length > 0) {
               if (obj[0].items.includes(anotherTag.values[0])) {
-                //do nothing
+                // do nothing
               } else {
                 obj[0].items.push(anotherTag.values[0]);
               }
             } else {
-              allTags.push({title: anotherTag.key, items: []});
+              allTags.push({ title: anotherTag.key, items: [] });
               allTags[i].items.push(anotherTag.values[0]);
             }
           }
         }
       }
 
-      this.setState({allTags: allTags});
-    })
+      this.setState({ allTags: allTags });
+    });
   }
 
   async queryTags(q) {
-    let res = await NerdGraphQuery.query({query: q});
+    let aSetOfTags = [];
+    const res = await NerdGraphQuery.query({ query: q });
     if (res.errors) {
-      console.debug(res.errors);
+      console.debug(res.errors); // eslint-disable-line no-console
+      return aSetOfTags;
     } else {
-      let aSetOfTags = res.data.actor.entitySearch.results.entities;
+      aSetOfTags = res.data.actor.entitySearch.results.entities;
       return aSetOfTags;
     }
   }
 
-  selected = (tagVal) => {
-    const { allTags } = this.state;
+  selected = tagVal => {
+    const { allTags, selectedTag } = this.state;
+    const { setTag } = this.props;
+
     let tagKey = null;
 
-    if (tagVal == 'Default') { //reset to default
+    if (tagVal === 'Default') {
+      // reset to default
       this.setState({ selectedTag: null, tagTitle: 'Tags' }, () => {
-        this.props.setTag(this.state.selectedTag);
-      })
+        setTag(selectedTag);
+      });
       return;
     }
 
-    for (let tag of allTags) {
+    for (const tag of allTags) {
       if (tag.items.includes(tagVal)) {
         tagKey = tag.title;
         break;
       }
     }
 
-    this.setState({ selectedTag: tagKey + ':' + tagVal, tagTitle: tagVal }, () => {
-      this.props.setTag(this.state.selectedTag);
-    });
-  }
+    this.setState(
+      { selectedTag: `${tagKey}:${tagVal}`, tagTitle: tagVal },
+      () => {
+        setTag(selectedTag);
+      }
+    );
+  };
 
   render() {
     let { allTags, searchText, tagTitle } = this.state;
@@ -119,36 +127,42 @@ export default class Tags extends React.Component {
     if (searchText.length > 0) {
       const re = new RegExp(searchText, 'i');
       allTags = allTags.filter(tag => {
-        var val = tag.items.find(v => v.includes(searchText));
+        const val = tag.items.find(v => v.includes(searchText));
         return tag.title.match(re) || val;
-      })
+      });
     }
 
     if (allTags == null) {
-      return ''
+      return '';
     } else {
       return (
         <Dropdown
-          style={{float: 'right'}}
-          title={tagTitle} items={allTags}
-          sectioned search={searchText}
+          style={{ float: 'right' }}
+          title={tagTitle}
+          items={allTags}
+          sectioned
+          search={searchText}
           onSearch={event => this.setState({ searchText: event.target.value })}
         >
-        {
-          allTags.map((t,i) => {
+          {allTags.map((t, i) => {
             return (
               <DropdownSection key={i} title={t.title} items={t.items}>
-              {
-                t.items.map((item, k) => {
-                  return <DropdownItem key={k} onClick={() => this.selected(item)}>{item}</DropdownItem>
-                })
-              }
+                {t.items.map((item, k) => {
+                  return (
+                    <DropdownItem key={k} onClick={() => this.selected(item)}>
+                      {item}
+                    </DropdownItem>
+                  );
+                })}
               </DropdownSection>
-            )
-          })
-        }
+            );
+          })}
         </Dropdown>
-      )
+      );
     }
   }
 }
+
+Tags.propTypes = {
+  setTag: PropTypes.func.isRequired
+};
