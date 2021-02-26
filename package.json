@@ -2,7 +2,7 @@
   "private": true,
   "name": "nr1-maturity",
   "description": "New Relic Account Maturity App",
-  "version": "0.6.2",
+  "version": "0.6.4",
   "scripts": {
     "start": "nr1 nerdpack:serve",
     "test": "exit 0",
@@ -15,7 +15,7 @@
     "email": "opensource+maturity@newrelic.com"
   },
   "dependencies": {
-    "maturity-products": "git+https://github.com/newrelic-experimental/nr1-account-maturity-products.git",
+    "maturity-products": "file:../nr1-account-maturity-products",
     "react-tabs": "^3.1.1",
     "snyk": "^1.424.0"
   },
