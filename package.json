@@ -18,7 +18,7 @@
     "maturity-products": "git+https://github.com/newrelic-experimental/nr1-account-maturity-products.git",
     "react": "^16.6.3",
     "react-dom": "^16.6.3",
-    "react-tabs": "^3.1.2",
+    "react-tabs": "^3.2.0",
     "snyk": "^1.425.4"
   },
   "browserslist": [
