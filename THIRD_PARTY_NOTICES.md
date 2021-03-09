@@ -66,10 +66,10 @@ SOFTWARE.
 
 ### react-tabs
 
-This product includes source derived from [react-tabs](https://github.com/reactjs/react-tabs) ([v3.1.2](https://github.com/reactjs/react-tabs/tree/v3.1.2)), distributed under the [MIT License](https://github.com/reactjs/react-tabs/blob/v3.1.2/LICENSE):
+This product includes source derived from [react-tabs](https://github.com/reactjs/react-tabs) ([v3.2.0](https://github.com/reactjs/react-tabs/tree/v3.2.0)), distributed under the [MIT License](https://github.com/reactjs/react-tabs/blob/v3.2.0/LICENSE):
 
 ```
-Copyright (c) 2015-2019 by Matt Zabriskie
+Copyright (c) Matt Zabriskie and Daniel Tschinder
 
 Permission is hereby granted, free of charge, to any person obtaining a copy
 of this software and associated documentation files (the "Software"), to deal
@@ -122,7 +122,7 @@ SOFTWARE.
 
 ### snyk
 
-This product includes source derived from [snyk](https://github.com/snyk/snyk) ([v1.425.4](https://github.com/snyk/snyk/tree/v1.425.4)), distributed under the [Apache-2.0 License](https://github.com/snyk/snyk/blob/v1.425.4/LICENSE):
+This product includes source derived from [snyk](https://github.com/snyk/snyk) ([v1.445.0](https://github.com/snyk/snyk/tree/v1.445.0)), distributed under the [Apache-2.0 License](https://github.com/snyk/snyk/blob/v1.445.0/LICENSE):
 
 ```
 Copyright 2015 Snyk Ltd.
