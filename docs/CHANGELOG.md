@@ -1,3 +1,18 @@
+## [0.5.5](https://github.com/newrelic/nr1-account-maturity/compare/v0.5.4...v0.5.5) (2021-03-29)
+
+
+### Bug Fixes
+
+* package.json & package-lock.json to reduce vulnerabilities ([eecee46](https://github.com/newrelic/nr1-account-maturity/commit/eecee46f97cf3c42426171ff2c4b2a4ac9261729))
+* package.json, package-lock.json & .snyk to reduce vulnerabilities ([135fecd](https://github.com/newrelic/nr1-account-maturity/commit/135fecd16812cbd263f234c2b051e13a17a4cbf2))
+* upgrade react-tabs from 3.1.1 to 3.1.2 ([a81abea](https://github.com/newrelic/nr1-account-maturity/commit/a81abeadde7a4ab536d783c70dd3e85dd845ad9f))
+* upgrade react-tabs from 3.1.2 to 3.2.0 ([cc3dc9b](https://github.com/newrelic/nr1-account-maturity/commit/cc3dc9bf0fc960ae207d3ab63dc0105be2b740f7))
+* upgrade snyk from 1.327.0 to 1.369.2 ([f3b77be](https://github.com/newrelic/nr1-account-maturity/commit/f3b77be2b508ef4a264e1845075f55c6f6969279))
+* upgrade snyk from 1.369.2 to 1.378.0 ([a76563f](https://github.com/newrelic/nr1-account-maturity/commit/a76563fe3aca959ba8871208fc7428b3123e6c4b))
+* upgrade snyk from 1.425.4 to 1.445.0 ([02108b5](https://github.com/newrelic/nr1-account-maturity/commit/02108b5199150a46ba6823d984871a5521677678))
+* upgrade snyk from 1.445.0 to 1.455.0 ([b311b7e](https://github.com/newrelic/nr1-account-maturity/commit/b311b7e930dd1b603898fbccf4edc8a70cd20f40))
+* upgrade snyk from 1.455.0 to 1.464.0 ([33a5fd3](https://github.com/newrelic/nr1-account-maturity/commit/33a5fd33057f50b9cf8935038a328d5f1f920d0f))
+
 ## [0.5.5](https://github.com/newrelic/nr1-account-maturity/compare/v0.5.4...v0.5.5) (2021-03-22)
 
 
