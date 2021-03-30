@@ -1,3 +1,10 @@
+## [0.6.4](https://github.com/newrelic/nr1-account-maturity/compare/v0.6.3...v0.6.4) (2021-03-30)
+
+
+### Bug Fixes
+
+* bugs on APM metrics; see latest maturity products ([b2ecd68](https://github.com/newrelic/nr1-account-maturity/commit/b2ecd682a0b367a8b7f29c0828759f2516bcd59f))
+
 ## [0.6.3](https://github.com/newrelic/nr1-account-maturity/compare/v0.6.2...v0.6.3) (2021-03-25)
 
 
