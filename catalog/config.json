@@ -13,5 +13,5 @@
       "url": "https://discuss.newrelic.com/t/new-relic-account-maturity-nerdpack/101542"
     }
   },
-  "whatsNew": "- Bug fixes on APM metrics: labels, recent agent version \n- Bug fixes on Insights metrics - dashboards \n- Updated default event types dictionary"
+  "whatsNew": "- Bug fix on APM metrics: recent agent version \n"
 }
