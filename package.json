@@ -16,8 +16,8 @@
   },
   "dependencies": {
     "maturity-products": "git+https://github.com/newrelic-experimental/nr1-account-maturity-products.git",
-    "react-tabs": "^3.2.1",
-    "snyk": "^1.424.0"
+    "snyk": "^1.518.0",
+    "react-tabs": "^3.2.1"
   },
   "browserslist": [
     "last 2 versions",

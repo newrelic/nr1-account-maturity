@@ -10,8 +10,8 @@ The goal of this app is to highlight functionalities which perhaps you are not a
 
 Currently, Account Maturity tracks the following New Relic products:
 
-- APM 
-- Browser 
+- APM
+- Browser
 - Synthetics
 - Mobile
 - Infrastructure
@@ -25,19 +25,23 @@ As this app evolves and more data is exposed through NerdGraph, we will be addin
 
 1. Ensure that you have [git](https://git-scm.com/book/en/v2/Getting-Started-Installing-Git) and [npm](https://www.npmjs.com/get-npm) installed. If you're unsure whether you have one or both of them installed, run the following commands (they will return versions numbers):
 ```bash
+
 git --version
 npm -v
 ```
+
 2. Install the [New Relic One CLI](https://one.newrelic.com/launcher/developer-center.launcher). Follow the instructions to set up your New Relic development environment.
 
 3. Clone this repository and run the code locally against your New Relic data:
+
 ```bash
 nr1 nerdpack:clone -r https://github.com/newrelic/nr1-account-maturity.git
 cd nr1-account-maturity
 npm install
 nr1 nerdpack:serve
 ```
-4. Visit [https://one.newrelic.com/?nerdpacks=local](https://one.newrelic.com/?nerdpacks=local), navigate to the application, and :sparkles: enjoy!
+
+1. Visit [https://one.newrelic.com/?nerdpacks=local](https://one.newrelic.com/?nerdpacks=local), navigate to the application, and :sparkles: enjoy!
 
 ## Deploying this Nerdpack
 
