@@ -1,0 +1,72 @@
+Arguments: 
+  /Users/jvajda/.nvm/versions/node/v12.18.1/bin/node /usr/local/Cellar/yarn/1.22.10/libexec/bin/yarn.js install
+
+PATH: 
+  /Users/jvajda/.nvm/versions/node/v12.18.1/bin:/Users/jvajda/go/bin:/usr/local/opt/python/libexec/bin:/usr/local/bin:/usr/bin:/bin:/usr/sbin:/sbin:/usr/local/go/bin:/Users/jvajda/.nvm/versions/node/v12.18.1/bin:/Users/jvajda/go/bin:/usr/local/opt/python/libexec/bin
+
+Yarn version: 
+  1.22.10
+
+Node version: 
+  12.18.1
+
+Platform: 
+  darwin x64
+
+Trace: 
+  SyntaxError: /Users/jvajda/Documents/Github/OSS/3rd-party-apps/nr1-account-maturity/package.json: Unexpected string in JSON at position 574
+      at JSON.parse (<anonymous>)
+      at /usr/local/Cellar/yarn/1.22.10/libexec/lib/cli.js:1625:59
+      at Generator.next (<anonymous>)
+      at step (/usr/local/Cellar/yarn/1.22.10/libexec/lib/cli.js:310:30)
+      at /usr/local/Cellar/yarn/1.22.10/libexec/lib/cli.js:321:13
+
+npm manifest: 
+  {
+    "private": true,
+    "name": "nr1-maturity",
+    "description": "New Relic Account Maturity App",
+    "version": "0.6.4",
+    "scripts": {
+      "start": "nr1 nerdpack:serve",
+      "test": "exit 0",
+      "eslint-check": "eslint nerdlets/",
+      "eslint-fix": "eslint nerdlets/ --fix",
+      "snyk-protect": "snyk protect",
+      "prepare": "npm run snyk-protect"
+    },
+    "bugs": {
+      "email": "opensource+maturity@newrelic.com"
+    },
+    "dependencies": {
+      "maturity-products": "git+https://github.com/newrelic-experimental/nr1-account-maturity-products.git",
+      "snyk": "^1.518.0"
+      "react-tabs": "^3.2.1",
+    },
+    "browserslist": [
+      "last 2 versions",
+      "not ie < 11",
+      "not dead"
+    ],
+    "devDependencies": {
+      "@newrelic/eslint-plugin-newrelic": "^0.3.1",
+      "@semantic-release/changelog": "^5.0.1",
+      "@semantic-release/git": "^9.0.0",
+      "babel-eslint": "^10.0.3",
+      "babel-runtime": "^6.26.0",
+      "eslint": "^6.7.2",
+      "eslint-config-prettier": "^6.7.0",
+      "eslint-plugin-prettier": "^3.1.2",
+      "file-loader": "^5.0.2",
+      "prettier": "^1.19.1",
+      "react": "16.6.3",
+      "react-dom": "16.6.3"
+    },
+    "snyk": true
+  }
+
+yarn manifest: 
+  No manifest
+
+Lockfile: 
+  No lockfile
