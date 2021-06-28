@@ -1,3 +1,10 @@
+## [0.6.6](https://github.com/newrelic/nr1-account-maturity/compare/v0.6.5...v0.6.6) (2021-06-28)
+
+
+### Bug Fixes
+
+* package.json & package-lock.json to reduce vulnerabilities ([e473971](https://github.com/newrelic/nr1-account-maturity/commit/e473971aa8f6df54107b7860262a1af485f132d9))
+
 ## [0.6.5](https://github.com/newrelic/nr1-account-maturity/compare/v0.6.4...v0.6.5) (2021-05-07)
 
 
