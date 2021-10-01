@@ -1,3 +1,10 @@
+# [0.7.0](https://github.com/newrelic/nr1-account-maturity/compare/v0.6.6...v0.7.0) (2021-10-01)
+
+
+### Features
+
+* update semantic release with node ([7003a9b](https://github.com/newrelic/nr1-account-maturity/commit/7003a9b7d1426c1a9160cb72578df04258afea72))
+
 ## [0.6.6](https://github.com/newrelic/nr1-account-maturity/compare/v0.6.5...v0.6.6) (2021-06-28)
 
 
