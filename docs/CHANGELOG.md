@@ -1,3 +1,10 @@
+# [0.8.0](https://github.com/newrelic/nr1-account-maturity/compare/v0.7.0...v0.8.0) (2021-10-05)
+
+
+### Features
+
+* add launcher screenshot ([1400452](https://github.com/newrelic/nr1-account-maturity/commit/14004520afd930d79dd1fe7a612af827ffbd0055))
+
 # [0.7.0](https://github.com/newrelic/nr1-account-maturity/compare/v0.6.6...v0.7.0) (2021-10-01)
 
 
