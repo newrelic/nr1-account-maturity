@@ -2,6 +2,8 @@
   "tagline": "Improve Your Account Usage",
   "repository": "https://github.com/newrelic/nr1-account-maturity.git",
   "details": "Account Maturity gives a simple overview of some features and functionalities of your New Relic account to highlight where you may have missed a key feature, forgotten to enable a setting or config and generally ensure across our platform that you're making the most of the connected aspects",
+  "categoryTerms": [],
+  "keywords": ["nerdgraph"],
   "support": {
     "issues": {
       "url": "https://github.com/newrelic/nr1-account-maturity/issues"
