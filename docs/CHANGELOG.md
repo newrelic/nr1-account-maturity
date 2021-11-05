@@ -1,3 +1,10 @@
+# [0.9.0](https://github.com/newrelic/nr1-account-maturity/compare/v0.8.0...v0.9.0) (2021-11-05)
+
+
+### Features
+
+* add catalog keywords ([d45da75](https://github.com/newrelic/nr1-account-maturity/commit/d45da751ebbc37f32febe635bc90ce7a4809d14f))
+
 # [0.8.0](https://github.com/newrelic/nr1-account-maturity/compare/v0.7.0...v0.8.0) (2021-10-05)
 
 
