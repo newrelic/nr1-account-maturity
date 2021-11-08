@@ -24,6 +24,7 @@ As this app evolves and more data is exposed through NerdGraph, we will be addin
 ## Install
 
 1. Ensure that you have [git](https://git-scm.com/book/en/v2/Getting-Started-Installing-Git) and [npm](https://www.npmjs.com/get-npm) installed. If you're unsure whether you have one or both of them installed, run the following commands (they will return versions numbers):
+
 ```bash
 
 git --version
@@ -70,7 +71,7 @@ Each tab lets you see a breakdown of how the score is calculated. We've weighted
 
 ![APM](assets/MaturityAPM.png)
 
-Each column on the table containes a metric and the evaluation we gave it for that account. To identify areas for improvement, click on the row of an account. The resulting drilldown is available for APM, Browser, and Synthetics, and we will add this to Mobile and to specific metrics on demand where the metric has a breakdown (some metrics are at account level and cannot be split any lower).
+Each column on the table contains a metric and the evaluation we gave it for that account. To identify areas for improvement, click on the row of an account. The resulting drilldown is available for APM, Browser, and Synthetics, and we will add this to Mobile and to specific metrics on demand where the metric has a breakdown (some metrics are at account level and cannot be split any lower).
 
 ![Drilldown](assets/Drilldown.png)
 
