@@ -1,3 +1,10 @@
+# [0.10.0](https://github.com/newrelic/nr1-account-maturity/compare/v0.9.0...v0.10.0) (2021-11-08)
+
+
+### Features
+
+* fix readme typo ([97e9268](https://github.com/newrelic/nr1-account-maturity/commit/97e92682ad81affaa3945dce05e3a4d614010f37))
+
 # [0.9.0](https://github.com/newrelic/nr1-account-maturity/compare/v0.8.0...v0.9.0) (2021-11-05)
 
 
