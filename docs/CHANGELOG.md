@@ -1,3 +1,10 @@
+## [0.10.1](https://github.com/newrelic/nr1-account-maturity/compare/v0.10.0...v0.10.1) (2022-02-22)
+
+
+### Bug Fixes
+
+* app deprecations ([e77d201](https://github.com/newrelic/nr1-account-maturity/commit/e77d201213c1778b885991ec7e0de78eab03c663))
+
 # [0.10.0](https://github.com/newrelic/nr1-account-maturity/compare/v0.9.0...v0.10.0) (2021-11-08)
 
 
