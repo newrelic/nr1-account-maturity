@@ -1,3 +1,10 @@
+# [0.11.0](https://github.com/newrelic/nr1-account-maturity/compare/v0.10.1...v0.11.0) (2022-06-24)
+
+
+### Features
+
+* Add workloads ([59c8579](https://github.com/newrelic/nr1-account-maturity/commit/59c857972b36757e324c402a6a5699ae5cf556ae))
+
 ## [0.10.1](https://github.com/newrelic/nr1-account-maturity/compare/v0.10.0...v0.10.1) (2022-02-22)
 
 
