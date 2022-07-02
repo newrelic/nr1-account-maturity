@@ -8,6 +8,7 @@ import {
   BrowserPanel,
   SynthPanel,
   InfraPanel,
+  KubernetesPanel,
   InsightsPanel,
   LogPanel,
   ProgramPanel,
@@ -33,9 +34,9 @@ export default class MaturityApplication extends React.Component {
           <Tab>Browser</Tab>
           <Tab>Synthetics</Tab>
           <Tab>Infrastructure</Tab>
+          <Tab>Kubernetes</Tab>
           <Tab>Insights</Tab>
           <Tab>Log</Tab>
-
           <Tab>Programmability</Tab>
           <Tab>Mobile</Tab>
           <Tab>Workloads</Tab>
@@ -56,6 +57,9 @@ export default class MaturityApplication extends React.Component {
             </TabPanel>
             <TabPanel>
               <InfraPanel />
+            </TabPanel>
+            <TabPanel>
+              <KubernetesPanel />
             </TabPanel>
             <TabPanel>
               <InsightsPanel />
