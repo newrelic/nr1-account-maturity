@@ -1,30 +1,43 @@
 {
-  "lastUpdated": "Mon Jun 28 2021 16:55:37 GMT+0000 (Coordinated Universal Time)",
+  "lastUpdated": "Mon Jul 18 2022 22:38:57 GMT+0000 (Coordinated Universal Time)",
   "projectName": "nr1-account-maturity",
   "projectUrl": "https://github.com/newrelic/nr1-account-maturity",
   "includeDev": true,
+  "includeOptDeps": false,
   "dependencies": {
-    "react-tabs@3.2.1": {
+    "maturity-products@1.1.5": {
+      "name": "maturity-products",
+      "version": "1.1.5",
+      "range": "github:newrelic-experimental/nr1-account-maturity-products",
+      "licenses": "UNLICENSED",
+      "repoUrl": "https://github.com/newrelic-experimental/nr1-account-maturity-products",
+      "versionedRepoUrl": "https://github.com/newrelic-experimental/nr1-account-maturity-products/tree/v1.1.5",
+      "licenseFile": "node_modules/maturity-products/LICENSE",
+      "licenseUrl": "https://github.com/newrelic-experimental/nr1-account-maturity-products/blob/v1.1.5/LICENSE",
+      "licenseTextSource": "file",
+      "publisher": "New Relic TAM/Programmability Team"
+    },
+    "react-tabs@3.2.3": {
       "name": "react-tabs",
-      "version": "3.2.1",
+      "version": "3.2.3",
       "range": "^3.2.1",
       "licenses": "MIT",
       "repoUrl": "https://github.com/reactjs/react-tabs",
-      "versionedRepoUrl": "https://github.com/reactjs/react-tabs/tree/v3.2.1",
+      "versionedRepoUrl": "https://github.com/reactjs/react-tabs/tree/v3.2.3",
       "licenseFile": "node_modules/react-tabs/LICENSE",
-      "licenseUrl": "https://github.com/reactjs/react-tabs/blob/v3.2.1/LICENSE",
+      "licenseUrl": "https://github.com/reactjs/react-tabs/blob/v3.2.3/LICENSE",
       "licenseTextSource": "file",
       "publisher": "Matt Zabriskie"
     },
-    "snyk@1.518.0": {
+    "snyk@1.855.0": {
       "name": "snyk",
-      "version": "1.518.0",
+      "version": "1.855.0",
       "range": "^1.518.0",
       "licenses": "Apache-2.0",
       "repoUrl": "https://github.com/snyk/snyk",
-      "versionedRepoUrl": "https://github.com/snyk/snyk/tree/v1.518.0",
+      "versionedRepoUrl": "https://github.com/snyk/snyk/tree/v1.855.0",
       "licenseFile": "node_modules/snyk/LICENSE",
-      "licenseUrl": "https://github.com/snyk/snyk/blob/v1.518.0/LICENSE",
+      "licenseUrl": "https://github.com/snyk/snyk/blob/v1.855.0/LICENSE",
       "licenseTextSource": "file",
       "publisher": "snyk.io"
     }
@@ -55,15 +68,15 @@
       "publisher": "Pierre Vanduynslager",
       "url": "https://github.com/pvdlg"
     },
-    "@semantic-release/git@9.0.0": {
+    "@semantic-release/git@9.0.1": {
       "name": "@semantic-release/git",
-      "version": "9.0.0",
+      "version": "9.0.1",
       "range": "^9.0.0",
       "licenses": "MIT",
       "repoUrl": "https://github.com/semantic-release/git",
-      "versionedRepoUrl": "https://github.com/semantic-release/git/tree/v9.0.0",
+      "versionedRepoUrl": "https://github.com/semantic-release/git/tree/v9.0.1",
       "licenseFile": "node_modules/@semantic-release/git/LICENSE",
-      "licenseUrl": "https://github.com/semantic-release/git/blob/v9.0.0/LICENSE",
+      "licenseUrl": "https://github.com/semantic-release/git/blob/v9.0.1/LICENSE",
       "licenseTextSource": "file",
       "publisher": "Pierre Vanduynslager",
       "url": "https://github.com/pvdlg"
@@ -94,27 +107,27 @@
       "publisher": "Sebastian McKenzie",
       "email": "sebmck@gmail.com"
     },
-    "eslint-config-prettier@6.11.0": {
+    "eslint-config-prettier@6.15.0": {
       "name": "eslint-config-prettier",
-      "version": "6.11.0",
+      "version": "6.15.0",
       "range": "^6.7.0",
       "licenses": "MIT",
       "repoUrl": "https://github.com/prettier/eslint-config-prettier",
-      "versionedRepoUrl": "https://github.com/prettier/eslint-config-prettier/tree/v6.11.0",
+      "versionedRepoUrl": "https://github.com/prettier/eslint-config-prettier/tree/v6.15.0",
       "licenseFile": "node_modules/eslint-config-prettier/LICENSE",
-      "licenseUrl": "https://github.com/prettier/eslint-config-prettier/blob/v6.11.0/LICENSE",
+      "licenseUrl": "https://github.com/prettier/eslint-config-prettier/blob/v6.15.0/LICENSE",
       "licenseTextSource": "file",
       "publisher": "Simon Lydell"
     },
-    "eslint-plugin-prettier@3.1.3": {
+    "eslint-plugin-prettier@3.4.1": {
       "name": "eslint-plugin-prettier",
-      "version": "3.1.3",
+      "version": "3.4.1",
       "range": "^3.1.2",
       "licenses": "MIT",
       "repoUrl": "https://github.com/prettier/eslint-plugin-prettier",
-      "versionedRepoUrl": "https://github.com/prettier/eslint-plugin-prettier/tree/v3.1.3",
+      "versionedRepoUrl": "https://github.com/prettier/eslint-plugin-prettier/tree/v3.4.1",
       "licenseFile": "node_modules/eslint-plugin-prettier/LICENSE.md",
-      "licenseUrl": "https://github.com/prettier/eslint-plugin-prettier/blob/v3.1.3/LICENSE.md",
+      "licenseUrl": "https://github.com/prettier/eslint-plugin-prettier/blob/v3.4.1/LICENSE.md",
       "licenseTextSource": "file",
       "publisher": "Teddy Katz"
     },
