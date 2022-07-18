@@ -1,3 +1,10 @@
+## [0.11.2](https://github.com/newrelic/nr1-account-maturity/compare/v0.11.1...v0.11.2) (2022-07-18)
+
+
+### Bug Fixes
+
+* **build:** update `nr1-account-maturity-products` to latest ([#60](https://github.com/newrelic/nr1-account-maturity/issues/60)) ([304a7e4](https://github.com/newrelic/nr1-account-maturity/commit/304a7e49e16bb8695eea43e95b1aec6928a18c82))
+
 ## [0.11.1](https://github.com/newrelic/nr1-account-maturity/compare/v0.11.0...v0.11.1) (2022-07-18)
 
 
