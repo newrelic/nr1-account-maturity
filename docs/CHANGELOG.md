@@ -1,3 +1,10 @@
+## [0.11.1](https://github.com/newrelic/nr1-account-maturity/compare/v0.11.0...v0.11.1) (2022-07-18)
+
+
+### Bug Fixes
+
+* kick build ([14547c1](https://github.com/newrelic/nr1-account-maturity/commit/14547c15d0c397f3c5f7819d494b32ff19f1386f))
+
 # [0.11.0](https://github.com/newrelic/nr1-account-maturity/compare/v0.10.1...v0.11.0) (2022-06-24)
 
 
