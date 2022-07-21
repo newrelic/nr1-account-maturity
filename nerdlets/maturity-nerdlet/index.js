@@ -14,7 +14,7 @@ import {
   ProgramPanel,
   MobilePanel,
   WorkloadPanel,
-  SLMPanel,
+  SLMPanel
 } from 'maturity-products/dist/entities';
 import {
   ApplicationCtxProvider,
