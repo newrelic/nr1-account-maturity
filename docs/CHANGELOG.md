@@ -1,3 +1,10 @@
+# [0.12.0](https://github.com/newrelic/nr1-account-maturity/compare/v0.11.2...v0.12.0) (2022-08-29)
+
+
+### Features
+
+* add kubernetes module ([2d4d722](https://github.com/newrelic/nr1-account-maturity/commit/2d4d72251454f95e080359c84df2cb69af079245))
+
 ## [0.11.2](https://github.com/newrelic/nr1-account-maturity/compare/v0.11.1...v0.11.2) (2022-07-18)
 
 
