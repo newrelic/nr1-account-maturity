@@ -13,7 +13,8 @@ import {
   LogPanel,
   ProgramPanel,
   MobilePanel,
-  WorkloadPanel
+  WorkloadPanel,
+  SLMPanel
 } from 'maturity-products/dist/entities';
 import {
   ApplicationCtxProvider,
@@ -40,6 +41,7 @@ export default class MaturityApplication extends React.Component {
           <Tab>Programmability</Tab>
           <Tab>Mobile</Tab>
           <Tab>Workloads</Tab>
+          <Tab>SLM</Tab>
         </TabList>
         <ApplicationCtxProvider nr1graph={NerdGraphQuery}>
           <MaturityScoreCtxProvider>
@@ -75,6 +77,9 @@ export default class MaturityApplication extends React.Component {
             </TabPanel>
             <TabPanel>
               <WorkloadPanel />
+            </TabPanel>
+            <TabPanel>
+              <SLMPanel />
             </TabPanel>
           </MaturityScoreCtxProvider>
         </ApplicationCtxProvider>
