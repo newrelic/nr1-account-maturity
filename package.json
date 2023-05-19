@@ -1,42 +1,46 @@
 {
-  "private": true,
-  "name": "nr1-maturity",
-  "description": "New Relic Account Maturity App",
-  "version": "0.14.0",
-  "scripts": {
-    "start": "nr1 nerdpack:serve",
-    "test": "exit 0",
-    "eslint-check": "eslint nerdlets/",
-    "eslint-fix": "eslint nerdlets/ --fix",
-    "snyk-protect": "snyk protect",
-    "prepare": "npm run snyk-protect"
-  },
-  "bugs": {
-    "email": "opensource+maturity@newrelic.com"
-  },
-  "dependencies": {
-    "maturity-products": "github:newrelic-experimental/nr1-account-maturity-products",
-    "react-tabs": "^3.2.1",
-    "snyk": "^1.996.0"
-  },
-  "browserslist": [
-    "last 2 versions",
-    "not ie < 11",
-    "not dead"
-  ],
-  "devDependencies": {
-    "@newrelic/eslint-plugin-newrelic": "^0.3.1",
-    "@semantic-release/changelog": "^5.0.1",
-    "@semantic-release/git": "^9.0.0",
-    "babel-eslint": "^10.0.3",
-    "babel-runtime": "^6.26.0",
-    "eslint": "^6.7.2",
-    "eslint-config-prettier": "^6.7.0",
-    "eslint-plugin-prettier": "^3.1.2",
-    "file-loader": "^5.0.2",
-    "prettier": "^1.19.1",
-    "react": "16.6.3",
-    "react-dom": "16.6.3"
-  },
-  "snyk": true
+    "private": true,
+    "name": "nr1-maturity",
+    "description": "New Relic Account Maturity App",
+    "version": "0.14.0",
+    "scripts": {
+        "start": "nr1 nerdpack:serve",
+        "eslint-check": "eslint nerdlets/ src/",
+        "eslint-fix": "eslint nerdlets/ src/ --fix",
+        "test": "exit 0"
+    },
+    "bugs": {
+        "email": "opensource+maturity@newrelic.com"
+    },
+    "browserslist": [
+        "last 2 versions",
+        "not ie < 11",
+        "not dead"
+    ],
+    "nr1":{
+        "id": "b54addf7-3663-47e0-8862-3ec058588b58"
+    },
+    "dependencies": {
+        "@mantine/hooks": "^6.0.10",
+        "async": "^3.2.4",
+        "prop-types": "15.7.2",
+        "react": "17.0.2",
+        "react-dom": "17.0.2"
+    },
+    "devDependencies": {
+        "@babel/core": "^7.20.2",
+        "@babel/plugin-proposal-class-properties": "^7.18.6",
+        "@babel/preset-env": "^7.20.2",
+        "@babel/preset-react": "^7.18.6",
+        "@semantic-release/changelog": "^5.0.1",
+        "@semantic-release/git": "^9.0.0",
+        "eslint": "^8.36.0",
+        "eslint-config-prettier": "^8.8.0",
+        "eslint-plugin-eslint-comments": "^3.2.0",
+        "eslint-plugin-import": "^2.27.5",
+        "eslint-plugin-prettier": "^4.2.1",
+        "eslint-plugin-promise": "^6.1.1",
+        "eslint-plugin-react": "^7.32.2",
+        "prettier": "^2.8.6"
+    }
 }
