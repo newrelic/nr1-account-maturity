@@ -2,6 +2,8 @@ import React, { createContext, useEffect } from 'react';
 import { useSetState } from '@mantine/hooks';
 import { nerdlet, NerdGraphQuery, Toast } from 'nr1';
 import { accountsQuery, entitySearchQueryByAccount } from '../queries/data';
+import rules from '../rules';
+import { chunk } from '../utils';
 
 const DataContext = createContext();
 const async = require('async');
@@ -118,32 +120,91 @@ export function useProvideData() {
       q.push({ cursor: null });
 
       q.drain(() => {
-        resolve(completedEntities);
+        decorateEntities(completedEntities).then((decoratedEntities) => {
+          console.log(decoratedEntities);
+
+          resolve(decoratedEntities);
+        });
       });
     });
   };
 
-  // const getEntityTypesByAccount = (accounts) => {
-  //   return new Promise((resolve) => {
-  //     const results = [];
+  const decorateEntities = (entities) => {
+    return new Promise((resolve) => {
+      const entityTypesToQuery = [];
 
-  //     const q = async.queue((task, callback) => {
-  //       NerdGraphQuery.query({
-  //         query: entityTypesQueryByAccount(task.id),
-  //       }).then((res) => {
-  //         task.entityTypes = res?.data?.actor?.entitySearch?.types || [];
-  //         results.push(task);
-  //         callback();
-  //       });
-  //     }, 5);
+      Object.keys(rules).forEach((key) => {
+        const rule = rules[key];
 
-  //     q.push(accounts);
+        if (rule.graphql) {
+          const foundEntities = entities.filter(
+            (e) => e.entityType === rule.entityType
+          );
 
-  //     q.drain(() => {
-  //       resolve(results);
-  //     });
-  //   });
-  // };
+          if (foundEntities.length > 0) {
+            entityTypesToQuery.push({
+              entities: foundEntities,
+              graphql: rule.graphql,
+            });
+          }
+        }
+      });
+
+      if (entityTypesToQuery.length > 0) {
+        let entityData = [];
+
+        const entityTypeQueue = async.queue((task, callback) => {
+          getEntityData(task).then((data) => {
+            entityData = [...entityData, ...data];
+            callback();
+          });
+        }, 5);
+
+        entityTypeQueue.push(entityTypesToQuery);
+
+        entityTypeQueue.drain(() => {
+          // merge entity data
+          entities.forEach((entity, i) => {
+            const foundEntity = entityData.find((e) => e.guid === entity.guid);
+            if (foundEntity) {
+              entities[i] = { ...foundEntity, ...entity };
+            }
+          });
+
+          resolve(entities);
+        });
+      } else {
+        resolve(entities);
+      }
+    });
+  };
+
+  const getEntityData = (entityTask) => {
+    return new Promise((resolve) => {
+      const guidChunks = chunk(
+        entityTask.entities.map((e) => e.guid),
+        25
+      );
+
+      let entityData = [];
+
+      const taskQueue = async.queue((guids, callback) => {
+        NerdGraphQuery.query({
+          query: entityTask.graphql,
+          variables: { guids },
+        }).then((res) => {
+          entityData = [...entityData, ...(res?.data?.actor?.entities || [])];
+          callback();
+        });
+      }, 5);
+
+      taskQueue.push(guidChunks);
+
+      taskQueue.drain(() => {
+        resolve(entityData);
+      });
+    });
+  };
 
   return {
     ...dataState,

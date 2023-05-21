@@ -1,3 +1,8 @@
+export const chunk = (arr, size) =>
+  Array.from({ length: Math.ceil(arr.length / size) }, (v, i) =>
+    arr.slice(i * size, i * size + size)
+  );
+
 const async = require('async');
 
 export const genericQueue = (concurrency) => {
