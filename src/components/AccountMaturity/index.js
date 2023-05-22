@@ -12,66 +12,49 @@ import {
 } from 'nr1';
 
 import DataContext from '../../context/data';
+import AccountTiles from '../AccountTiles';
 
 export default function AccountMaturity() {
-  const { fetchingAccountData, errorMsg } = useContext(DataContext);
+  const { fetchingData, errorMsg } = useContext(DataContext);
 
   return (
     <div>
-      <Stack
-        style={{ marginTop: '10px' }}
-        directionType={Stack.DIRECTION_TYPE.VERTICAL}
-        fullHeight
-        fullWidth
-      >
-        {fetchingAccountData && (
-          <StackItem grow>
-            {/* <StackItem grow style={{ width: usableWidth }}> */}
-            <EmptyState
-              title="Fetching data..."
-              type={EmptyState.TYPE.LOADING}
-            />
-          </StackItem>
-        )}
-        {errorMsg && (
-          <StackItem grow>
-            {/* <StackItem grow style={{ width: usableWidth }}> */}
-            <EmptyState title={errorMsg} />
-          </StackItem>
-        )}
+      {fetchingData && (
+        <EmptyState title="Fetching data..." type={EmptyState.TYPE.LOADING} />
+      )}
 
-        {!fetchingAccountData && !errorMsg && (
-          <>
-            {/* <SearchBox /> */}
+      {errorMsg && <EmptyState title={errorMsg} />}
 
-            {/* <OpenAiConfiguration />
-            <QueryModal />
-            <Indexes />
-            <Help /> */}
-          </>
-        )}
-      </Stack>
+      {!fetchingData && !errorMsg && (
+        <>
+          <Layout fullHeight>
+            <LayoutItem>
+              <div
+                style={{
+                  paddingTop: '25px',
+                  paddingBottom: '25px',
+                  paddingLeft: '10px',
+                  backgroundColor: 'white',
+                }}
+              >
+                <AccountTiles />
+              </div>
+            </LayoutItem>
 
-      <Layout fullHeight>
-        <LayoutItem>
-          <div style={{ paddingTop: '25px' }}>
-            something
-            {/* <QueryTable height={tableHeight} width={width} /> */}
-          </div>
-        </LayoutItem>
-
-        <CollapsibleLayoutItem
-          // collapsed={!detailsOpen}
-          collapsed={true}
-          triggerType={CollapsibleLayoutItem.TRIGGER_TYPE.CUSTOM}
-          type={LayoutItem.TYPE.SPLIT_RIGHT}
-        >
-          <div style={{ paddingTop: '25px' }}>
-            another pane
-            {/* <DetailsPane height={tableHeight} /> */}
-          </div>
-        </CollapsibleLayoutItem>
-      </Layout>
+            <CollapsibleLayoutItem
+              // collapsed={!detailsOpen}
+              collapsed={true}
+              triggerType={CollapsibleLayoutItem.TRIGGER_TYPE.CUSTOM}
+              type={LayoutItem.TYPE.SPLIT_RIGHT}
+            >
+              <div style={{ paddingTop: '25px' }}>
+                another pane
+                {/* <DetailsPane height={tableHeight} /> */}
+              </div>
+            </CollapsibleLayoutItem>
+          </Layout>
+        </>
+      )}
     </div>
   );
 }

@@ -18,6 +18,7 @@ export default DataContext;
 export function useProvideData() {
   const [dataState, setDataState] = useSetState({
     userConfirmed: null,
+    fetchingData: true,
     fetchingAccountData: false,
     apiKeyModalOpen: false,
     errorMsg: null,
@@ -25,11 +26,13 @@ export function useProvideData() {
     checkingAccount: false,
     diracAuth: null,
     accountIds: [],
+    summarizedScores: {},
   });
 
   useEffect(async () => {
     // eslint-disable-next-line
     console.log("DataProvider loaded");
+    setDataState({ fetchingData: true });
 
     nerdlet.setConfig({
       accountPicker: true,
@@ -39,10 +42,10 @@ export function useProvideData() {
     const accounts = await getAccounts();
     setDataState({ accounts });
 
-    const entitiesByAccount = await getEntitiesForAccounts(accounts);
-    setDataState({ entitiesByAccount });
+    const { entitiesByAccount, summarizedScores } =
+      await getEntitiesForAccounts(accounts);
 
-    console.log(entitiesByAccount);
+    setDataState({ entitiesByAccount, summarizedScores, fetchingData: false });
   }, []);
 
   const getAccounts = () =>
@@ -70,8 +73,64 @@ export function useProvideData() {
 
       q.drain(() => {
         setDataState({ gettingEntities: false });
-        resolve(completedAccounts);
+        evaluateAccounts(completedAccounts).then(
+          ({ accounts, summarizedScores }) => {
+            resolve({ entitiesByAccount: accounts, summarizedScores });
+          }
+        );
       });
+    });
+  };
+
+  const evaluateAccounts = (accounts) => {
+    return new Promise((resolve) => {
+      const summarizedScores = {};
+
+      accounts.forEach((account) => {
+        if (!account.scores) {
+          account.scores = {};
+        }
+
+        Object.keys(rules).forEach((key) => {
+          const { scores } = rules[key];
+
+          scores.forEach((score) => {
+            const { name, check } = score;
+
+            if (!account.scores[name]) {
+              account.scores[name] = {
+                passed: 0,
+                failed: 0,
+              };
+            }
+
+            if (!summarizedScores[name]) {
+              summarizedScores[name] = {
+                passed: 0,
+                failed: 0,
+              };
+            }
+
+            if (rules[key].entityType) {
+              const foundEntities = account.entities.filter(
+                (e) => e.entityType === rules[key].entityType
+              );
+
+              foundEntities.forEach((entity) => {
+                if (check(entity)) {
+                  account.scores[name].passed++;
+                  summarizedScores[name].passed++;
+                } else {
+                  account.scores[name].failed++;
+                  summarizedScores[name].failed++;
+                }
+              });
+            }
+          });
+        });
+      });
+
+      resolve({ accounts, summarizedScores });
     });
   };
 
@@ -121,8 +180,6 @@ export function useProvideData() {
 
       q.drain(() => {
         decorateEntities(completedEntities).then((decoratedEntities) => {
-          console.log(decoratedEntities);
-
           resolve(decoratedEntities);
         });
       });

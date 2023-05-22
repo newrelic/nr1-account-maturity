@@ -39,8 +39,8 @@ export default {
         }
       }
     }`,
-    // rules and values to run and display
-    rules: [
+    // scores and values to run and display
+    scores: [
       {
         name: 'Reporting Apps',
         check: (entity) => entity.reporting,
