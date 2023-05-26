@@ -4,7 +4,7 @@ import PropTypes from 'prop-types';
 import { StatusIcon } from '@newrelic/nr-labs-components';
 import { STATUSES } from '../../constants';
 
-const Signal = ({ name, status }) => {
+const Score = ({ name, status }) => {
   return (
     <div className="score">
       <StatusIcon status={status} />
@@ -13,9 +13,9 @@ const Signal = ({ name, status }) => {
   );
 };
 
-Signal.propTypes = {
+Score.propTypes = {
   name: PropTypes.string,
   status: PropTypes.oneOf(Object.values(STATUSES)),
 };
 
-export default Signal;
+export default Score;
