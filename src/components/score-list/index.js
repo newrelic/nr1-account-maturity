@@ -2,7 +2,7 @@ import React from 'react';
 import PropTypes from 'prop-types';
 
 import Score from '../score';
-import { StatusIcon } from '@newrelic/nr-labs-components';
+import { STATUSES } from '../../constants';
 
 const ScoreList = ({ scores = [] }) => {
   return (
@@ -18,7 +18,7 @@ ScoreList.propTypes = {
   scores: PropTypes.arrayOf(
     PropTypes.shape({
       name: PropTypes.string,
-      status: PropTypes.oneOf(Object.values(StatusIcon.STATUSES)),
+      status: PropTypes.oneOf(Object.values(STATUSES)),
     })
   ),
 };
