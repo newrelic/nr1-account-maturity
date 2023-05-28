@@ -18,6 +18,9 @@ export const accountDataQuery = (accountId) => ngql`{
       KeySet_Transaction: nrql(query: "SELECT keyset() FROM Transaction") {
         results
       }
+      KeySet_PageView: nrql(query: "SELECT keyset() FROM PageView") {
+        results
+      }
     }
   }
 }`
@@ -66,6 +69,11 @@ export const dataDictionaryQuery = ngql`{
   docs {
     dataDictionary {
       APM_APPLICATION_ENTITY: events(names: "Transaction") {
+        attributes {
+          name
+        }
+      }
+      BROWSER_APPLICATION_ENTITY: events(names: "PageView") {
         attributes {
           name
         }

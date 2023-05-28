@@ -145,18 +145,26 @@ export function useProvideData() {
         Object.keys(rules).forEach((key) => {
           const { scores } = rules[key];
 
+          if (!account.scores[key]) {
+            account.scores[key] = {};
+          }
+
+          if (!summarizedScores[key]) {
+            summarizedScores[key] = {};
+          }
+
           scores.forEach((score) => {
             const { name, entityCheck, accountCheck } = score;
 
-            if (!account.scores[name]) {
-              account.scores[name] = {
+            if (!account.scores[key][name]) {
+              account.scores[key][name] = {
                 passed: 0,
                 failed: 0,
               };
             }
 
-            if (!summarizedScores[name]) {
-              summarizedScores[name] = {
+            if (!summarizedScores[key][name]) {
+              summarizedScores[key][name] = {
                 passed: 0,
                 failed: 0,
               };
@@ -164,11 +172,11 @@ export function useProvideData() {
 
             if (accountCheck) {
               if (accountCheck(account, dataDictionary)) {
-                account.scores[name].passed++;
-                summarizedScores[name].passed++;
+                account.scores[key][name].passed++;
+                summarizedScores[key][name].passed++;
               } else {
-                account.scores[name].failed++;
-                summarizedScores[name].failed++;
+                account.scores[key][name].failed++;
+                summarizedScores[key][name].failed++;
               }
             }
 
@@ -180,11 +188,11 @@ export function useProvideData() {
               foundEntities.forEach((entity) => {
                 if (entityCheck) {
                   if (entityCheck(entity, agentReleases)) {
-                    account.scores[name].passed++;
-                    summarizedScores[name].passed++;
+                    account.scores[key][name].passed++;
+                    summarizedScores[key][name].passed++;
                   } else {
-                    account.scores[name].failed++;
-                    summarizedScores[name].failed++;
+                    account.scores[key][name].failed++;
+                    summarizedScores[key][name].failed++;
                   }
                 }
               });
