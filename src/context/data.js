@@ -1,7 +1,13 @@
 import React, { createContext, useEffect } from 'react';
 import { useSetState } from '@mantine/hooks';
 import { nerdlet, NerdGraphQuery, Toast } from 'nr1';
-import { accountsQuery, entitySearchQueryByAccount } from '../queries/data';
+import {
+  accountDataQuery,
+  accountsQuery,
+  agentReleasesQuery,
+  dataDictionaryQuery,
+  entitySearchQueryByAccount,
+} from '../queries/data';
 import rules from '../rules';
 import { chunk } from '../utils';
 
@@ -27,6 +33,8 @@ export function useProvideData() {
     diracAuth: null,
     accountIds: [],
     summarizedScores: {},
+    agentReleases: null,
+    dataDictionary: null,
   });
 
   useEffect(async () => {
@@ -39,21 +47,64 @@ export function useProvideData() {
       timePicker: false,
     });
 
-    const accounts = await getAccounts();
-    setDataState({ accounts });
+    const [accountsInit, agentReleases, dataDictionary] = await Promise.all([
+      getAccounts(),
+      getAgentReleases(),
+      getDataDictionary(),
+    ]);
+
+    const accounts = await decorateAccountData(accountsInit);
+
+    setDataState({
+      accounts,
+      agentReleases,
+      dataDictionary,
+    });
 
     const { entitiesByAccount, summarizedScores } =
-      await getEntitiesForAccounts(accounts);
+      await getEntitiesForAccounts(accounts, agentReleases, dataDictionary);
 
     setDataState({ entitiesByAccount, summarizedScores, fetchingData: false });
   }, []);
+
+  // decorate additional account data
+  const decorateAccountData = (accounts) => {
+    // eslint-disable-next-line
+    return new Promise(async (resolve) => {
+      const accountData = await Promise.all(
+        accounts.map((account) =>
+          NerdGraphQuery.query({ query: accountDataQuery(account.id) })
+        )
+      );
+
+      accountData.forEach((res, index) => {
+        accounts[index].data = res?.data?.actor?.account;
+      });
+
+      resolve(accounts);
+    });
+  };
+
+  const getAgentReleases = () =>
+    NerdGraphQuery.query({ query: agentReleasesQuery }).then(
+      (res) => res?.data
+    );
+
+  const getDataDictionary = () =>
+    NerdGraphQuery.query({ query: dataDictionaryQuery }).then(
+      (res) => res?.data?.docs?.dataDictionary
+    );
 
   const getAccounts = () =>
     NerdGraphQuery.query({ query: accountsQuery }).then(
       (res) => res?.data?.actor?.accounts || []
     );
 
-  const getEntitiesForAccounts = async (accounts) => {
+  const getEntitiesForAccounts = async (
+    accounts,
+    agentReleases,
+    dataDictionary
+  ) => {
     setDataState({ gettingEntities: true });
 
     return new Promise((resolve) => {
@@ -73,7 +124,7 @@ export function useProvideData() {
 
       q.drain(() => {
         setDataState({ gettingEntities: false });
-        evaluateAccounts(completedAccounts).then(
+        evaluateAccounts(completedAccounts, agentReleases, dataDictionary).then(
           ({ accounts, summarizedScores }) => {
             resolve({ entitiesByAccount: accounts, summarizedScores });
           }
@@ -82,7 +133,7 @@ export function useProvideData() {
     });
   };
 
-  const evaluateAccounts = (accounts) => {
+  const evaluateAccounts = (accounts, agentReleases, dataDictionary) => {
     return new Promise((resolve) => {
       const summarizedScores = {};
 
@@ -95,7 +146,7 @@ export function useProvideData() {
           const { scores } = rules[key];
 
           scores.forEach((score) => {
-            const { name, check } = score;
+            const { name, entityCheck, accountCheck } = score;
 
             if (!account.scores[name]) {
               account.scores[name] = {
@@ -111,18 +162,30 @@ export function useProvideData() {
               };
             }
 
+            if (accountCheck) {
+              if (accountCheck(account, dataDictionary)) {
+                account.scores[name].passed++;
+                summarizedScores[name].passed++;
+              } else {
+                account.scores[name].failed++;
+                summarizedScores[name].failed++;
+              }
+            }
+
             if (rules[key].entityType) {
               const foundEntities = account.entities.filter(
                 (e) => e.entityType === rules[key].entityType
               );
 
               foundEntities.forEach((entity) => {
-                if (check(entity)) {
-                  account.scores[name].passed++;
-                  summarizedScores[name].passed++;
-                } else {
-                  account.scores[name].failed++;
-                  summarizedScores[name].failed++;
+                if (entityCheck) {
+                  if (entityCheck(entity, agentReleases)) {
+                    account.scores[name].passed++;
+                    summarizedScores[name].passed++;
+                  } else {
+                    account.scores[name].failed++;
+                    summarizedScores[name].failed++;
+                  }
                 }
               });
             }
