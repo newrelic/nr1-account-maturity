@@ -77,11 +77,12 @@ ScoreCard.propTypes = {
   rollUpStatus: PropTypes.oneOf(Object.values(STATUSES)),
   /* the title assigned to the list of scored elements */
   elementListLabel: PropTypes.string,
-  /* the individual scored elements for that contribute to the aggregate score */
+  /* the individual scored elements that contribute to the aggregate score */
   elementScores: PropTypes.arrayOf(
     PropTypes.shape({
       name: PropTypes.string,
       status: PropTypes.oneOf(Object.values(STATUSES)),
+      title: PropTypes.string,
     })
   ),
   /* callback fired when the score card is clicked */
