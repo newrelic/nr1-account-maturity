@@ -23,7 +23,9 @@ const ScoreCard = ({
 
     return (
       <div className="score-card" onClick={onClick}>
-        <HeadingText type={HeadingText.TYPE.HEADING_3}>{title}</HeadingText>
+        <HeadingText className="title" type={HeadingText.TYPE.HEADING_3}>
+          {title}
+        </HeadingText>
         <div className="subtitle">{subtitle}</div>
 
         <HeadingText type={HeadingText.TYPE.HEADING_6}>
@@ -46,7 +48,7 @@ const ScoreCard = ({
           style={{ marginTop: '24px', marginBottom: '4px' }}
           type={HeadingText.TYPE.HEADING_6}
         >
-          {elementListLabel}
+          {elementListLabel} ({elementScores.length})
         </HeadingText>
 
         <div className="elements">
