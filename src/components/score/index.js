@@ -4,11 +4,13 @@ import PropTypes from 'prop-types';
 import { StatusIcon } from '@newrelic/nr-labs-components';
 import { STATUSES } from '../../constants';
 
-const Score = ({ name, status }) => {
+const Score = ({ name, status, score }) => {
   return (
     <div className="score">
-      <StatusIcon status={status} />
-      <span className="name">{name}</span>
+      <StatusIcon title={`Score: ${score}`} status={status} />
+      <span title={`Score: ${score}`} className="name">
+        {name}
+      </span>
     </div>
   );
 };
@@ -16,6 +18,7 @@ const Score = ({ name, status }) => {
 Score.propTypes = {
   name: PropTypes.string,
   status: PropTypes.oneOf(Object.values(STATUSES)),
+  score: PropTypes.string,
 };
 
 export default Score;
