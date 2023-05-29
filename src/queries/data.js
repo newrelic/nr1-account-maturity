@@ -12,6 +12,19 @@ export const accountsQuery = ngql`{
   }
 }`;
 
+export const accountDataQuery = (accountId) => ngql`{
+  actor {
+    account(id: ${accountId}) {
+      KeySet_Transaction: nrql(query: "SELECT keyset() FROM Transaction") {
+        results
+      }
+      KeySet_PageView: nrql(query: "SELECT keyset() FROM PageView") {
+        results
+      }
+    }
+  }
+}`
+
 export const entitySearchQueryByAccount = (
   accountId,
   searchClause
@@ -51,3 +64,101 @@ export const entityTypesQueryByAccount = (accountId) => ngql`{
     }
   }
 }`;
+
+export const dataDictionaryQuery = ngql`{
+  docs {
+    dataDictionary {
+      APM_APPLICATION_ENTITY: events(names: "Transaction") {
+        attributes {
+          name
+        }
+      }
+      BROWSER_APPLICATION_ENTITY: events(names: "PageView") {
+        attributes {
+          name
+        }
+      }
+    }
+  }
+}`
+
+export const agentReleasesQuery = ngql`{
+      android: docs {
+        agentReleases(agentName: ANDROID) {
+          version
+          date
+        }
+      }
+      browser: docs {
+        agentReleases(agentName: BROWSER) {
+          version
+          date
+        }
+      }
+      dotnet: docs {
+        agentReleases(agentName: DOTNET) {
+          version
+          date
+        }
+      }
+      elixir: docs {
+        agentReleases(agentName: ELIXIR) {
+          version
+          date
+        }
+      }
+      go: docs {
+        agentReleases(agentName: GO) {
+          version
+          date
+        }
+      }
+      infrastructure: docs {
+        agentReleases(agentName: INFRASTRUCTURE) {
+          version
+          date
+        }
+      }
+      ios: docs {
+        agentReleases(agentName: IOS) {
+          version
+          date
+        }
+      }
+      java: docs {
+        agentReleases(agentName: JAVA) {
+          version
+          date
+        }
+      }
+      nodejs: docs {
+        agentReleases(agentName: NODEJS) {
+          version
+          date
+        }
+      }
+      php: docs {
+        agentReleases(agentName: PHP) {
+          version
+          date
+        }
+      }
+      python: docs {
+        agentReleases(agentName: PYTHON) {
+          version
+          date
+        }
+      }
+      ruby: docs {
+        agentReleases(agentName: RUBY) {
+          version
+          date
+        }
+      }
+      sdk: docs {
+        agentReleases(agentName: SDK) {
+          version
+          date
+        }
+      }
+    }`
