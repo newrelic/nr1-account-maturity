@@ -20,8 +20,6 @@ const ScoreCard = ({
       elementScores.length > 8
         ? Math.round(elementScores.length / 2)
         : elementScores.length;
-    // const col1 = elementScores.splice(0, elementSpliceIndex);
-    // const col2 = elementScores.splice(elementSpliceIndex);
 
     return (
       <div className="score-card" onClick={onClick}>
