@@ -9,5 +9,8 @@
     font-size: 12px;
     line-height: 16px;
     color: #293338;
+    max-width: 130px;
+
+    @include text-ellipsis;
   }
 }

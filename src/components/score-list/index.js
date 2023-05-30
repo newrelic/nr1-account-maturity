@@ -19,6 +19,7 @@ ScoreList.propTypes = {
     PropTypes.shape({
       name: PropTypes.string,
       status: PropTypes.oneOf(Object.values(STATUSES)),
+      score: PropTypes.string,
     })
   ),
 };
