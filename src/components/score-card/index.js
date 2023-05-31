@@ -1,9 +1,9 @@
 import React, { useMemo } from 'react';
 import PropTypes from 'prop-types';
 import { HeadingText } from 'nr1';
-import { ProgressBar } from '@newrelic/nr-labs-components';
-import ScoreList from '../score-list';
-import { STATUSES } from '../../constants';
+import SummaryCard from './summary-card';
+import NavigatorCard from './navigator-card';
+import { STATUSES, DISPLAY_MODES } from '../../constants';
 
 const ScoreCard = ({
   title,
@@ -13,48 +13,30 @@ const ScoreCard = ({
   rollUpStatus,
   elementListLabel,
   elementScores,
+  displayMode,
   onClick,
 }) => {
   return useMemo(() => {
-    const elementSliceIndex =
-      elementScores.length > 8
-        ? Math.round(elementScores.length / 2)
-        : elementScores.length;
-
     return (
-      <div className="score-card" onClick={onClick}>
+      <div className={`score-card ${displayMode}`} onClick={onClick}>
         <HeadingText className="title" type={HeadingText.TYPE.HEADING_3}>
           {title}
         </HeadingText>
         <div className="subtitle">{subtitle}</div>
 
-        <HeadingText type={HeadingText.TYPE.HEADING_6}>
-          Maturity Score
-        </HeadingText>
+        {displayMode === DISPLAY_MODES.SUMMARY && (
+          <SummaryCard
+            rollUpScore={rollUpScore}
+            maxScore={maxScore}
+            rollUpStatus={rollUpStatus}
+            elementListLabel={elementListLabel}
+            elementScores={elementScores}
+          />
+        )}
 
-        <div className="score-label">
-          <span className={rollUpStatus}>{rollUpScore}</span>
-          <span>/{maxScore}</span>
-        </div>
-
-        <ProgressBar
-          height="25px"
-          value={rollUpScore}
-          max={maxScore}
-          status={rollUpStatus}
-        />
-
-        <HeadingText
-          style={{ marginTop: '24px', marginBottom: '4px' }}
-          type={HeadingText.TYPE.HEADING_6}
-        >
-          {elementListLabel} ({elementScores.length})
-        </HeadingText>
-
-        <div className="elements">
-          <ScoreList scores={elementScores.slice(0, elementSliceIndex)} />
-          <ScoreList scores={elementScores.slice(elementSliceIndex)} />
-        </div>
+        {displayMode === DISPLAY_MODES.NAVIGATOR && (
+          <NavigatorCard elementScores={elementScores} />
+        )}
       </div>
     );
   }, [
@@ -65,6 +47,7 @@ const ScoreCard = ({
     rollUpStatus,
     elementListLabel,
     elementScores,
+    displayMode,
   ]);
 };
 
@@ -84,9 +67,10 @@ ScoreCard.propTypes = {
     PropTypes.shape({
       name: PropTypes.string,
       status: PropTypes.oneOf(Object.values(STATUSES)),
-      title: PropTypes.string,
+      score: PropTypes.string,
     })
   ),
+  displayMode: PropTypes.oneOf(Object.values(DISPLAY_MODES)),
   /* callback fired when the score card is clicked */
   onClick: PropTypes.func,
 };
