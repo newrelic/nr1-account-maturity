@@ -30,6 +30,7 @@ const NavigatorCard = ({ elementScores = [] }) => {
                   margin: 1,
                   marginBottom: -7,
                 }}
+                onClick={() => console.info(`Navigator clicked ${i}`)}
               />
             </PopoverTrigger>
             <PopoverBody>

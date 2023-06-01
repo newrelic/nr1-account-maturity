@@ -12,10 +12,6 @@
     height: 164px;
   }
 
-  :hover {
-    cursor: pointer;
-  }
-
   .title {
     @include text-ellipsis;
   }

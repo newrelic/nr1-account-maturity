@@ -14,15 +14,19 @@ const ScoreCard = ({
   elementListLabel,
   elementScores,
   displayMode,
-  onClick,
 }) => {
   return useMemo(() => {
     return (
-      <div className={`score-card ${displayMode}`} onClick={onClick}>
-        <HeadingText className="title" type={HeadingText.TYPE.HEADING_3}>
-          {title}
-        </HeadingText>
-        <div className="subtitle">{subtitle}</div>
+      <div className={`score-card ${displayMode}`}>
+        <div
+          style={{ cursor: 'pointer' }}
+          onClick={() => console.info('card clicked')}
+        >
+          <HeadingText className="title" type={HeadingText.TYPE.HEADING_3}>
+            {title}
+          </HeadingText>
+          <div className="subtitle">{subtitle}</div>
+        </div>
 
         {displayMode === DISPLAY_MODES.SUMMARY && (
           <SummaryCard
@@ -71,8 +75,6 @@ ScoreCard.propTypes = {
     })
   ),
   displayMode: PropTypes.oneOf(Object.values(DISPLAY_MODES)),
-  /* callback fired when the score card is clicked */
-  onClick: PropTypes.func,
 };
 
 export default ScoreCard;
