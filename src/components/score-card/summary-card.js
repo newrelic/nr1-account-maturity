@@ -44,8 +44,14 @@ const SummaryCard = ({
         </HeadingText>
 
         <div className="elements">
-          <ScoreList scores={elementScores.slice(0, elementSliceIndex)} />
-          <ScoreList scores={elementScores.slice(elementSliceIndex)} />
+          <ScoreList
+            idxBase={0}
+            scores={elementScores.slice(0, elementSliceIndex)}
+          />
+          <ScoreList
+            idxBase={elementSliceIndex}
+            scores={elementScores.slice(elementSliceIndex)}
+          />
         </div>
       </>
     );
