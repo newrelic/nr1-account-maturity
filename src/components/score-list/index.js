@@ -1,6 +1,6 @@
 import React from 'react';
 import PropTypes from 'prop-types';
-
+import { Tooltip } from 'nr1';
 import Score from '../score';
 import { STATUSES } from '../../constants';
 
@@ -8,7 +8,12 @@ const ScoreList = ({ scores = [] }) => {
   return (
     <div className="scores-list">
       {scores.map((score, i) => (
-        <Score key={i} {...score} />
+        <Tooltip key={i} text={`${score.name}: ${score.score}`}>
+          <Score
+            {...score}
+            onClick={() => console.info(`ScoreListclicked ${i}`)}
+          />
+        </Tooltip>
       ))}
     </div>
   );

@@ -3,10 +3,13 @@
   box-shadow: 0px 4px 4px 4px rgba(0, 0, 0, 0.02),
     0px 8px 16px 8px rgba(2, 3, 3, 0.05);
   border-radius: 4px;
-  height: 323px;
 
-  :hover {
-    cursor: pointer;
+  &.summary {
+    height: 323px;
+  }
+
+  &.navigator {
+    height: 164px;
   }
 
   .title {
@@ -22,26 +25,47 @@
     @include text-ellipsis;
   }
 
-  .score-label {
-    color: #6b757b;
-    margin-top: 4px;
-    margin-bottom: 2px;
-    font-size: 0.875rem;
-    font-weight: 600;
-    line-height: 20px;
-
-    @include status-colors(
-      $critical: 'critical',
-      $success: 'success',
-      $warning: 'warning'
-    );
-  }
-
   .elements {
     height: 160px;
     overflow-y: auto;
     display: grid;
     column-gap: 8px;
     grid-template-columns: 50% 50%;
+  }
+
+  .status-icons-wrapper {
+    display: flex;
+    margin-bottom: 3px;
+  }
+
+  .status-icons-container {
+    font-size: 0;
+
+    &::before {
+      content: '';
+      width: 15px;
+      float: left;
+      height: 120%;
+      shape-outside: repeating-linear-gradient(transparent 0 52px, #000 0 60px);
+    }
+  }
+}
+
+.score-label {
+  color: #6b757b;
+  margin-top: 4px;
+  margin-bottom: 2px;
+  font-size: 0.875rem;
+  font-weight: 600;
+  line-height: 20px;
+
+  .success {
+    color: $success;
+  }
+  .warning {
+    color: $warning;
+  }
+  .critical {
+    color: $critical;
   }
 }

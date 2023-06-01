@@ -16,10 +16,8 @@ const MaturityElementList = ({
       default:
         return (
           <div className="score-card-list">
-            {elements.map((score) => (
-              <div>
-                <ScoreCard {...score} />
-              </div>
+            {elements.map((score, idx) => (
+              <ScoreCard key={idx} {...score} />
             ))}
           </div>
         );
