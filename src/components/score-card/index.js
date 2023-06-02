@@ -13,7 +13,7 @@ const ScoreCard = ({
   rollUpStatus,
   elementListLabel,
   elementScores,
-  displayMode,
+  displayMode = DISPLAY_MODES.SUMMARY,
 }) => {
   return useMemo(() => {
     return (
