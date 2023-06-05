@@ -64,6 +64,8 @@ export function useProvideData() {
     const { entitiesByAccount, summarizedScores } =
       await getEntitiesForAccounts(accounts, agentReleases, dataDictionary);
 
+    console.log(summarizedScores);
+
     setDataState({ entitiesByAccount, summarizedScores, fetchingData: false });
   }, []);
 
@@ -146,15 +148,19 @@ export function useProvideData() {
           const { scores } = rules[key];
 
           if (!account.scores[key]) {
-            account.scores[key] = {};
+            account.scores[key] = { overallScore: 0, maxScore: 0 };
           }
 
           if (!summarizedScores[key]) {
-            summarizedScores[key] = {};
+            summarizedScores[key] = {
+              // overallScore: scores.length * accounts.length,
+            };
           }
 
           scores.forEach((score) => {
             const { name, entityCheck, accountCheck } = score;
+
+            account.scores[key].maxScore += score?.weight || 1;
 
             if (!account.scores[key][name]) {
               account.scores[key][name] = {
@@ -174,6 +180,7 @@ export function useProvideData() {
               if (accountCheck(account, dataDictionary)) {
                 account.scores[key][name].passed++;
                 summarizedScores[key][name].passed++;
+                account.scores[key].overallScore++;
               } else {
                 account.scores[key][name].failed++;
                 summarizedScores[key][name].failed++;
@@ -196,8 +203,18 @@ export function useProvideData() {
                   }
                 }
               });
+
+              if (entityCheck) {
+                const computedScore =
+                  account.scores[key][name].passed / foundEntities.length || 0;
+
+                account.scores[key].overallScore +=
+                  computedScore * (score?.weight || 1);
+              }
             }
           });
+
+          //
         });
       });
 

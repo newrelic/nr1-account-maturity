@@ -15,10 +15,28 @@ export const accountsQuery = ngql`{
 export const accountDataQuery = (accountId) => ngql`{
   actor {
     account(id: ${accountId}) {
+      cloud {
+        linkedAccounts {
+          disabled
+          name
+          id
+          nrAccountId
+          provider {
+            id
+            name
+          }
+        }
+      }
+      awsBilling: nrql(query: "SELECT count(*) as 'count' FROM FinanceSample", timeout: 120) {
+        results
+      }
       KeySet_Transaction: nrql(query: "SELECT keyset() FROM Transaction") {
         results
       }
       KeySet_PageView: nrql(query: "SELECT keyset() FROM PageView") {
+        results
+      }
+      KeySet_SystemSample: nrql(query: "SELECT keyset() FROM SystemSample") {
         results
       }
     }
@@ -74,6 +92,11 @@ export const dataDictionaryQuery = ngql`{
         }
       }
       BROWSER_APPLICATION_ENTITY: events(names: "PageView") {
+        attributes {
+          name
+        }
+      }
+      INFRASTRUCTURE_HOST_ENTITY: events(names: "SystemSample") {
         attributes {
           name
         }

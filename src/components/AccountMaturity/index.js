@@ -1,18 +1,8 @@
-import React, { useContext, useEffect } from 'react';
-import {
-  Grid,
-  GridItem,
-  Spinner,
-  Stack,
-  StackItem,
-  EmptyState,
-  Layout,
-  LayoutItem,
-  CollapsibleLayoutItem,
-} from 'nr1';
+import React, { useContext } from 'react';
+import { EmptyState, Layout, LayoutItem, CollapsibleLayoutItem } from 'nr1';
 
 import DataContext from '../../context/data';
-import AccountTiles from '../AccountTiles';
+// import AccountTiles from '../AccountTiles';
 
 export default function AccountMaturity() {
   const { fetchingData, errorMsg } = useContext(DataContext);
@@ -37,7 +27,7 @@ export default function AccountMaturity() {
                   backgroundColor: 'white',
                 }}
               >
-                <AccountTiles />
+                {/* <AccountTiles /> */}
               </div>
             </LayoutItem>
 
