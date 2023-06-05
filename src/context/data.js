@@ -7,6 +7,7 @@ import {
   agentReleasesQuery,
   dataDictionaryQuery,
   entitySearchQueryByAccount,
+  nrqlGqlQuery,
 } from '../queries/data';
 import rules from '../rules';
 import { chunk } from '../utils';
@@ -319,10 +320,8 @@ export function useProvideData() {
 
         const nrqlQueue = async.queue((task, callback) => {
           const nrqlPromises = Object.keys(task.nrqlQueries).map((q) => {
-            return NrqlQuery.query({
-              accountIds: [task.accountId],
-              query: task.nrqlQueries[q],
-              formatType: NrqlQuery.FORMAT_TYPE.RAW,
+            return NerdGraphQuery.query({
+              query: nrqlGqlQuery(task.accountId, task.nrqlQueries[q]),
             });
           });
 
@@ -330,7 +329,8 @@ export function useProvideData() {
             const nrqlData = {};
 
             values.forEach((v, i) => {
-              nrqlData[Object.keys(task.nrqlQueries)[i]] = v?.data?.results;
+              nrqlData[Object.keys(task.nrqlQueries)[i]] =
+                v?.data?.actor?.account?.nrql?.results;
             });
 
             entityNrqlData.push({
@@ -345,6 +345,8 @@ export function useProvideData() {
         nrqlQueue.push(entityNrqlQueries);
 
         await nrqlQueue.drain();
+
+        console.log(entityNrqlData);
 
         entities.forEach((entity, i) => {
           const foundEntity = entityNrqlData.find(

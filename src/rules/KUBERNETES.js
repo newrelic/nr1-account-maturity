@@ -21,11 +21,11 @@ export default {
       }
     }`,
   nrqlQueries: (entity) => ({
-    pixie: `FROM Span SELECT count(*) as pixieProviders where instrumentation.provider = 'pixie' AND service.name is not null AND k8s.cluster.name = '${entity.name}' since 7 days ago LIMIT MAX`,
-    prometheusLabels: `SELECT uniqueCount(clusterName) FROM Metric WHERE integrationName ='nri-prometheus' OR instrumentation.provider = 'prometheus' AND clusterName = '${entity.name}' since 7 days ago LIMIT MAX`,
+    pixie: `FROM Span SELECT count(*) where instrumentation.provider = 'pixie' AND service.name is not null AND k8s.cluster.name = '${entity.name}' since 7 days ago LIMIT MAX`,
+    prometheusLabels: `SELECT uniqueCount(clusterName) as 'clusterName' FROM Metric WHERE integrationName ='nri-prometheus' OR instrumentation.provider = 'prometheus' AND clusterName = '${entity.name}' since 7 days ago LIMIT MAX`,
     logEvents: `FROM Log SELECT count(*) where plugin.source = 'kubernetes' AND cluster_name = '${entity.name}' since 7 days ago LIMIT MAX`,
-    apmAgents: `FROM Transaction SELECT uniqueCount(appName) WHERE clusterName IS NOT NULL AND clusterName = '${entity.name}' since 7 days ago LIMIT MAX`,
-    infraAgents: `FROM K8sClusterSample SELECT uniqueCount(clusterName) WHERE agentName = 'Infrastructure' AND clusterName = '${entity.name}' since 7 days ago LIMIT MAX`,
+    apmAgents: `FROM Transaction SELECT uniqueCount(appName) as 'appName' WHERE clusterName IS NOT NULL AND clusterName = '${entity.name}' since 7 days ago LIMIT MAX`,
+    infraAgents: `FROM K8sClusterSample SELECT uniqueCount(clusterName) as 'clusterName' WHERE agentName = 'Infrastructure' AND clusterName = '${entity.name}' since 7 days ago LIMIT MAX`,
   }),
   // scores and values to run and display
   scores: [
@@ -61,7 +61,7 @@ export default {
     {
       name: 'Using Prometheus',
       entityCheck: (entity) =>
-        entity?.nrqlData?.prometheusLabels?.[0]?.uniqueCount > 0,
+        entity?.nrqlData?.prometheusLabels?.[0]?.clusterName > 0,
     },
     {
       name: 'Using Pixie',
@@ -73,13 +73,12 @@ export default {
     },
     {
       name: 'APM Agents Installed',
-      entityCheck: (entity) =>
-        entity?.nrqlData?.apmAgents?.[0]?.uniqueCount > 0,
+      entityCheck: (entity) => entity?.nrqlData?.apmAgents?.[0]?.appName > 0,
     },
     {
       name: 'Infra Agents Installed',
       entityCheck: (entity) =>
-        entity?.nrqlData?.infraAgents?.[0]?.uniqueCount > 0,
+        entity?.nrqlData?.infraAgents?.[0]?.clusterName > 0,
     },
   ],
 };

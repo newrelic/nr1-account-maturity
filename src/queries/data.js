@@ -12,6 +12,17 @@ export const accountsQuery = ngql`{
   }
 }`;
 
+// eslint-disable-next-line
+export const nrqlGqlQuery = (accountId, query, alias) => ngql`{
+  actor {
+    account(id: ${accountId}) {
+      nrql(query: "${query}", timeout: 120) {
+        results
+      }
+    }
+  }
+}`
+
 export const accountDataQuery = (accountId) => ngql`{
   actor {
     account(id: ${accountId}) {
