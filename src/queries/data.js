@@ -59,6 +59,10 @@ export const entitySearchQueryByAccount = (
           entityType
           domain
           type
+          account {
+            id
+            name
+          }
           tags {
             key
             values

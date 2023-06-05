@@ -1,6 +1,6 @@
 import React, { createContext, useEffect } from 'react';
 import { useSetState } from '@mantine/hooks';
-import { nerdlet, NerdGraphQuery, Toast } from 'nr1';
+import { nerdlet, NerdGraphQuery, Toast, NrqlQuery } from 'nr1';
 import {
   accountDataQuery,
   accountsQuery,
@@ -189,7 +189,9 @@ export function useProvideData() {
 
             if (rules[key].entityType) {
               const foundEntities = account.entities.filter(
-                (e) => e.entityType === rules[key].entityType
+                (e) =>
+                  e.entityType === rules[key].entityType &&
+                  (rules[key].type ? rules[key].type === e.type : true)
               );
 
               foundEntities.forEach((entity) => {
@@ -275,8 +277,10 @@ export function useProvideData() {
   };
 
   const decorateEntities = (entities) => {
-    return new Promise((resolve) => {
+    //eslint-disable-next-line
+    return new Promise(async (resolve) => {
       const entityTypesToQuery = [];
+      const entityNrqlQueries = [];
 
       Object.keys(rules).forEach((key) => {
         const rule = rules[key];
@@ -293,7 +297,64 @@ export function useProvideData() {
             });
           }
         }
+
+        if (rule.nrqlQueries) {
+          const foundEntities = entities.filter(
+            (e) => e.entityType === rule.entityType && e.type === rule.type
+          );
+
+          foundEntities.forEach((e) => {
+            entityNrqlQueries.push({
+              guid: e.guid,
+              name: e.name,
+              accountId: e.account.id,
+              nrqlQueries: rule.nrqlQueries(e),
+            });
+          });
+        }
       });
+
+      if (entityNrqlQueries.length > 0) {
+        let entityNrqlData = [];
+
+        const nrqlQueue = async.queue((task, callback) => {
+          const nrqlPromises = Object.keys(task.nrqlQueries).map((q) => {
+            return NrqlQuery.query({
+              accountIds: [task.accountId],
+              query: task.nrqlQueries[q],
+              formatType: NrqlQuery.FORMAT_TYPE.RAW,
+            });
+          });
+
+          Promise.all(nrqlPromises).then((values) => {
+            const nrqlData = {};
+
+            values.forEach((v, i) => {
+              nrqlData[Object.keys(task.nrqlQueries)[i]] = v?.data?.results;
+            });
+
+            entityNrqlData.push({
+              guid: task.guid,
+              nrqlData,
+            });
+
+            callback();
+          });
+        }, 5);
+
+        nrqlQueue.push(entityNrqlQueries);
+
+        await nrqlQueue.drain();
+
+        entities.forEach((entity, i) => {
+          const foundEntity = entityNrqlData.find(
+            (e) => e.guid === entity.guid
+          );
+          if (foundEntity) {
+            entities[i] = { ...foundEntity, ...entity };
+          }
+        });
+      }
 
       if (entityTypesToQuery.length > 0) {
         let entityData = [];
@@ -318,7 +379,9 @@ export function useProvideData() {
 
           resolve(entities);
         });
-      } else {
+      }
+
+      if (entityTypesToQuery.length === 0 && entityNrqlQueries.length === 0) {
         resolve(entities);
       }
     });

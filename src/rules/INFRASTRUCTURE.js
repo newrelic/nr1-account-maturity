@@ -99,8 +99,6 @@ export default {
         const attributes =
           dataDictionary?.INFRASTRUCTURE_HOST_ENTITY?.[0]?.attributes || [];
 
-        console.log(currentKeySet, attributes);
-
         if (attributes) {
           return currentKeySet.length > attributes.length;
         } else {
