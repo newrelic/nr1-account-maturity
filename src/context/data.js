@@ -1,6 +1,6 @@
 import React, { createContext, useEffect } from 'react';
 import { useSetState } from '@mantine/hooks';
-import { nerdlet, NerdGraphQuery, Toast, NrqlQuery } from 'nr1';
+import { nerdlet, NerdGraphQuery, Toast } from 'nr1';
 import {
   accountDataQuery,
   accountsQuery,
@@ -82,6 +82,7 @@ export function useProvideData() {
 
       accountData.forEach((res, index) => {
         accounts[index].data = res?.data?.actor?.account;
+        accounts[index].entityInfo = res?.data?.actor?.entityInfo;
       });
 
       resolve(accounts);
@@ -112,6 +113,7 @@ export function useProvideData() {
 
     return new Promise((resolve) => {
       let completedAccounts = [];
+      // eslint-disable-next-line
       let completedPercentage = 0;
 
       const q = async.queue((task, callback) => {
@@ -159,7 +161,7 @@ export function useProvideData() {
           }
 
           scores.forEach((score) => {
-            const { name, entityCheck, accountCheck } = score;
+            const { name, entityCheck, accountCheck, valueCheck } = score;
 
             account.scores[key].maxScore += score?.weight || 1;
 
@@ -186,6 +188,17 @@ export function useProvideData() {
                 account.scores[key][name].failed++;
                 summarizedScores[key][name].failed++;
               }
+            }
+
+            if (valueCheck) {
+              const { passed, failed } = valueCheck(account);
+
+              account.scores[key][name].passed += passed;
+              summarizedScores[key][name].passed += passed;
+              account.scores[key][name].failed += failed;
+              summarizedScores[key][name].failed += failed;
+
+              account.scores[key].overallScore += passed;
             }
 
             if (rules[key].entityType) {
@@ -345,8 +358,6 @@ export function useProvideData() {
         nrqlQueue.push(entityNrqlQueries);
 
         await nrqlQueue.drain();
-
-        console.log(entityNrqlData);
 
         entities.forEach((entity, i) => {
           const foundEntity = entityNrqlData.find(

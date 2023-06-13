@@ -25,6 +25,14 @@ export const nrqlGqlQuery = (accountId, query, alias) => ngql`{
 
 export const accountDataQuery = (accountId) => ngql`{
   actor {
+    entityInfo: entitySearch(query: "tags.accountId = '${accountId}'") {
+      types {
+        count
+        entityType
+        type
+        domain
+      }
+    }
     account(id: ${accountId}) {
       cloud {
         linkedAccounts {
@@ -39,6 +47,31 @@ export const accountDataQuery = (accountId) => ngql`{
         }
       }
       awsBilling: nrql(query: "SELECT count(*) as 'count' FROM FinanceSample", timeout: 120) {
+        results
+      }
+      logMessageCount: nrql(query: "SELECT count(*) as 'count' FROM Log since 12 hours ago ", timeout: 120) {
+        results
+      }
+      nrqlLoggingAlertCount:alerts {
+        nrqlConditionsSearch(searchCriteria: {queryLike: "FROM log"}) {
+          totalCount
+        }
+      }
+      slmAlertCount:alerts {
+        nrqlConditionsSearch(searchCriteria: {queryLike: "newrelic.sli"}) {
+          totalCount
+        }
+      }
+      npmNoEntityDefinitionDevices: nrql(query: "SELECT uniqueCount(device_name) from Metric where entity.name is null and instrumentation.provider = 'kentik' and instrumentation.name != 'heartbeat'", timeout: 120) {
+        results
+      }
+      npmSnmpPollingFailures: nrql(query: "SELECT uniqueCount(device_name) From Metric where PollingHealth = 'BAD' SINCE 1 day ago", timeout: 120) {
+        results
+      }
+      npmKtranslateSyslogDevices: nrql(query: "SELECT uniqueCount(device_name) from Log where plugin.type = 'ktranslate-syslog' since 1 day ago", timeout: 120) {
+        results
+      }  
+      programDeployCount: nrql(query: "SELECT count(*) FROM NrAuditEvent  WHERE targetType = 'nerdpack' and actionIdentifier ='nerdpack.subscribe' SINCE 7 days ago", timeout: 120) {
         results
       }
       KeySet_Transaction: nrql(query: "SELECT keyset() FROM Transaction") {
@@ -197,6 +230,21 @@ export const agentReleasesQuery = ngql`{
         agentReleases(agentName: SDK) {
           version
           date
+        }
+      }
+    }`
+
+const nerdpackSubscriptionCheckQuery = (id) => `{
+      actor {
+        nerdpacks {
+          nerdpack(id: "${id}") {
+            accountId
+            id
+            subscriptionModel
+            subscriptions {
+              accountId
+            }
+          }
         }
       }
     }`
