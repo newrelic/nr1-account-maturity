@@ -1,3 +1,15 @@
+# [0.14.0](https://github.com/newrelic/nr1-account-maturity/compare/v0.13.0...v0.14.0) (2022-11-04)
+
+
+### Bug Fixes
+
+* update package version and documentation ([282f7aa](https://github.com/newrelic/nr1-account-maturity/commit/282f7aa8e9ab7b6bc413c55920866dffb91858c6))
+
+
+### Features
+
+* Add NPM module ([c7f4926](https://github.com/newrelic/nr1-account-maturity/commit/c7f49261189b02156086a03d595037eddd9fca53))
+
 # [0.13.0](https://github.com/newrelic/nr1-account-maturity/compare/v0.12.0...v0.13.0) (2022-10-21)
 
 
