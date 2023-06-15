@@ -1,3 +1,10 @@
+## [0.14.1](https://github.com/newrelic/nr1-account-maturity/compare/v0.14.0...v0.14.1) (2023-06-15)
+
+
+### Bug Fixes
+
+* Update deployment API in maturity-products ([10bfd9c](https://github.com/newrelic/nr1-account-maturity/commit/10bfd9cff4a5643ebbaa4ba59cb4ea7f8ef46ec7))
+
 # [0.14.0](https://github.com/newrelic/nr1-account-maturity/compare/v0.13.0...v0.14.0) (2022-11-04)
 
 
