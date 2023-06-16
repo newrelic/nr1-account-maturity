@@ -10,7 +10,7 @@ import {
   nrqlGqlQuery,
 } from '../queries/data';
 import rules from '../rules';
-import { chunk } from '../utils';
+import { chunk, generateAccountSummary } from '../utils';
 
 const DataContext = createContext();
 const async = require('async');
@@ -34,8 +34,10 @@ export function useProvideData() {
     diracAuth: null,
     accountIds: [],
     summarizedScores: {},
+    accountSummaries: null,
     agentReleases: null,
     dataDictionary: null,
+    sortBy: 'Lowest score',
   });
 
   useEffect(async () => {
@@ -65,9 +67,19 @@ export function useProvideData() {
     const { entitiesByAccount, summarizedScores } =
       await getEntitiesForAccounts(accounts, agentReleases, dataDictionary);
 
-    console.log(summarizedScores);
+    const accountSummaries = generateAccountSummary(
+      entitiesByAccount,
+      dataState?.sortBy
+    );
 
-    setDataState({ entitiesByAccount, summarizedScores, fetchingData: false });
+    console.log(accountSummaries);
+
+    setDataState({
+      entitiesByAccount,
+      summarizedScores,
+      fetchingData: false,
+      accountSummaries,
+    });
   }, []);
 
   // decorate additional account data
@@ -163,7 +175,9 @@ export function useProvideData() {
           scores.forEach((score) => {
             const { name, entityCheck, accountCheck, valueCheck } = score;
 
-            account.scores[key].maxScore += score?.weight || 1;
+            if (!valueCheck) {
+              account.scores[key].maxScore += score?.weight || 1;
+            }
 
             if (!account.scores[key][name]) {
               account.scores[key][name] = {
@@ -181,24 +195,27 @@ export function useProvideData() {
 
             if (accountCheck) {
               if (accountCheck(account, dataDictionary)) {
-                account.scores[key][name].passed++;
-                summarizedScores[key][name].passed++;
-                account.scores[key].overallScore++;
+                account.scores[key][name].passed += score?.weight || 1;
+                summarizedScores[key][name].passed += score?.weight || 1;
+                account.scores[key].overallScore += score?.weight || 1;
               } else {
-                account.scores[key][name].failed++;
-                summarizedScores[key][name].failed++;
+                account.scores[key][name].failed += score?.weight || 1;
+                summarizedScores[key][name].failed += score?.weight || 1;
               }
-            }
-
-            if (valueCheck) {
+            } else if (valueCheck) {
               const { passed, failed } = valueCheck(account);
+              const weightedPass = passed * (score?.weight || 1);
+              const weightedFail = failed * (score?.weight || 1);
 
-              account.scores[key][name].passed += passed;
-              summarizedScores[key][name].passed += passed;
-              account.scores[key][name].failed += failed;
-              summarizedScores[key][name].failed += failed;
+              account.scores[key][name].passed += weightedPass;
+              summarizedScores[key][name].passed += weightedPass;
+              account.scores[key][name].failed += weightedFail;
+              summarizedScores[key][name].failed += weightedFail;
 
-              account.scores[key].overallScore += passed;
+              account.scores[key].overallScore += weightedPass;
+
+              // may need to do something about this
+              account.scores[key].maxScore += weightedPass + weightedFail;
             }
 
             if (rules[key].entityType) {
@@ -229,10 +246,10 @@ export function useProvideData() {
               }
             }
           });
-
-          //
         });
       });
+
+      console.log(accounts);
 
       resolve({ accounts, summarizedScores });
     });

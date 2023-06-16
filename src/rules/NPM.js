@@ -80,6 +80,7 @@ export default {
     },
     {
       name: 'VPC Flows',
+      weight: 0.2,
       accountCheck: (account) =>
         (account.reportingEventTypes || []).includes('Log_VPC_Flows') ||
         (account.reportingEventTypes || []).includes('Log_VPC_Flows_AWS') ||

@@ -31,6 +31,7 @@
     display: grid;
     column-gap: 8px;
     grid-template-columns: 50% 50%;
+    overflow-x: hidden;
   }
 
   .status-icons-wrapper {

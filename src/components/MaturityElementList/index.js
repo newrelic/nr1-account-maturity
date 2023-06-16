@@ -1,6 +1,6 @@
 import React, { useMemo } from 'react';
 import PropTypes from 'prop-types';
-import ScoreCard from '../score-card';
+import ScoreCard from '../ScoreCard';
 import { STATUSES, DISPLAY_MODES } from '../../constants';
 
 const MaturityElementList = ({

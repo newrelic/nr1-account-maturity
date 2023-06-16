@@ -21,7 +21,7 @@ export const nrqlGqlQuery = (accountId, query, alias) => ngql`{
       }
     }
   }
-}`
+}`;
 
 export const accountDataQuery = (accountId) => ngql`{
   actor {
@@ -85,7 +85,7 @@ export const accountDataQuery = (accountId) => ngql`{
       }
     }
   }
-}`
+}`;
 
 export const entitySearchQueryByAccount = (
   accountId,
@@ -151,7 +151,7 @@ export const dataDictionaryQuery = ngql`{
       }
     }
   }
-}`
+}`;
 
 export const agentReleasesQuery = ngql`{
       android: docs {
@@ -232,8 +232,9 @@ export const agentReleasesQuery = ngql`{
           date
         }
       }
-    }`
+    }`;
 
+// eslint-disable-next-line
 const nerdpackSubscriptionCheckQuery = (id) => `{
       actor {
         nerdpacks {
@@ -247,4 +248,4 @@ const nerdpackSubscriptionCheckQuery = (id) => `{
           }
         }
       }
-    }`
+    }`;

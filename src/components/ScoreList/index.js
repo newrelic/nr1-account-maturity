@@ -1,7 +1,7 @@
 import React from 'react';
 import PropTypes from 'prop-types';
 import { Tooltip } from 'nr1';
-import Score from '../score';
+import Score from '../Score';
 import { STATUSES } from '../../constants';
 
 const ScoreList = ({ idxBase, scores = [] }) => {

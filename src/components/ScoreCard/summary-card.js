@@ -3,7 +3,7 @@ import PropTypes from 'prop-types';
 import { HeadingText } from 'nr1';
 import { ProgressBar } from '@newrelic/nr-labs-components';
 import { STATUSES } from '../../constants';
-import ScoreList from '../score-list';
+import ScoreList from '../ScoreList';
 
 const SummaryCard = ({
   elementScores,

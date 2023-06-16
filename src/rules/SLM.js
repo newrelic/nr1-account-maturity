@@ -39,7 +39,7 @@ export default {
         (account?.data?.slmAlertCount?.nrqlConditionsSearch?.totalCount || 0) >
         0,
     },
-    // the has owner check just looks for a team tag, this has arguable value since it is not communicated to end users on how to resolve it
+    // the "has owner check" just looks for a team tag, this has arguable value since it is not communicated to end users on how to resolve it
     // have chosen not to add that check
   ],
 };

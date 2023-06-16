@@ -1,11 +1,52 @@
 import React, { useContext } from 'react';
-import { EmptyState, Layout, LayoutItem, CollapsibleLayoutItem } from 'nr1';
+import {
+  EmptyState,
+  Layout,
+  LayoutItem,
+  CollapsibleLayoutItem,
+  HeadingText,
+} from 'nr1';
 
 import DataContext from '../../context/data';
-// import AccountTiles from '../AccountTiles';
+import MaturityElementList from '../MaturityElementList';
+import { STATUSES } from '../../constants';
+import rules from '../../rules';
+import { percentageToStatus } from '../../utils';
+import SortBy from '../SortBy';
 
 export default function AccountMaturity() {
-  const { fetchingData, errorMsg } = useContext(DataContext);
+  const { fetchingData, errorMsg, accountSummaries } = useContext(DataContext);
+
+  const scoredCollection = (accountSummaries || []).map((a) => {
+    const elementScores = [];
+
+    Object.keys(rules).forEach((key) => {
+      const value = a[key];
+
+      if (value !== undefined && value !== null) {
+        const payload = {
+          name: key,
+          status: percentageToStatus(value),
+          score: `${Math.round(value)}%`,
+        };
+
+        elementScores.push(payload);
+      }
+    });
+
+    const payload = {
+      title: a.name,
+      subtitle: a.id,
+      rollUpScore: Math.round((a.totalScore / a.maxScore) * 100),
+      rollUpStatus: STATUSES.UNKNOWN,
+      elementListLabel: 'Products',
+      elementScores,
+    };
+
+    payload.rollUpStatus = percentageToStatus(payload.rollUpScore);
+
+    return payload;
+  });
 
   return (
     <div>
@@ -27,7 +68,19 @@ export default function AccountMaturity() {
                   backgroundColor: 'white',
                 }}
               >
-                {/* <AccountTiles /> */}
+                <div style={{ paddingBottom: '50px' }}>
+                  <div style={{ float: 'left' }}>
+                    <HeadingText type={HeadingText.TYPE.HEADING_3}>
+                      Account Maturity Scores
+                    </HeadingText>
+                  </div>
+                  <div style={{ float: 'right' }}>
+                    <SortBy />
+                  </div>
+                </div>
+                <div>
+                  <MaturityElementList elements={scoredCollection} />
+                </div>
               </div>
             </LayoutItem>
 
