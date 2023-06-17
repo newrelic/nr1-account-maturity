@@ -12,6 +12,16 @@ export const accountsQuery = ngql`{
   }
 }`;
 
+export const userQuery = ngql`{
+  actor {
+    user {
+      email
+      id
+      name
+    }
+  }
+}`
+
 // eslint-disable-next-line
 export const nrqlGqlQuery = (accountId, query, alias) => ngql`{
   actor {

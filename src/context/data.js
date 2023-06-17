@@ -1,6 +1,11 @@
 import React, { createContext, useEffect } from 'react';
 import { useSetState } from '@mantine/hooks';
-import { nerdlet, NerdGraphQuery, Toast } from 'nr1';
+import {
+  NerdGraphQuery,
+  Toast,
+  AccountStorageQuery,
+  AccountStorageMutation,
+} from 'nr1';
 import {
   accountDataQuery,
   accountsQuery,
@@ -8,22 +13,25 @@ import {
   dataDictionaryQuery,
   entitySearchQueryByAccount,
   nrqlGqlQuery,
+  userQuery,
 } from '../queries/data';
 import rules from '../rules';
 import { chunk, generateAccountSummary } from '../utils';
+import { ACCOUNT_USER_CONFIG_COLLECTION } from '../constants';
 
 const DataContext = createContext();
 const async = require('async');
 
-export function ProvideData({ children }) {
-  const auth = useProvideData();
-  return <DataContext.Provider value={auth}>{children}</DataContext.Provider>;
+export function ProvideData(v) {
+  const auth = useProvideData(v.platformContext);
+  return <DataContext.Provider value={auth}>{v.children}</DataContext.Provider>;
 }
 
 export default DataContext;
 
-export function useProvideData() {
+export function useProvideData(props) {
   const [dataState, setDataState] = useSetState({
+    accounts: null,
     userConfirmed: null,
     fetchingData: true,
     fetchingAccountData: false,
@@ -37,18 +45,37 @@ export function useProvideData() {
     accountSummaries: null,
     agentReleases: null,
     dataDictionary: null,
+    selectedAccountId: null,
+    reportConfigs: null,
+    fetchingReportConfigs: false,
+    user: null,
+    view: { page: 'ReportList', title: 'Maturity Reports' },
     sortBy: 'Lowest score',
   });
 
+  // handle initial load
   useEffect(async () => {
     // eslint-disable-next-line
     console.log("DataProvider loaded");
-    setDataState({ fetchingData: true });
+    const user = await NerdGraphQuery.query({ query: userQuery });
+    setDataState({ user: user?.data?.actor?.user });
+  }, []);
 
-    nerdlet.setConfig({
-      accountPicker: true,
-      timePicker: false,
-    });
+  // handle account picker changes
+  useEffect(async () => {
+    const { accountId } = props;
+    console.log('account id changed => ', accountId);
+    setDataState({ fetchingData: true, selectedAccountId: accountId });
+
+    const reportConfigs =
+      (
+        await AccountStorageQuery.query({
+          accountId,
+          collection: ACCOUNT_USER_CONFIG_COLLECTION,
+        })
+      )?.data || [];
+
+    console.log(reportConfigs);
 
     const [accountsInit, agentReleases, dataDictionary] = await Promise.all([
       getAccounts(),
@@ -59,28 +86,32 @@ export function useProvideData() {
     const accounts = await decorateAccountData(accountsInit);
 
     setDataState({
+      selectedAccountId: accountId,
       accounts,
       agentReleases,
       dataDictionary,
+      reportConfigs,
     });
 
-    const { entitiesByAccount, summarizedScores } =
-      await getEntitiesForAccounts(accounts, agentReleases, dataDictionary);
+    console.log(accounts);
 
-    const accountSummaries = generateAccountSummary(
-      entitiesByAccount,
-      dataState?.sortBy
-    );
+    // const { entitiesByAccount, summarizedScores } =
+    //   await getEntitiesForAccounts(accounts, agentReleases, dataDictionary);
 
-    console.log(accountSummaries);
+    // const accountSummaries = generateAccountSummary(
+    //   entitiesByAccount,
+    //   dataState?.sortBy
+    // );
+
+    // console.log(accountSummaries);
 
     setDataState({
-      entitiesByAccount,
-      summarizedScores,
       fetchingData: false,
-      accountSummaries,
+      // entitiesByAccount,
+      // summarizedScores,
+      // accountSummaries,
     });
-  }, []);
+  }, [props.accountId]);
 
   // decorate additional account data
   const decorateAccountData = (accounts) => {
@@ -115,6 +146,58 @@ export function useProvideData() {
     NerdGraphQuery.query({ query: accountsQuery }).then(
       (res) => res?.data?.actor?.accounts || []
     );
+
+  const checkUser = (owner) => {
+    if (owner?.id !== dataState.user?.id) {
+      Toast.showToast({
+        title: 'Failed to deleted',
+        description: 'You are not the owner',
+        type: Toast.TYPE.CRITICAL,
+      });
+
+      return false;
+    } else {
+      return true;
+    }
+  };
+
+  const fetchReportConfigs = async () => {
+    setDataState({ fetchingReports: true });
+
+    const reportConfigs =
+      (
+        await AccountStorageQuery.query({
+          accountId: dataState.selectedAccountId,
+          collection: ACCOUNT_USER_CONFIG_COLLECTION,
+        })
+      )?.data || [];
+
+    setDataState({ fetchingReports: false, reportConfigs });
+  };
+
+  const deleteReportConfig = async (documentId) => {
+    const res = await AccountStorageMutation.mutate({
+      accountId: dataState.selectedAccountId,
+      actionType: AccountStorageMutation.ACTION_TYPE.DELETE_DOCUMENT,
+      collection: ACCOUNT_USER_CONFIG_COLLECTION,
+      documentId,
+    });
+
+    if (res.error) {
+      Toast.showToast({
+        title: 'Failed to deleted',
+        description: 'Check your permissions',
+        type: Toast.TYPE.CRITICAL,
+      });
+    } else {
+      Toast.showToast({
+        title: 'Deleted successfully',
+        type: Toast.TYPE.NORMAL,
+      });
+
+      await fetchReportConfigs();
+    }
+  };
 
   const getEntitiesForAccounts = async (
     accounts,
@@ -447,5 +530,8 @@ export function useProvideData() {
   return {
     ...dataState,
     setDataState,
+    fetchReportConfigs,
+    deleteReportConfig,
+    checkUser,
   };
 }
