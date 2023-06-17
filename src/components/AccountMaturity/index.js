@@ -10,52 +10,19 @@ import {
 
 import DataContext from '../../context/data';
 import MaturityElementList from '../MaturityElementList';
-import { STATUSES } from '../../constants';
-import rules from '../../rules';
-import { percentageToStatus } from '../../utils';
 import SortBy from '../SortBy';
 import ReportList from '../ReportList';
 import CreateReport from '../CreateReport';
+import ReportView from '../ReportView';
 
 export default function AccountMaturity() {
-  const { fetchingData, errorMsg, accountSummaries, view, setDataState } =
+  const { fetchingData, errorMsg, view, setDataState } =
     useContext(DataContext);
-
-  const scoredCollection = (accountSummaries || []).map((a) => {
-    const elementScores = [];
-
-    Object.keys(rules).forEach((key) => {
-      const value = a[key];
-
-      if (value !== undefined && value !== null) {
-        const payload = {
-          name: key,
-          status: percentageToStatus(value),
-          score: `${Math.round(value)}%`,
-        };
-
-        elementScores.push(payload);
-      }
-    });
-
-    const payload = {
-      title: a.name,
-      subtitle: a.id,
-      rollUpScore: Math.round((a.totalScore / a.maxScore) * 100),
-      rollUpStatus: STATUSES.UNKNOWN,
-      elementListLabel: 'Products',
-      elementScores,
-    };
-
-    payload.rollUpStatus = percentageToStatus(payload.rollUpScore);
-
-    return payload;
-  });
 
   const renderView = () => {
     switch (view.page) {
       case 'ReportList': {
-        return <ReportList />;
+        return <ReportList {...(view.props || {})} />;
       }
       case 'CreateReport': {
         return <CreateReport {...(view.props || {})} />;
@@ -63,8 +30,16 @@ export default function AccountMaturity() {
       case 'EditReport': {
         return <CreateReport {...(view.props || {})} />;
       }
+      case 'ReportView': {
+        return <ReportView {...(view.props || {})} />;
+      }
       case 'MaturityAccountScores': {
-        return <MaturityElementList elements={scoredCollection} />;
+        return (
+          <MaturityElementList
+            // elements={scoredCollection}
+            {...(view.props || {})}
+          />
+        );
       }
       default: {
         return 'Unknown View';
@@ -90,6 +65,7 @@ export default function AccountMaturity() {
           </Button>
         );
       }
+      case 'ReportView':
       case 'CreateReport': {
         return (
           <Button

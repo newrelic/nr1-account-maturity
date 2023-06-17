@@ -43,12 +43,19 @@ export const generateAccountSummary = (accounts, sortBy) => {
 
     Object.keys(scores).forEach((key) => {
       const { overallScore, maxScore } = scores[key];
-      summary[key] = (overallScore / maxScore) * 100;
-      summary.maxScore += 100;
-      summary.totalScore += summary[key];
+      if (overallScore !== null && maxScore !== null) {
+        summary[key] = (overallScore / maxScore) * 100;
+        summary[key] = isNaN(summary[key]) ? 0 : summary[key];
+        summary.maxScore += 100;
+        summary.totalScore += summary[key];
+      }
     });
 
     summary.scorePercentage = (summary.totalScore / summary.maxScore) * 100;
+
+    summary.scorePercentage = isNaN(summary.scorePercentage)
+      ? 0
+      : summary.scorePercentage;
 
     accountSummaries.push(summary);
   });

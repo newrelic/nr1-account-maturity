@@ -129,7 +129,7 @@ export function useProvideData(props) {
 
     const totalScorePercentage =
       accountSummaries.reduce(
-        (n, { scorePercentage }) => n + scorePercentage,
+        (n, { scorePercentage }) => n + (scorePercentage || 0),
         0
       ) / accountSummaries.length;
 

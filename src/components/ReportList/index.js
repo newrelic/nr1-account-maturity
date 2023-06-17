@@ -84,6 +84,17 @@ export default function ReportList() {
             const latestScore =
               item?.history?.[0]?.document?.totalScorePercentage;
 
+            let rowClick = () =>
+              setDataState({
+                view: {
+                  page: 'ReportView',
+                  title: `Report: ${item.document.name}`,
+                  props: { ...item, selected: 0 },
+                },
+              });
+
+            if (runningReport) rowClick = undefined;
+
             return (
               <TableRow
                 actions={[
@@ -106,14 +117,23 @@ export default function ReportList() {
                       // eslint-disable-next-line prettier/prettier
                       }`,
                   }}
+                  onClick={rowClick}
                 >
                   {item.document.name}
                 </TableRowCell>
-                <TableRowCell>{item.document.owner?.name} </TableRowCell>
-                <TableRowCell alignmentType={TableRowCell.ALIGNMENT_TYPE.RIGHT}>
+                <TableRowCell onClick={rowClick}>
+                  {item.document.owner?.name}{' '}
+                </TableRowCell>
+                <TableRowCell
+                  onClick={rowClick}
+                  alignmentType={TableRowCell.ALIGNMENT_TYPE.RIGHT}
+                >
                   {item.document.accounts.length}
                 </TableRowCell>
-                <TableRowCell alignmentType={TableRowCell.ALIGNMENT_TYPE.RIGHT}>
+                <TableRowCell
+                  onClick={rowClick}
+                  alignmentType={TableRowCell.ALIGNMENT_TYPE.RIGHT}
+                >
                   {latestScore !== null && latestScore !== undefined
                     ? `${latestScore.toFixed(2)}%`
                     : '-'}
