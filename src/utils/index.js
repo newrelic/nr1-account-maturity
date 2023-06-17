@@ -34,7 +34,7 @@ export const percentageToStatus = (value) => {
   return STATUSES.UNKNOWN;
 };
 
-export const generateAccountSummary = (accounts, sortBy) => {
+export const generateAccountSummary = (accounts, sortBy, report) => {
   const accountSummaries = [];
 
   accounts.forEach((account) => {
@@ -42,12 +42,19 @@ export const generateAccountSummary = (accounts, sortBy) => {
     const summary = { name, id, totalScore: 0, maxScore: 0 };
 
     Object.keys(scores).forEach((key) => {
-      const { overallScore, maxScore } = scores[key];
-      if (overallScore !== null && maxScore !== null) {
-        summary[key] = (overallScore / maxScore) * 100;
-        summary[key] = isNaN(summary[key]) ? 0 : summary[key];
-        summary.maxScore += 100;
-        summary.totalScore += summary[key];
+      console.log(key, report);
+
+      if (
+        report?.document?.allProducts ||
+        (report?.document?.products || []).includes(key)
+      ) {
+        const { overallScore, maxScore } = scores[key];
+        if (overallScore !== null && maxScore !== null) {
+          summary[key] = (overallScore / maxScore) * 100;
+          summary[key] = isNaN(summary[key]) ? 0 : summary[key];
+          summary.maxScore += 100;
+          summary.totalScore += summary[key];
+        }
       }
     });
 
@@ -59,6 +66,9 @@ export const generateAccountSummary = (accounts, sortBy) => {
 
     accountSummaries.push(summary);
   });
+
+  console.log(accounts);
+  console.log(accountSummaries);
 
   return sortSummaries(accountSummaries, sortBy);
 };

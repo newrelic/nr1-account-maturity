@@ -15,7 +15,7 @@ const MaturityElementList = ({
       case DISPLAY_MODES.NAVIGATOR:
       default:
         return (
-          <div className="score-card-list">
+          <div className="score-card-list" style={{ paddingTop: '10px' }}>
             {elements.map((score, idx) => (
               <ScoreCard key={idx} {...score} />
             ))}

@@ -44,7 +44,6 @@ export function useProvideData(props) {
     searchText: '',
     checkingAccount: false,
     diracAuth: null,
-    accountIds: [],
     summarizedScores: {},
     accountSummaries: null,
     agentReleases: null,
@@ -74,6 +73,12 @@ export function useProvideData(props) {
     const { accountId } = props;
     console.log('account id changed => ', accountId);
     setDataState({ fetchingData: true, selectedAccountId: accountId });
+
+    // AccountStorageMutation.mutate({
+    //   accountId,
+    //   actionType: AccountStorageMutation.ACTION_TYPE.DELETE_COLLECTION,
+    //   collection: ACCOUNT_USER_HISTORY_COLLECTION,
+    // });
 
     const reportConfigs =
       (
@@ -109,11 +114,15 @@ export function useProvideData(props) {
     setDataState({
       runningReport: true,
       [`runningReport.${selectedReport.id}`]: true,
+      entitiesByAccount: null,
+      summarizedScores: null,
+      accountSummaries: null,
     });
+
     const report = selectedReport || dataState.selectedReport;
-    const accounts = report.document.accounts.map((id) =>
-      dataState.accounts.find((a) => a.id === id)
-    );
+    const accounts = [...report.document.accounts].map((id) => ({
+      ...[...dataState.accounts].find((a) => a.id === id),
+    }));
 
     const { entitiesByAccount, summarizedScores } =
       await getEntitiesForAccounts(
@@ -124,7 +133,8 @@ export function useProvideData(props) {
 
     const accountSummaries = generateAccountSummary(
       entitiesByAccount,
-      dataState?.sortBy
+      dataState?.sortBy,
+      selectedReport
     );
 
     const totalScorePercentage =
@@ -135,7 +145,7 @@ export function useProvideData(props) {
 
     console.log(report, selectedReport);
 
-    const res = AccountStorageMutation.mutate({
+    const res = await AccountStorageMutation.mutate({
       accountId: dataState.selectedAccountId,
       actionType: AccountStorageMutation.ACTION_TYPE.WRITE_DOCUMENT,
       collection: ACCOUNT_USER_HISTORY_COLLECTION,
@@ -163,6 +173,8 @@ export function useProvideData(props) {
     }
 
     // console.log(accountSummaries, totalScorePercentage);
+
+    fetchReportHistory();
 
     setDataState({
       runningReport: false,

@@ -25,11 +25,14 @@ export default function CreateReport(selectedReport) {
     setDataState,
   } = useContext(DataContext);
 
+  const allProducts = selectedReport?.document?.allProducts;
+
   const [state, setState] = useSetState({
     creatingReport: false,
     name: selectedReport?.document?.name || '',
     entitySearchQuery: selectedReport?.document?.entitySearchQuery || '',
-    allProducts: selectedReport?.document?.allProducts || true,
+    allProducts:
+      allProducts !== undefined && allProducts !== null ? true : allProducts,
     accounts: selectedReport?.document?.accounts || [],
     products: selectedReport?.document?.products || [],
   });
