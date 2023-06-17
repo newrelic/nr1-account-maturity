@@ -6,6 +6,20 @@ export const chunk = (arr, size) =>
     arr.slice(i * size, i * size + size)
   );
 
+export const scoreToColor = (value) => {
+  if (value === null || value === undefined) {
+    return { color: '#9ea5a9' };
+  } else if (value >= 0 && value <= 50) {
+    return { color: '#f5554b', fontColor: '#FAFBFB' };
+  } else if (value >= 51 && value < 70) {
+    return { color: '#f07a0e', fontColor: '#293338' };
+  } else if (value >= 70 && value < 80) {
+    return { color: '#ffd23d', fontColor: '#FAFBFB' };
+  } else if (value >= 80) {
+    return { color: '#01a76a', fontColor: '#FAFBFB' };
+  }
+};
+
 export const percentageToStatus = (value) => {
   if (value !== null && value !== undefined) {
     if (value <= 50) {
@@ -33,6 +47,8 @@ export const generateAccountSummary = (accounts, sortBy) => {
       summary.maxScore += 100;
       summary.totalScore += summary[key];
     });
+
+    summary.scorePercentage = (summary.totalScore / summary.maxScore) * 100;
 
     accountSummaries.push(summary);
   });

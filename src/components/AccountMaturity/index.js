@@ -58,7 +58,10 @@ export default function AccountMaturity() {
         return <ReportList />;
       }
       case 'CreateReport': {
-        return <CreateReport />;
+        return <CreateReport {...(view.props || {})} />;
+      }
+      case 'EditReport': {
+        return <CreateReport {...(view.props || {})} />;
       }
       case 'MaturityAccountScores': {
         return <MaturityElementList elements={scoredCollection} />;
@@ -71,6 +74,22 @@ export default function AccountMaturity() {
 
   const renderTopRight = () => {
     switch (view.page) {
+      case 'ReportList': {
+        return (
+          <Button
+            style={{ marginRight: '10px' }}
+            type={Button.TYPE.PRIMARY}
+            sizeType={Button.SIZE_TYPE.SMALL}
+            onClick={() =>
+              setDataState({
+                view: { page: 'CreateReport', title: 'Create Report' },
+              })
+            }
+          >
+            Create Report
+          </Button>
+        );
+      }
       case 'CreateReport': {
         return (
           <Button

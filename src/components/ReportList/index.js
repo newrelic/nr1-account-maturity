@@ -9,12 +9,25 @@ import {
   TableRowCell,
 } from 'nr1';
 import DataContext from '../../context/data';
+import { scoreToColor } from '../../utils';
 
 export default function ReportList() {
-  const { checkUser, reportConfigs, deleteReportConfig, setDataState } =
-    useContext(DataContext);
+  const dataCtx = useContext(DataContext);
+  const {
+    user,
+    checkUser,
+    runReport,
+    reportHistory,
+    runningReport,
+    reportConfigs,
+    deleteReportConfig,
+    setDataState,
+  } = dataCtx;
 
-  console.log(reportConfigs);
+  const sortedReportConfigs = reportConfigs.map((r) => ({
+    ...r,
+    history: reportHistory.filter((h) => h.document.reportId === r.id),
+  }));
 
   return useMemo(() => {
     if ((reportConfigs || []).length === 0) {
@@ -38,7 +51,7 @@ export default function ReportList() {
 
     return (
       <>
-        <Table items={reportConfigs}>
+        <Table items={sortedReportConfigs}>
           <TableHeader>
             <TableHeaderCell value={({ item }) => item.document.name}>
               Name
@@ -53,7 +66,9 @@ export default function ReportList() {
               Accounts
             </TableHeaderCell>
             <TableHeaderCell
-              value={({ item }) => item.document.latestScore}
+              value={({ item }) =>
+                item?.history?.[0]?.document?.totalScorePercentage
+              }
               width="100px"
               alignmentType={TableRowCell.ALIGNMENT_TYPE.RIGHT}
             >
@@ -65,43 +80,81 @@ export default function ReportList() {
             />
           </TableHeader>
 
-          {({ item }) => (
-            <TableRow
-              actions={[
-                {
-                  label: 'Delete',
-                  type: TableRow.ACTION_TYPE.DESTRUCTIVE,
-                  onClick: (evt, { item }) => {
-                    if (checkUser(item.document.owner)) {
-                      deleteReportConfig(item.id);
-                    }
+          {({ item }) => {
+            const latestScore =
+              item?.history?.[0]?.document?.totalScorePercentage;
+
+            return (
+              <TableRow
+                actions={[
+                  {
+                    label: 'Delete',
+                    type: TableRow.ACTION_TYPE.DESTRUCTIVE,
+                    disabled: runningReport,
+                    onClick: (evt, { item }) => {
+                      if (checkUser(item.document.owner)) {
+                        deleteReportConfig(item.id);
+                      }
+                    },
                   },
-                },
-              ]}
-            >
-              <TableRowCell>{item.document.name}</TableRowCell>
-              <TableRowCell>{item.document.owner?.name} </TableRowCell>
-              <TableRowCell>{item.document.accounts.length}</TableRowCell>
-              <TableRowCell>{item.document?.latestScore}</TableRowCell>
-              <TableRowCell style={{ textAlign: 'right' }}>
-                <Button
-                  type={Button.TYPE.PRIMARY}
-                  sizeType={Button.SIZE_TYPE.SMALL}
+                ]}
+              >
+                <TableRowCell
+                  style={{
+                    // eslint-disable-next-line
+                    borderLeft: `5px solid ${scoreToColor(latestScore).color
+                      // eslint-disable-next-line prettier/prettier
+                      }`,
+                  }}
                 >
-                  Run
-                </Button>
-                &nbsp; &nbsp;
-                <Button
-                  type={Button.TYPE.PRIMARY}
-                  sizeType={Button.SIZE_TYPE.SMALL}
-                >
-                  Edit
-                </Button>
-              </TableRowCell>
-            </TableRow>
-          )}
+                  {item.document.name}
+                </TableRowCell>
+                <TableRowCell>{item.document.owner?.name} </TableRowCell>
+                <TableRowCell alignmentType={TableRowCell.ALIGNMENT_TYPE.RIGHT}>
+                  {item.document.accounts.length}
+                </TableRowCell>
+                <TableRowCell alignmentType={TableRowCell.ALIGNMENT_TYPE.RIGHT}>
+                  {latestScore !== null && latestScore !== undefined
+                    ? `${latestScore.toFixed(2)}%`
+                    : '-'}
+                </TableRowCell>
+                <TableRowCell style={{ textAlign: 'right' }}>
+                  <Button
+                    type={Button.TYPE.PRIMARY}
+                    sizeType={Button.SIZE_TYPE.SMALL}
+                    loading={dataCtx[`runningReport.${item.id}`]}
+                    disabled={
+                      runningReport || user.id !== item.document?.owner?.id
+                    }
+                    onClick={() => runReport(item)}
+                  >
+                    Run
+                  </Button>
+                  &nbsp; &nbsp;
+                  <Button
+                    type={Button.TYPE.PRIMARY}
+                    sizeType={Button.SIZE_TYPE.SMALL}
+                    disabled={
+                      runningReport || user.id !== item.document?.owner?.id
+                    }
+                    onClick={() =>
+                      setDataState({
+                        view: {
+                          page: 'CreateReport',
+                          title: 'Edit Report',
+                          props: item,
+                        },
+                      })
+                    }
+                  >
+                    Edit
+                  </Button>
+                </TableRowCell>
+              </TableRow>
+            );
+          }}
         </Table>
       </>
     );
-  }, [reportConfigs]);
+  }, [reportConfigs, runningReport, reportHistory]);
 }

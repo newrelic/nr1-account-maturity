@@ -16,7 +16,7 @@ import { v4 as uuidv4 } from 'uuid';
 import rules from '../../rules';
 import { ACCOUNT_USER_CONFIG_COLLECTION } from '../../constants';
 
-export default function CreateReport() {
+export default function CreateReport(selectedReport) {
   const {
     accounts,
     user,
@@ -27,11 +27,11 @@ export default function CreateReport() {
 
   const [state, setState] = useSetState({
     creatingReport: false,
-    name: '',
-    entitySearchQuery: '',
-    allProducts: true,
-    accounts: [],
-    products: [],
+    name: selectedReport?.document?.name || '',
+    entitySearchQuery: selectedReport?.document?.entitySearchQuery || '',
+    allProducts: selectedReport?.document?.allProducts || true,
+    accounts: selectedReport?.document?.accounts || [],
+    products: selectedReport?.document?.products || [],
   });
 
   const createReport = () => {
@@ -56,7 +56,7 @@ export default function CreateReport() {
         accountId: selectedAccountId,
         actionType: AccountStorageMutation.ACTION_TYPE.WRITE_DOCUMENT,
         collection: ACCOUNT_USER_CONFIG_COLLECTION,
-        documentId: 'test' || uuidv4(),
+        documentId: selectedReport?.id || uuidv4(),
         document,
       }).then((res) => {
         if (res.error) {
@@ -130,7 +130,7 @@ export default function CreateReport() {
               (!state.allProducts && state.products.length === 0)
             }
           >
-            Create Report
+            {selectedReport ? 'Save Report' : 'Create Report'}
           </Button>
         </div>
 
@@ -199,5 +199,5 @@ export default function CreateReport() {
         </div>
       </>
     );
-  }, [accounts, user, state]);
+  }, [accounts, user, state, selectedReport]);
 }

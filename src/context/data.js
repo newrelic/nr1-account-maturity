@@ -16,8 +16,12 @@ import {
   userQuery,
 } from '../queries/data';
 import rules from '../rules';
+import { v4 as uuidv4 } from 'uuid';
 import { chunk, generateAccountSummary } from '../utils';
-import { ACCOUNT_USER_CONFIG_COLLECTION } from '../constants';
+import {
+  ACCOUNT_USER_CONFIG_COLLECTION,
+  ACCOUNT_USER_HISTORY_COLLECTION,
+} from '../constants';
 
 const DataContext = createContext();
 const async = require('async');
@@ -46,8 +50,12 @@ export function useProvideData(props) {
     agentReleases: null,
     dataDictionary: null,
     selectedAccountId: null,
+    runningReport: false,
+    selectedReport: null,
     reportConfigs: null,
+    reportHistory: null,
     fetchingReportConfigs: false,
+    fetchingReportHistory: false,
     user: null,
     view: { page: 'ReportList', title: 'Maturity Reports' },
     sortBy: 'Lowest score',
@@ -77,6 +85,8 @@ export function useProvideData(props) {
 
     console.log(reportConfigs);
 
+    await fetchReportHistory(accountId);
+
     const [accountsInit, agentReleases, dataDictionary] = await Promise.all([
       getAccounts(),
       getAgentReleases(),
@@ -91,27 +101,77 @@ export function useProvideData(props) {
       agentReleases,
       dataDictionary,
       reportConfigs,
-    });
-
-    console.log(accounts);
-
-    // const { entitiesByAccount, summarizedScores } =
-    //   await getEntitiesForAccounts(accounts, agentReleases, dataDictionary);
-
-    // const accountSummaries = generateAccountSummary(
-    //   entitiesByAccount,
-    //   dataState?.sortBy
-    // );
-
-    // console.log(accountSummaries);
-
-    setDataState({
       fetchingData: false,
-      // entitiesByAccount,
-      // summarizedScores,
-      // accountSummaries,
     });
   }, [props.accountId]);
+
+  const runReport = async (selectedReport) => {
+    setDataState({
+      runningReport: true,
+      [`runningReport.${selectedReport.id}`]: true,
+    });
+    const report = selectedReport || dataState.selectedReport;
+    const accounts = report.document.accounts.map((id) =>
+      dataState.accounts.find((a) => a.id === id)
+    );
+
+    const { entitiesByAccount, summarizedScores } =
+      await getEntitiesForAccounts(
+        accounts,
+        dataState.agentReleases,
+        dataState.dataDictionary
+      );
+
+    const accountSummaries = generateAccountSummary(
+      entitiesByAccount,
+      dataState?.sortBy
+    );
+
+    const totalScorePercentage =
+      accountSummaries.reduce(
+        (n, { scorePercentage }) => n + scorePercentage,
+        0
+      ) / accountSummaries.length;
+
+    console.log(report, selectedReport);
+
+    const res = AccountStorageMutation.mutate({
+      accountId: dataState.selectedAccountId,
+      actionType: AccountStorageMutation.ACTION_TYPE.WRITE_DOCUMENT,
+      collection: ACCOUNT_USER_HISTORY_COLLECTION,
+      documentId: uuidv4(),
+      document: {
+        reportId: report.id,
+        runAt: new Date().getTime(),
+        totalScorePercentage,
+        accountSummaries,
+      },
+    });
+
+    if (res.error) {
+      Toast.showToast({
+        title: 'Failed to save',
+        description: 'Check your permissions',
+        type: Toast.TYPE.CRITICAL,
+      });
+    } else {
+      Toast.showToast({
+        title: 'Saved result successfully',
+        description: 'Refreshing history...',
+        type: Toast.TYPE.NORMAL,
+      });
+    }
+
+    // console.log(accountSummaries, totalScorePercentage);
+
+    setDataState({
+      runningReport: false,
+      [`runningReport.${selectedReport.id}`]: false,
+      entitiesByAccount,
+      summarizedScores,
+      accountSummaries,
+    });
+  };
 
   // decorate additional account data
   const decorateAccountData = (accounts) => {
@@ -159,6 +219,29 @@ export function useProvideData(props) {
     } else {
       return true;
     }
+  };
+
+  const fetchReportHistory = (accountId) => {
+    // eslint-disable-next-line
+    return new Promise(async (resolve) => {
+      setDataState({ fetchingReportHistory: true });
+
+      const reportHistory =
+        (
+          await AccountStorageQuery.query({
+            accountId: accountId || dataState.selectedAccountId,
+            collection: ACCOUNT_USER_HISTORY_COLLECTION,
+          })
+        )?.data || [];
+
+      setDataState({
+        fetchingReportHistory: false,
+        reportHistory: reportHistory.sort(
+          (a, b) => b.document.runAt - a.document.runAt
+        ),
+      });
+      resolve();
+    });
   };
 
   const fetchReportConfigs = async () => {
@@ -531,7 +614,9 @@ export function useProvideData(props) {
     ...dataState,
     setDataState,
     fetchReportConfigs,
+    fetchReportHistory,
     deleteReportConfig,
     checkUser,
+    runReport,
   };
 }
