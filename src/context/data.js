@@ -111,6 +111,7 @@ export function useProvideData(props) {
   }, [props.accountId]);
 
   const runReport = async (selectedReport) => {
+    console.log('selected', selectedReport);
     setDataState({
       runningReport: true,
       [`runningReport.${selectedReport.id}`]: true,

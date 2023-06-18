@@ -1,52 +1,104 @@
-import React, { useMemo, useContext } from 'react';
-import { Button, EmptyState } from 'nr1';
-import DataContext from '../../context/data';
-import { scoreToColor, percentageToStatus } from '../../utils';
-import { STATUSES } from '../../constants';
+import React, { useMemo } from 'react';
+import { Grid, GridItem, BillboardChart, LineChart } from 'nr1';
 import rules from '../../rules';
-import MaturityElementList from '../MaturityElementList';
+import MaturityContainer from './maturityContainer';
 
 export default function ReportView(props) {
   return useMemo(() => {
-    console.log('props', props);
-
     const { history, selected } = props;
-    const selectedHistory = history[selected];
-    const { accountSummaries } = selectedHistory?.document || {};
-    const scoredCollection = (accountSummaries || []).map((a) => {
-      const elementScores = [];
 
-      Object.keys(rules).forEach((key) => {
-        const value = a[key];
+    const latestScorePerc = history?.[0]?.document?.totalScorePercentage;
+    let prevScorePerc = history?.[1]?.document?.totalScorePercentage;
+    prevScorePerc = isNaN(prevScorePerc) ? latestScorePerc : prevScorePerc;
 
-        if (value !== undefined && value !== null) {
-          const payload = {
-            name: key,
-            status: percentageToStatus(value),
-            score: `${Math.round(value)}%`,
-          };
+    const billboardData = [
+      {
+        metadata: {
+          id: 'LatestScore',
+          name: 'Latest Score',
+          viz: 'main',
+          units_data: {
+            y: 'PERCENTAGE',
+          },
+        },
+        data: [
+          { y: prevScorePerc / 100 }, // Previous value.
+          { y: latestScorePerc / 100 }, // Current value.
+        ],
+      },
+    ];
 
-          elementScores.push(payload);
+    const lineData = [
+      {
+        metadata: {
+          id: 'scoreHistory',
+          name: 'Score History',
+          color: '#a35ebf',
+          viz: 'main',
+          units_data: {
+            x: 'TIMESTAMP',
+            y: 'COUNT',
+          },
+        },
+        data: (history || []).map((h) => ({
+          x: h?.document?.runAt,
+          y: h?.document?.totalScorePercentage,
+        })),
+      },
+    ];
+
+    const productLineData = [];
+    Object.keys(rules).forEach((key) => {
+      const series = {
+        metadata: {
+          id: key,
+          name: key,
+          color: `#${Math.floor(Math.random() * 16777215).toString(16)}`,
+          viz: 'main',
+          units_data: {
+            x: 'TIMESTAMP',
+            y: 'COUNT',
+          },
+        },
+        data: [],
+      };
+
+      history.forEach((h) => {
+        const { document } = h;
+        const { accountSummaries, runAt } = document;
+        const data = { x: runAt, y: null };
+
+        accountSummaries.forEach((s) => {
+          if (s[key]) {
+            data.y += s[key];
+          }
+        });
+
+        data.y = data.y / accountSummaries.length;
+
+        if (data.y) {
+          series.data.push(data);
         }
       });
 
-      const payload = {
-        title: a.name,
-        subtitle: a.id,
-        rollUpScore: Math.round((a.totalScore / a.maxScore) * 100),
-        rollUpStatus: STATUSES.UNKNOWN,
-        elementListLabel: 'Products',
-        elementScores,
-      };
-
-      payload.rollUpStatus = percentageToStatus(payload.rollUpScore);
-
-      return payload;
+      productLineData.push(series);
     });
 
     return (
       <>
-        <MaturityElementList elements={scoredCollection} />
+        <Grid>
+          <GridItem columnSpan={4} style={{ padding: '5px' }}>
+            <BillboardChart data={billboardData} fullWidth />
+          </GridItem>
+          <GridItem columnSpan={4} style={{ padding: '5px' }}>
+            <LineChart data={lineData} fullWidth />
+          </GridItem>
+          <GridItem columnSpan={4} style={{ padding: '5px' }}>
+            <LineChart data={productLineData} fullWidth />
+          </GridItem>
+        </Grid>
+        <br />
+        <MaturityContainer history={history} selected={selected} />
       </>
     );
   }, [props]);

@@ -23,6 +23,7 @@ export default function CreateReport(selectedReport) {
     selectedAccountId,
     fetchReportConfigs,
     setDataState,
+    runReport,
   } = useContext(DataContext);
 
   const allProducts = selectedReport?.document?.allProducts;
@@ -55,11 +56,13 @@ export default function CreateReport(selectedReport) {
         document.products = state.products;
       }
 
+      const documentId = selectedReport?.id || uuidv4();
+
       AccountStorageMutation.mutate({
         accountId: selectedAccountId,
         actionType: AccountStorageMutation.ACTION_TYPE.WRITE_DOCUMENT,
         collection: ACCOUNT_USER_CONFIG_COLLECTION,
-        documentId: selectedReport?.id || uuidv4(),
+        documentId,
         document,
       }).then((res) => {
         if (res.error) {
@@ -75,6 +78,7 @@ export default function CreateReport(selectedReport) {
           });
         }
 
+        runReport({ document, id: documentId });
         fetchReportConfigs().then(() => {
           setState({ creatingReport: false });
           resolve(res);

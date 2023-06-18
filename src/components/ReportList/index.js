@@ -66,6 +66,16 @@ export default function ReportList() {
               Accounts
             </TableHeaderCell>
             <TableHeaderCell
+              width="70px"
+              value={({ item }) =>
+                item.document?.allProducts
+                  ? 100
+                  : (item.document.products || []).length
+              }
+            >
+              Products
+            </TableHeaderCell>
+            <TableHeaderCell
               value={({ item }) =>
                 item?.history?.[0]?.document?.totalScorePercentage
               }
@@ -88,8 +98,11 @@ export default function ReportList() {
               setDataState({
                 view: {
                   page: 'ReportView',
-                  title: `Report: ${item.document.name}`,
-                  props: { ...item, selected: 0 },
+                  title: item.document.name,
+                  props: {
+                    ...item,
+                    selected: item?.history?.[0]?.document?.runAt || 0,
+                  },
                 },
               });
 
@@ -129,6 +142,14 @@ export default function ReportList() {
                   alignmentType={TableRowCell.ALIGNMENT_TYPE.RIGHT}
                 >
                   {item.document.accounts.length}
+                </TableRowCell>
+                <TableRowCell
+                  onClick={rowClick}
+                  alignmentType={TableRowCell.ALIGNMENT_TYPE.RIGHT}
+                >
+                  {item.document?.allProducts
+                    ? 'All'
+                    : item.document.products.length}
                 </TableRowCell>
                 <TableRowCell
                   onClick={rowClick}
