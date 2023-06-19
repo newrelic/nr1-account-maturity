@@ -16,7 +16,7 @@ import CreateReport from '../CreateReport';
 import ReportView from '../ReportView';
 
 export default function AccountMaturity() {
-  const { fetchingData, errorMsg, view, setDataState } =
+  const { fetchingData, errorMsg, view, setDataState, selectedAccountId } =
     useContext(DataContext);
 
   const renderView = () => {
@@ -31,7 +31,12 @@ export default function AccountMaturity() {
         return <CreateReport {...(view.props || {})} />;
       }
       case 'ReportView': {
-        return <ReportView {...(view.props || {})} />;
+        return (
+          <ReportView
+            {...(view.props || {})}
+            selectedAccountId={selectedAccountId}
+          />
+        );
       }
       case 'MaturityAccountScores': {
         return (

@@ -4,6 +4,8 @@ import ScoreCard from '../ScoreCard';
 import { STATUSES, DISPLAY_MODES } from '../../constants';
 
 const MaturityElementList = ({
+  selectedAccountId = 0,
+  historyId = '',
   elements = [],
   displayMode = DISPLAY_MODES.SUMMARY,
 }) => {
@@ -17,7 +19,12 @@ const MaturityElementList = ({
         return (
           <div className="score-card-list" style={{ paddingTop: '10px' }}>
             {elements.map((score, idx) => (
-              <ScoreCard key={idx} {...score} />
+              <ScoreCard
+                key={idx}
+                {...score}
+                historyId={historyId}
+                selectedAccountId={selectedAccountId}
+              />
             ))}
           </div>
         );

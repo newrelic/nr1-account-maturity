@@ -5,24 +5,34 @@ import MaturityContainer from './maturityContainer';
 
 export default function ReportView(props) {
   return useMemo(() => {
-    const { history, selected } = props;
+    const { history, selected, selectedAccountId } = props;
 
     const latestScorePerc = history?.[0]?.document?.totalScorePercentage;
-    let prevScorePerc = history?.[1]?.document?.totalScorePercentage;
-    prevScorePerc = isNaN(prevScorePerc) ? latestScorePerc : prevScorePerc;
+
+    const selectedHistory = history.find((h) => h.document.runAt === selected);
+
+    let selectedScorePerc = selectedHistory?.document?.totalScorePercentage;
+    selectedScorePerc = isNaN(selectedScorePerc)
+      ? latestScorePerc
+      : selectedScorePerc;
+
+    const billboardTitle =
+      history?.[0].document.runAt === selectedHistory.document.runAt
+        ? 'Latest Score'
+        : 'Latest Score vs Selected Score';
 
     const billboardData = [
       {
         metadata: {
           id: 'LatestScore',
-          name: 'Latest Score',
+          name: billboardTitle,
           viz: 'main',
           units_data: {
             y: 'PERCENTAGE',
           },
         },
         data: [
-          { y: prevScorePerc / 100 }, // Previous value.
+          { y: selectedScorePerc / 100 }, // Previous value.
           { y: latestScorePerc / 100 }, // Current value.
         ],
       },
@@ -98,7 +108,14 @@ export default function ReportView(props) {
           </GridItem>
         </Grid>
         <br />
-        <MaturityContainer history={history} selected={selected} />
+        <hr />
+        <br />
+
+        <MaturityContainer
+          history={history}
+          selected={selected}
+          selectedAccountId={selectedAccountId}
+        />
       </>
     );
   }, [props]);

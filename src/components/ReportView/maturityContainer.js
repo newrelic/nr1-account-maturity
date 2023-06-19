@@ -6,7 +6,7 @@ import rules from '../../rules';
 import HistorySelector from './historySelector';
 
 export default function MaturityContainer(props) {
-  const { history, selected } = props;
+  const { history, selected, selectedAccountId } = props;
 
   const selectedHistory = history.find(
     (h) => h.document.runAt === selected
@@ -48,7 +48,11 @@ export default function MaturityContainer(props) {
     return (
       <>
         <HistorySelector history={history} />
-        <MaturityElementList elements={scoredCollection} />
+        <MaturityElementList
+          elements={scoredCollection}
+          historyId={selectedHistory.id}
+          selectedAccountId={selectedAccountId}
+        />
       </>
     );
   }, [history, selected]);

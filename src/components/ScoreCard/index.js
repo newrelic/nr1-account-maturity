@@ -1,11 +1,13 @@
 import React, { useMemo } from 'react';
 import PropTypes from 'prop-types';
-import { HeadingText } from 'nr1';
+import { HeadingText, navigation } from 'nr1';
 import SummaryCard from './summary-card';
 import NavigatorCard from './navigator-card';
 import { STATUSES, DISPLAY_MODES } from '../../constants';
 
 const ScoreCard = ({
+  selectedAccountId,
+  historyId,
   title,
   subtitle,
   rollUpScore = 0,
@@ -20,7 +22,18 @@ const ScoreCard = ({
       <div className={`score-card ${displayMode}`}>
         <div
           style={{ cursor: 'pointer' }}
-          onClick={() => console.info('card clicked')}
+          onClick={() =>
+            navigation.openStackedNerdlet({
+              id: 'score-details-nerdlet',
+              urlState: {
+                accountName: title,
+                accountId: subtitle,
+                accountPercentage: rollUpScore,
+                historyId,
+                selectedAccountId,
+              },
+            })
+          }
         >
           <HeadingText className="title" type={HeadingText.TYPE.HEADING_3}>
             {title}
