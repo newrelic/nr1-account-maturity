@@ -40,10 +40,8 @@ export default function ScoreDetailRoot() {
         historyDocument: data,
         selectedDocument: data.accountSummaries.find((a) => a.id === accountId),
       })
-    ); //
+    );
   }, [historyId]);
-
-  console.log(historyId, selectedAccountId, dataState);
 
   return (
     <div>
@@ -98,7 +96,9 @@ export default function ScoreDetailRoot() {
               </div>
               <br /> <br />
               <hr />
-              <ScoreDetailsTable />
+              <ScoreDetailsTable
+                selectedDocument={dataState.selectedDocument}
+              />
             </div>
           )}
         </AutoSizer>
