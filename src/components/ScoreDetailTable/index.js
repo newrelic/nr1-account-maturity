@@ -1,9 +1,12 @@
+// eslint-disable-next-line eslint-comments/disable-enable-pair
+/* eslint-disable prettier/prettier */
 import React, { Fragment, useEffect } from 'react';
 import { Card, CardHeader, CardBody } from 'nr1';
 import { ProgressBar } from '@newrelic/nr-labs-components';
 import rules from '../../rules';
 import { percentageToStatus, scoreToColor } from '../../utils';
 import { useSetState } from '@mantine/hooks';
+import EntityTable from './entityTable';
 
 export default function ScoreDetailsTable(props) {
   const { selectedDocument } = props;
@@ -41,6 +44,7 @@ export default function ScoreDetailsTable(props) {
       }}
     >
       {(dataState.categories || []).map((cat) => {
+        console.log(selectedDocument[`${cat.name}.entities`]);
         return (
           <div
             key={cat.name}
@@ -69,7 +73,7 @@ export default function ScoreDetailsTable(props) {
                     </span>
                     <span
                       style={{
-                        color: scoreToColor(cat.score).color,
+                        color: scoreToColor(cat.score)?.color,
                         fontSize: '14px',
                       }}
                     >
@@ -79,13 +83,52 @@ export default function ScoreDetailsTable(props) {
                 }
               />
               <CardBody style={{ paddingLeft: '20px' }}>
-                Lorem ipsum dolor sit amet, consectetur adipiscing elit, sed do
-                eiusmod tempor incididunt ut labore et dolore magna aliqua. Ut
-                enim ad minim veniam, quis nostrud exercitation ullamco laboris
-                nisi ut aliquip ex ea commodo consequat. Duis aute irure dolor
-                in reprehenderit in voluptate velit esse cillum dolore eu fugiat
-                nulla pariatur. Excepteur sint occaecat cupidatat non proident,
-                sunt in culpa qui officia deserunt mollit anim id est laborum.
+                <div>
+                  {rules[cat.name].scores.map((score) => {
+                    const { entityCheck, accountCheck, valueCheck } = score;
+
+                    const { passed = 0, failed = 0 } =
+                      selectedDocument[`${cat.name}.scoring`]?.[score.name] ||
+                      {};
+                    const maxValue = passed + failed;
+
+                    let label = undefined;
+                    if (entityCheck) {
+                      console.log(passed, maxValue);
+                      label = `${Math.round((passed / maxValue) * 100)}/100`;
+                    } else if (accountCheck) {
+                      label = passed >= 1 ? 'true' : 'false';
+                    } else if (valueCheck) {
+                      label = `${passed}`;
+                    }
+
+                    return (
+                      <div
+                        key={score.name}
+                        style={{
+                          width: '150px',
+                          display: 'inline-block',
+                          padding: '10px',
+                        }}
+                      >
+                        <ProgressBar
+                          height="15px"
+                          value={passed}
+                          label={label}
+                          max={maxValue}
+                          status={percentageToStatus((passed / maxValue) * 100)}
+                        />
+                        {score.name}
+                      </div>
+                    );
+                  })}
+                  {Object.keys(selectedDocument[`${cat.name}.entities`])
+                    .length > 0 && (
+                      <EntityTable
+                        entities={selectedDocument[`${cat.name}.entities`]}
+                      />
+                    )}
+                </div>
               </CardBody>
             </Card>
           </div>

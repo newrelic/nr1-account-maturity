@@ -74,12 +74,6 @@ export function useProvideData(props) {
     console.log('account id changed => ', accountId);
     setDataState({ fetchingData: true, selectedAccountId: accountId });
 
-    // AccountStorageMutation.mutate({
-    //   accountId,
-    //   actionType: AccountStorageMutation.ACTION_TYPE.DELETE_COLLECTION,
-    //   collection: ACCOUNT_USER_HISTORY_COLLECTION,
-    // });
-
     const reportConfigs =
       (
         await AccountStorageQuery.query({
@@ -358,6 +352,10 @@ export function useProvideData(props) {
               account.scores[key].maxScore += score?.weight || 1;
             }
 
+            if (!account.scores[key].offendingEntities) {
+              account.scores[key].offendingEntities = {};
+            }
+
             if (!account.scores[key][name]) {
               account.scores[key][name] = {
                 passed: 0,
@@ -410,6 +408,16 @@ export function useProvideData(props) {
                     account.scores[key][name].passed++;
                     summarizedScores[key][name].passed++;
                   } else {
+                    if (!account.scores[key].offendingEntities[entity.guid]) {
+                      account.scores[key].offendingEntities[entity.guid] = {
+                        name: entity.name,
+                        [name]: false,
+                      };
+                    } else {
+                      account.scores[key].offendingEntities[entity.guid][
+                        name
+                      ] = false;
+                    }
                     account.scores[key][name].failed++;
                     summarizedScores[key][name].failed++;
                   }
@@ -427,8 +435,6 @@ export function useProvideData(props) {
           });
         });
       });
-
-      console.log(accounts);
 
       resolve({ accounts, summarizedScores });
     });

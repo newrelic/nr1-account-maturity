@@ -47,7 +47,7 @@ export default function MaturityContainer(props) {
   return useMemo(() => {
     return (
       <>
-        <HistorySelector history={history} />
+        <HistorySelector history={history} accountId={selectedAccountId} />
         <MaturityElementList
           elements={scoredCollection}
           historyId={selectedHistory.id}

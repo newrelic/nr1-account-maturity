@@ -30,6 +30,10 @@ export default function ScoreDetailRoot() {
   });
 
   useEffect(() => {
+    fetchHistory();
+  }, [historyId]);
+
+  const fetchHistory = () => {
     AccountStorageQuery.query({
       accountId: selectedAccountId,
       collection: ACCOUNT_USER_HISTORY_COLLECTION,
@@ -41,7 +45,7 @@ export default function ScoreDetailRoot() {
         selectedDocument: data.accountSummaries.find((a) => a.id === accountId),
       })
     );
-  }, [historyId]);
+  };
 
   return (
     <div>

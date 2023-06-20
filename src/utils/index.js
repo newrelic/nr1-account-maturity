@@ -1,5 +1,6 @@
 import { sortSummaries } from '../components/SortBy';
 import { STATUSES } from '../constants';
+import rules from '../rules';
 
 export const chunk = (arr, size) =>
   Array.from({ length: Math.ceil(arr.length / size) }, (v, i) =>
@@ -42,13 +43,22 @@ export const generateAccountSummary = (accounts, sortBy, report) => {
     const summary = { name, id, totalScore: 0, maxScore: 0 };
 
     Object.keys(scores).forEach((key) => {
-      console.log(key, report);
-
       if (
         report?.document?.allProducts ||
         (report?.document?.products || []).includes(key)
       ) {
-        const { overallScore, maxScore } = scores[key];
+        const { overallScore, maxScore, offendingEntities } = scores[key];
+
+        (rules[key].scores || []).forEach((scoreKey) => {
+          if (!summary[`${key}.scoring`]) {
+            summary[`${key}.scoring`] = {};
+          }
+
+          summary[`${key}.scoring`][scoreKey.name] = scores[key][scoreKey.name];
+        });
+
+        summary[`${key}.entities`] = offendingEntities;
+
         if (overallScore !== null && maxScore !== null) {
           summary[key] = (overallScore / maxScore) * 100;
           summary[key] = isNaN(summary[key]) ? 0 : summary[key];
@@ -66,9 +76,6 @@ export const generateAccountSummary = (accounts, sortBy, report) => {
 
     accountSummaries.push(summary);
   });
-
-  console.log(accounts);
-  console.log(accountSummaries);
 
   return sortSummaries(accountSummaries, sortBy);
 };

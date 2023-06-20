@@ -4,12 +4,14 @@ import rules from '../../rules';
 import MaturityContainer from './maturityContainer';
 
 export default function ReportView(props) {
-  return useMemo(() => {
-    const { history, selected, selectedAccountId } = props;
+  const { history, selected, selectedAccountId } = props;
 
+  return useMemo(() => {
     const latestScorePerc = history?.[0]?.document?.totalScorePercentage;
 
-    const selectedHistory = history.find((h) => h.document.runAt === selected);
+    const selectedHistory = (history || []).find(
+      (h) => h.document.runAt === selected
+    );
 
     let selectedScorePerc = selectedHistory?.document?.totalScorePercentage;
     selectedScorePerc = isNaN(selectedScorePerc)
@@ -17,7 +19,7 @@ export default function ReportView(props) {
       : selectedScorePerc;
 
     const billboardTitle =
-      history?.[0].document.runAt === selectedHistory.document.runAt
+      history?.[0]?.document?.runAt === selectedHistory?.document?.runAt
         ? 'Latest Score'
         : 'Latest Score vs Selected Score';
 
@@ -118,5 +120,5 @@ export default function ReportView(props) {
         />
       </>
     );
-  }, [props]);
+  }, [props, history]);
 }
