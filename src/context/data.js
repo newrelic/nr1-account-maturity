@@ -82,8 +82,6 @@ export function useProvideData(props) {
         })
       )?.data || [];
 
-    console.log(reportConfigs);
-
     await fetchReportHistory(accountId);
 
     const [accountsInit, agentReleases, dataDictionary] = await Promise.all([
@@ -137,8 +135,6 @@ export function useProvideData(props) {
         (n, { scorePercentage }) => n + (scorePercentage || 0),
         0
       ) / accountSummaries.length;
-
-    console.log(report, selectedReport);
 
     const res = await AccountStorageMutation.mutate({
       accountId: dataState.selectedAccountId,

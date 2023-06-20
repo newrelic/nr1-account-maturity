@@ -44,7 +44,6 @@ export default function ScoreDetailsTable(props) {
       }}
     >
       {(dataState.categories || []).map((cat) => {
-        console.log(selectedDocument[`${cat.name}.entities`]);
         return (
           <div
             key={cat.name}
@@ -94,8 +93,8 @@ export default function ScoreDetailsTable(props) {
 
                     let label = undefined;
                     if (entityCheck) {
-                      console.log(passed, maxValue);
-                      label = `${Math.round((passed / maxValue) * 100)}/100`;
+                      const value = Math.round(((passed) / maxValue) * 100)
+                      label = `${isNaN(value) ? 0 : value}/100`;
                     } else if (accountCheck) {
                       label = passed >= 1 ? 'true' : 'false';
                     } else if (valueCheck) {
