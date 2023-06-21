@@ -51,7 +51,7 @@ export default function ReportList() {
 
     return (
       <>
-        <Table items={sortedReportConfigs}>
+        <Table items={sortedReportConfigs} multivalue>
           <TableHeader>
             <TableHeaderCell value={({ item }) => item.document.name}>
               Name
@@ -131,10 +131,18 @@ export default function ReportList() {
                       }`,
                   }}
                   onClick={rowClick}
+                  additionalValue={
+                    item.document?.entitySearchQuery
+                      ? `Entity Search: ${item.document.entitySearchQuery}`
+                      : 'Entity Search: ALL'
+                  }
                 >
                   {item.document.name}
                 </TableRowCell>
-                <TableRowCell onClick={rowClick}>
+                <TableRowCell
+                  onClick={rowClick}
+                  additionalValue={item.document.owner.email}
+                >
                   {item.document.owner?.name}{' '}
                 </TableRowCell>
                 <TableRowCell

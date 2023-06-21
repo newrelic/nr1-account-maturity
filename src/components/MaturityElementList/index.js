@@ -4,6 +4,7 @@ import ScoreCard from '../ScoreCard';
 import { STATUSES, DISPLAY_MODES } from '../../constants';
 
 const MaturityElementList = ({
+  entitySearchQuery = '',
   selectedAccountId = 0,
   historyId = '',
   elements = [],
@@ -22,6 +23,7 @@ const MaturityElementList = ({
               <ScoreCard
                 key={idx}
                 {...score}
+                entitySearchQuery={entitySearchQuery}
                 historyId={historyId}
                 selectedAccountId={selectedAccountId}
               />

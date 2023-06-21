@@ -30,7 +30,7 @@ export default {
   // scores and values to run and display
   scores: [
     {
-      name: 'Reporting Apps',
+      name: 'Reporting',
       entityCheck: (entity) => entity.reporting,
     },
     {

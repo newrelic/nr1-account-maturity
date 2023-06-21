@@ -120,6 +120,7 @@ export function useProvideData(props) {
     const { entitiesByAccount, summarizedScores } =
       await getEntitiesForAccounts(
         accounts,
+        report.document?.entitySearchQuery || '',
         dataState.agentReleases,
         dataState.dataDictionary
       );
@@ -287,6 +288,7 @@ export function useProvideData(props) {
 
   const getEntitiesForAccounts = async (
     accounts,
+    entitySearchQuery,
     agentReleases,
     dataDictionary
   ) => {
@@ -298,7 +300,7 @@ export function useProvideData(props) {
       let completedPercentage = 0;
 
       const q = async.queue((task, callback) => {
-        getEntitiesByAccount(task).then((entities) => {
+        getEntitiesByAccount(task, entitySearchQuery).then((entities) => {
           task.entities = entities;
           completedAccounts.push(task);
           completedPercentage = (completedAccounts / accounts.length) * 100;
@@ -436,14 +438,17 @@ export function useProvideData(props) {
     });
   };
 
-  const getEntitiesByAccount = (account) => {
+  const getEntitiesByAccount = (account, entitySearchQuery) => {
     return new Promise((resolve) => {
       let completedEntities = [];
       let totalEntityCount = 0;
       let completedPercentage = 0;
 
       const q = async.queue((task, callback) => {
-        const searchClause = " AND type NOT IN ('DASHBOARD')";
+        const entityClause = entitySearchQuery
+          ? `AND ${entitySearchQuery}`
+          : '';
+        const searchClause = ` AND type NOT IN ('DASHBOARD') ${entityClause}`;
         NerdGraphQuery.query({
           query: entitySearchQueryByAccount(account.id, searchClause),
           variables: { cursor: task.cursor },

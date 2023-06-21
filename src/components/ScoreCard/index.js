@@ -7,6 +7,7 @@ import { STATUSES, DISPLAY_MODES } from '../../constants';
 
 const ScoreCard = ({
   selectedAccountId,
+  entitySearchQuery,
   historyId,
   title,
   subtitle,
@@ -31,6 +32,7 @@ const ScoreCard = ({
                 accountPercentage: rollUpScore,
                 historyId,
                 selectedAccountId,
+                entitySearchQuery,
               },
             })
           }

@@ -4,7 +4,7 @@ import rules from '../../rules';
 import MaturityContainer from './maturityContainer';
 
 export default function ReportView(props) {
-  const { history, selected, selectedAccountId } = props;
+  const { history, selected, selectedAccountId, document } = props;
 
   return useMemo(() => {
     const latestScorePerc = history?.[0]?.document?.totalScorePercentage;
@@ -117,6 +117,7 @@ export default function ReportView(props) {
           history={history}
           selected={selected}
           selectedAccountId={selectedAccountId}
+          entitySearchQuery={document?.entitySearchQuery}
         />
       </>
     );

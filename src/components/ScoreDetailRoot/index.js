@@ -20,6 +20,7 @@ export default function ScoreDetailRoot() {
     selectedAccountId,
     historyId,
     accountPercentage,
+    entitySearchQuery,
   } = nerdletContext;
   const statusColor = scoreToColor(accountPercentage).color;
   const percentageDiff = 100 - accountPercentage;
@@ -42,7 +43,9 @@ export default function ScoreDetailRoot() {
       setDataState({
         fetchingHistory: false,
         historyDocument: data,
-        selectedDocument: data.accountSummaries.find((a) => a.id === accountId),
+        selectedDocument: (data?.accountSummaries || []).find(
+          (a) => a.id === accountId
+        ),
       })
     );
   };
@@ -97,6 +100,16 @@ export default function ScoreDetailRoot() {
                 <div>
                   <span style={{ fontSize: '14px' }}>{accountId}</span>
                 </div>
+                {entitySearchQuery && (
+                  <div style={{ paddingTop: '10px' }}>
+                    <span style={{ fontSize: '12px', fontWeight: 'bold' }}>
+                      Entity Search Query:
+                    </span>
+                    <span style={{ fontSize: '12px' }}>
+                      &nbsp;{entitySearchQuery}
+                    </span>
+                  </div>
+                )}
               </div>
               <br /> <br />
               <hr />

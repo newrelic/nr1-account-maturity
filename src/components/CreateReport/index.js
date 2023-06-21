@@ -9,6 +9,7 @@ import {
   GridItem,
   Button,
   AccountStorageMutation,
+  NerdGraphQuery,
 } from 'nr1';
 import DataContext from '../../context/data';
 import { useSetState } from '@mantine/hooks';
@@ -38,52 +39,105 @@ export default function CreateReport(selectedReport) {
     products: selectedReport?.document?.products || [],
   });
 
-  const createReport = () => {
+  const validateEntitySearchQuery = () => {
     return new Promise((resolve) => {
-      setState({ creatingReport: true });
-      const document = {
-        name: state.name,
-        owner: user,
-        accounts: state.accounts,
-      };
-      if (state.entitySearchQuery) {
-        document.entitySearchQuery = state.entitySearchQuery;
-      }
-
-      if (state.allProducts) {
-        document.allProducts = true;
-      } else {
-        document.products = state.products;
-      }
-
-      const documentId = selectedReport?.id || uuidv4();
-
-      AccountStorageMutation.mutate({
-        accountId: selectedAccountId,
-        actionType: AccountStorageMutation.ACTION_TYPE.WRITE_DOCUMENT,
-        collection: ACCOUNT_USER_CONFIG_COLLECTION,
-        documentId,
-        document,
+      const accountsClause = `and tags.accountId IN ('${state.accounts.join(
+        "','"
+      )}')`;
+      NerdGraphQuery.query({
+        query: `{
+        actor {
+          entitySearch(query: "${state.entitySearchQuery} ${accountsClause}") {
+            count
+          }
+        }
+      }`,
       }).then((res) => {
         if (res.error) {
           Toast.showToast({
-            title: 'Failed to save report',
-            description: 'Check your permissions',
+            title: 'Bad entity search query',
+            description: res?.error?.message,
             type: Toast.TYPE.CRITICAL,
           });
+          resolve(false);
         } else {
-          Toast.showToast({
-            title: 'Report created',
-            type: Toast.TYPE.NORMAL,
-          });
+          const count = res?.data?.actor?.entitySearch?.count || 0;
+          console.log(count);
+          if (!count) {
+            Toast.showToast({
+              title: 'Bad entity search query',
+              description: 'No entities returned',
+              type: Toast.TYPE.CRITICAL,
+            });
+            resolve(false);
+          } else {
+            resolve(true);
+          }
+        }
+      });
+    });
+  };
+
+  const createReport = () => {
+    // eslint-disable-next-line
+    return new Promise(async (resolve) => {
+      setState({ creatingReport: true });
+
+      let esqPassed = false;
+      if (state.entitySearchQuery) {
+        esqPassed = await validateEntitySearchQuery();
+      } else {
+        esqPassed = true;
+      }
+
+      if (esqPassed) {
+        const document = {
+          name: state.name,
+          owner: user,
+          accounts: state.accounts,
+        };
+        if (state.entitySearchQuery) {
+          document.entitySearchQuery = state.entitySearchQuery;
         }
 
-        runReport({ document, id: documentId });
-        fetchReportConfigs().then(() => {
-          setState({ creatingReport: false });
-          resolve(res);
+        if (state.allProducts) {
+          document.allProducts = true;
+        } else {
+          document.products = state.products;
+        }
+
+        const documentId = selectedReport?.id || uuidv4();
+
+        AccountStorageMutation.mutate({
+          accountId: selectedAccountId,
+          actionType: AccountStorageMutation.ACTION_TYPE.WRITE_DOCUMENT,
+          collection: ACCOUNT_USER_CONFIG_COLLECTION,
+          documentId,
+          document,
+        }).then((res) => {
+          if (res.error) {
+            Toast.showToast({
+              title: 'Failed to save report',
+              description: 'Check your permissions',
+              type: Toast.TYPE.CRITICAL,
+            });
+          } else {
+            Toast.showToast({
+              title: selectedReport ? 'Report saved' : 'Report created',
+              type: Toast.TYPE.NORMAL,
+            });
+          }
+
+          runReport({ document, id: documentId });
+          fetchReportConfigs().then(() => {
+            setState({ creatingReport: false });
+            resolve(res);
+          });
         });
-      });
+      } else {
+        setState({ creatingReport: false });
+        resolve(false);
+      }
     });
   };
 
@@ -120,7 +174,7 @@ export default function CreateReport(selectedReport) {
             sizeType={Button.SIZE_TYPE.SMALL}
             onClick={async () => {
               const res = await createReport();
-              if (!res?.error) {
+              if (!res?.error && res !== false) {
                 setDataState({
                   view: {
                     page: 'ReportList',
@@ -139,6 +193,19 @@ export default function CreateReport(selectedReport) {
           >
             {selectedReport ? 'Save Report' : 'Create Report'}
           </Button>
+        </div>
+
+        <br />
+
+        <div>
+          <TextField
+            label="Entity Search Query (optional)"
+            value={state.entitySearchQuery}
+            onChange={(e) => setState({ entitySearchQuery: e.target.value })}
+            labelInline
+            placeholder="e.g. tags.team = 'labs'"
+          />
+          &nbsp;&nbsp;
         </div>
 
         <br />
