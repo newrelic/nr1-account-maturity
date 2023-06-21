@@ -123,6 +123,7 @@ export default function AccountMaturity() {
                     <HeadingText type={HeadingText.TYPE.HEADING_3}>
                       {view?.title || view?.page || 'Account Maturity Scores'}
                     </HeadingText>
+                    {view.subtitle && <div>{view.subtitle}</div>}
                   </div>
                   <div style={{ float: 'right' }}>{renderTopRight()}</div>
                 </div>

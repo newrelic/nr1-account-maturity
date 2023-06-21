@@ -147,6 +147,7 @@ export function useProvideData(props) {
         runAt: new Date().getTime(),
         totalScorePercentage,
         accountSummaries,
+        entitySearchQuery: report.document?.entitySearchQuery,
       },
     });
 

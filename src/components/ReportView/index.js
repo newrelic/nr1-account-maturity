@@ -98,7 +98,8 @@ export default function ReportView(props) {
 
     return (
       <>
-        <Grid>
+        <hr style={{ marginTop: '30px' }} />
+        <Grid style={{ paddingTop: '10px' }}>
           <GridItem columnSpan={4} style={{ padding: '5px' }}>
             <BillboardChart data={billboardData} fullWidth />
           </GridItem>

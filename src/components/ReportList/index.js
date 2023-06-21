@@ -99,6 +99,16 @@ export default function ReportList() {
                 view: {
                   page: 'ReportView',
                   title: item.document.name,
+                  subtitle: (
+                    <div style={{ paddingBottom: '10px' }}>
+                      <span style={{ fontSize: '12px', fontWeight: 'bold' }}>
+                        Entity Search Query:
+                      </span>
+                      <span style={{ fontSize: '12px' }}>
+                        &nbsp;{item.document?.entitySearchQuery || 'ALL'}
+                      </span>
+                    </div>
+                  ),
                   props: {
                     ...item,
                     selected: item?.history?.[0]?.document?.runAt || 0,
