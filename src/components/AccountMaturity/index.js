@@ -27,6 +27,9 @@ export default function AccountMaturity() {
       case 'CreateReport': {
         return <CreateReport {...(view.props || {})} />;
       }
+      case 'DefaultReport': {
+        return <CreateReport {...(view.props || {})} />;
+      }
       case 'EditReport': {
         return <CreateReport {...(view.props || {})} />;
       }

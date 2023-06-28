@@ -1,7 +1,6 @@
 import React, { useMemo, useContext } from 'react';
 import {
   EmptyState,
-  HeadingText,
   TextField,
   Toast,
   Switch,
@@ -9,6 +8,7 @@ import {
   GridItem,
   Button,
   AccountStorageMutation,
+  UserStorageMutation,
   NerdGraphQuery,
 } from 'nr1';
 import DataContext from '../../context/data';
@@ -25,19 +25,25 @@ export default function CreateReport(selectedReport) {
     fetchReportConfigs,
     setDataState,
     runReport,
+    view,
   } = useContext(DataContext);
 
   const allProducts = selectedReport?.document?.allProducts;
 
   const [state, setState] = useSetState({
     creatingReport: false,
-    name: selectedReport?.document?.name || '',
+    name:
+      view.page === 'DefaultReport'
+        ? 'default'
+        : selectedReport?.document?.name || '',
     entitySearchQuery: selectedReport?.document?.entitySearchQuery || '',
     allProducts:
       allProducts !== undefined && allProducts !== null ? true : allProducts,
     accounts: selectedReport?.document?.accounts || [],
     products: selectedReport?.document?.products || [],
   });
+
+  console.log(view);
 
   const validateEntitySearchQuery = () => {
     return new Promise((resolve) => {
@@ -108,32 +114,60 @@ export default function CreateReport(selectedReport) {
 
         const documentId = selectedReport?.id || uuidv4();
 
-        AccountStorageMutation.mutate({
-          accountId: selectedAccountId,
-          actionType: AccountStorageMutation.ACTION_TYPE.WRITE_DOCUMENT,
-          collection: ACCOUNT_USER_CONFIG_COLLECTION,
-          documentId,
-          document,
-        }).then((res) => {
-          if (res.error) {
-            Toast.showToast({
-              title: 'Failed to save report',
-              description: 'Check your permissions',
-              type: Toast.TYPE.CRITICAL,
-            });
-          } else {
-            Toast.showToast({
-              title: selectedReport ? 'Report saved' : 'Report created',
-              type: Toast.TYPE.NORMAL,
-            });
-          }
+        if (view.page === 'DefaultReport') {
+          UserStorageMutation.mutate({
+            actionType: UserStorageMutation.ACTION_TYPE.WRITE_DOCUMENT,
+            collection: ACCOUNT_USER_CONFIG_COLLECTION,
+            documentId,
+            document,
+          }).then((res) => {
+            if (res.error) {
+              Toast.showToast({
+                title: 'Failed to save',
+                description: 'Check your permissions',
+                type: Toast.TYPE.CRITICAL,
+              });
+            } else {
+              Toast.showToast({
+                title: selectedReport ? 'Saved' : 'Created',
+                type: Toast.TYPE.NORMAL,
+              });
+            }
 
-          runReport({ document, id: documentId });
-          fetchReportConfigs().then(() => {
-            setState({ creatingReport: false });
-            resolve(res);
+            runReport({ document, id: 'default' });
+            fetchReportConfigs().then(() => {
+              setState({ creatingReport: false });
+              resolve(res);
+            });
           });
-        });
+        } else {
+          AccountStorageMutation.mutate({
+            accountId: selectedAccountId,
+            actionType: AccountStorageMutation.ACTION_TYPE.WRITE_DOCUMENT,
+            collection: ACCOUNT_USER_CONFIG_COLLECTION,
+            documentId,
+            document,
+          }).then((res) => {
+            if (res.error) {
+              Toast.showToast({
+                title: 'Failed to save',
+                description: 'Check your permissions',
+                type: Toast.TYPE.CRITICAL,
+              });
+            } else {
+              Toast.showToast({
+                title: selectedReport ? 'Saved' : 'Created',
+                type: Toast.TYPE.NORMAL,
+              });
+            }
+
+            runReport({ document, id: documentId });
+            fetchReportConfigs().then(() => {
+              setState({ creatingReport: false });
+              resolve(res);
+            });
+          });
+        }
       } else {
         setState({ creatingReport: false });
         resolve(false);
@@ -160,40 +194,42 @@ export default function CreateReport(selectedReport) {
 
     return (
       <>
-        <div style={{ paddingTop: '10px' }}>
-          <TextField
-            label="Name"
-            value={state.name}
-            onChange={(e) => setState({ name: e.target.value })}
-            labelInline
-            placeholder="e.g. DevOps Team"
-          />
-          &nbsp;&nbsp;
-          <Button
-            type={Button.TYPE.PRIMARY}
-            sizeType={Button.SIZE_TYPE.SMALL}
-            onClick={async () => {
-              const res = await createReport();
-              if (!res?.error && res !== false) {
-                setDataState({
-                  view: {
-                    page: 'ReportList',
-                    title: 'Maturity Reports',
-                  },
-                });
+        {view.page !== 'DefaultReport' && (
+          <div style={{ paddingTop: '10px' }}>
+            <TextField
+              label="Name"
+              value={state.name}
+              onChange={(e) => setState({ name: e.target.value })}
+              labelInline
+              placeholder="e.g. DevOps Team"
+            />
+            &nbsp;&nbsp;
+            <Button
+              type={Button.TYPE.PRIMARY}
+              sizeType={Button.SIZE_TYPE.SMALL}
+              onClick={async () => {
+                const res = await createReport();
+                if (!res?.error && res !== false) {
+                  setDataState({
+                    view: {
+                      page: 'ReportList',
+                      title: 'Maturity Reports',
+                    },
+                  });
+                }
+              }}
+              loading={state.creatingReport}
+              disabled={
+                state.accounts.length === 0 ||
+                !state.name ||
+                state.name.length <= 3 ||
+                (!state.allProducts && state.products.length === 0)
               }
-            }}
-            loading={state.creatingReport}
-            disabled={
-              state.accounts.length === 0 ||
-              !state.name ||
-              state.name.length <= 3 ||
-              (!state.allProducts && state.products.length === 0)
-            }
-          >
-            {selectedReport ? 'Save Report' : 'Create Report'}
-          </Button>
-        </div>
+            >
+              {selectedReport ? 'Save' : 'Create'}
+            </Button>
+          </div>
+        )}
 
         <br />
 
@@ -245,7 +281,25 @@ export default function CreateReport(selectedReport) {
           </Grid>
         </div>
         <div style={{ paddingTop: '10px' }}>
-          <HeadingText type={HeadingText.TYPE.HEADING_4}>Accounts</HeadingText>
+          <br />
+          <div>
+            <span style={{ fontWeight: 'bold', fontSize: '16px' }}>
+              Accounts
+            </span>
+            &nbsp;&nbsp;&nbsp;
+            <Switch
+              label={'All Accounts'}
+              checked={state.accounts.length === accounts.length}
+              style={{ paddingBottom: '0px' }}
+              onChange={() => {
+                if (state.accounts.length === accounts.length) {
+                  setState({ accounts: [] });
+                } else {
+                  setState({ accounts: accounts.map((a) => a.id) });
+                }
+              }}
+            />
+          </div>
 
           <div style={{ paddingTop: '10px' }}>
             <Grid>
@@ -256,6 +310,7 @@ export default function CreateReport(selectedReport) {
                     label={a.name}
                     style={{ paddingBottom: '0px' }}
                     checked={state.accounts.includes(a.id)}
+                    disabled={state.accounts.length === accounts.length}
                     onChange={() => {
                       if (state.accounts.includes(a.id)) {
                         setState({
@@ -270,6 +325,35 @@ export default function CreateReport(selectedReport) {
               ))}
             </Grid>
           </div>
+
+          {view.page === 'DefaultReport' && (
+            <div style={{ textAlign: 'right', marginRight: '10px' }}>
+              <Button
+                type={Button.TYPE.PRIMARY}
+                sizeType={Button.SIZE_TYPE.SMALL}
+                onClick={async () => {
+                  const res = await createReport();
+                  if (!res?.error && res !== false) {
+                    setDataState({
+                      view: {
+                        page: 'ReportList',
+                        title: 'Maturity Reports',
+                      },
+                    });
+                  }
+                }}
+                loading={state.creatingReport}
+                disabled={
+                  state.accounts.length === 0 ||
+                  !state.name ||
+                  state.name.length <= 3 ||
+                  (!state.allProducts && state.products.length === 0)
+                }
+              >
+                Save
+              </Button>
+            </div>
+          )}
         </div>
       </>
     );

@@ -5,6 +5,7 @@ import {
   Toast,
   AccountStorageQuery,
   AccountStorageMutation,
+  UserStorageQuery,
 } from 'nr1';
 import {
   accountDataQuery,
@@ -55,7 +56,7 @@ export function useProvideData(props) {
     reportHistory: null,
     fetchingReportConfigs: false,
     fetchingReportHistory: false,
-    user: null,
+    defaultReport: null,
     view: { page: 'ReportList', title: 'Maturity Reports' },
     sortBy: 'Lowest score',
   });
@@ -64,8 +65,18 @@ export function useProvideData(props) {
   useEffect(async () => {
     // eslint-disable-next-line
     console.log("DataProvider loaded");
+    const state = {};
+    const defaultReport = await getUserReport();
+    await getUserSettings();
+    if (defaultReport) {
+      state.view = {
+        page: 'DefaultReport',
+        title: 'Setup default configuration',
+      };
+    }
     const user = await NerdGraphQuery.query({ query: userQuery });
-    setDataState({ user: user?.data?.actor?.user });
+    state.user = user?.data?.actor?.user;
+    setDataState(state);
   }, []);
 
   // handle account picker changes
@@ -101,6 +112,32 @@ export function useProvideData(props) {
       fetchingData: false,
     });
   }, [props.accountId]);
+
+  const getUserSettings = () => {
+    return new Promise((resolve) => {
+      UserStorageQuery.query({
+        collection: 'userSettings',
+        documentId: 'settings',
+      }).then((res) => {
+        const userSettings = res?.data || {};
+        setDataState({ userSettings });
+        resolve(userSettings);
+      });
+    });
+  };
+
+  const getUserReport = () => {
+    return new Promise((resolve) => {
+      UserStorageQuery.query({
+        collection: 'userSettings',
+        documentId: 'default',
+      }).then((res) => {
+        const defaultReport = res?.data || {};
+        setDataState({ defaultReport });
+        resolve(defaultReport);
+      });
+    });
+  };
 
   const runReport = async (selectedReport) => {
     console.log('selected', selectedReport);
@@ -252,6 +289,8 @@ export function useProvideData(props) {
   const fetchReportConfigs = async () => {
     setDataState({ fetchingReports: true });
 
+    const defaultReport = await getUserReport();
+
     const reportConfigs =
       (
         await AccountStorageQuery.query({
@@ -260,7 +299,10 @@ export function useProvideData(props) {
         })
       )?.data || [];
 
-    setDataState({ fetchingReports: false, reportConfigs });
+    setDataState({
+      fetchingReports: false,
+      reportConfigs: [...reportConfigs, defaultReport],
+    });
   };
 
   const deleteReportConfig = async (documentId) => {
