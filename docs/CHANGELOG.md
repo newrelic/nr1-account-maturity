@@ -1,3 +1,10 @@
+## [0.14.2](https://github.com/newrelic/nr1-account-maturity/compare/v0.14.1...v0.14.2) (2023-07-21)
+
+
+### Bug Fixes
+
+* regenerate package-lock.json ([4546ca6](https://github.com/newrelic/nr1-account-maturity/commit/4546ca68b7f83da0f7fd2ecf23afc91f33dac20b))
+
 ## [0.14.1](https://github.com/newrelic/nr1-account-maturity/compare/v0.14.0...v0.14.1) (2023-06-15)
 
 
