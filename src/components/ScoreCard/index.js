@@ -16,6 +16,7 @@ const ScoreCard = ({
   rollUpStatus,
   elementListLabel,
   elementScores,
+  isUserDefault,
   displayMode = DISPLAY_MODES.SUMMARY,
 }) => {
   return useMemo(() => {
@@ -27,6 +28,7 @@ const ScoreCard = ({
             navigation.openStackedNerdlet({
               id: 'score-details-nerdlet',
               urlState: {
+                isUserDefault,
                 accountName: title,
                 accountId: subtitle,
                 accountPercentage: rollUpScore,

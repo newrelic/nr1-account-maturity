@@ -25,15 +25,16 @@ export default function CreateReport(selectedReport) {
     fetchReportConfigs,
     setDataState,
     runReport,
+    runUserReport,
     view,
   } = useContext(DataContext);
 
   const allProducts = selectedReport?.document?.allProducts;
 
   const [state, setState] = useSetState({
-    creatingReport: false,
+    creatingView: false,
     name:
-      view.page === 'DefaultReport'
+      view.page === 'CreateDefaultView'
         ? 'default'
         : selectedReport?.document?.name || '',
     entitySearchQuery: selectedReport?.document?.entitySearchQuery || '',
@@ -42,8 +43,6 @@ export default function CreateReport(selectedReport) {
     accounts: selectedReport?.document?.accounts || [],
     products: selectedReport?.document?.products || [],
   });
-
-  console.log(view);
 
   const validateEntitySearchQuery = () => {
     return new Promise((resolve) => {
@@ -87,7 +86,9 @@ export default function CreateReport(selectedReport) {
   const createReport = () => {
     // eslint-disable-next-line
     return new Promise(async (resolve) => {
-      setState({ creatingReport: true });
+      const runAt = new Date().getTime();
+
+      setState({ creatingView: true });
 
       let esqPassed = false;
       if (state.entitySearchQuery) {
@@ -114,13 +115,13 @@ export default function CreateReport(selectedReport) {
 
         const documentId = selectedReport?.id || uuidv4();
 
-        if (view.page === 'DefaultReport') {
+        if (view.page === 'CreateDefaultView') {
           UserStorageMutation.mutate({
             actionType: UserStorageMutation.ACTION_TYPE.WRITE_DOCUMENT,
-            collection: ACCOUNT_USER_CONFIG_COLLECTION,
-            documentId,
+            collection: 'userViews',
+            documentId: 'default',
             document,
-          }).then((res) => {
+          }).then(async (res) => {
             if (res.error) {
               Toast.showToast({
                 title: 'Failed to save',
@@ -134,10 +135,11 @@ export default function CreateReport(selectedReport) {
               });
             }
 
-            runReport({ document, id: 'default' });
+            // need new handling for default run
+            runUserReport({ document, id: 'default', runAt });
             fetchReportConfigs().then(() => {
-              setState({ creatingReport: false });
-              resolve(res);
+              setState({ creatingView: false });
+              resolve({ res, runAt });
             });
           });
         } else {
@@ -161,15 +163,15 @@ export default function CreateReport(selectedReport) {
               });
             }
 
-            runReport({ document, id: documentId });
+            runReport({ document, id: documentId, runAt });
             fetchReportConfigs().then(() => {
-              setState({ creatingReport: false });
-              resolve(res);
+              setState({ creatingView: false });
+              resolve({ res, runAt });
             });
           });
         }
       } else {
-        setState({ creatingReport: false });
+        setState({ creatingView: false });
         resolve(false);
       }
     });
@@ -194,7 +196,7 @@ export default function CreateReport(selectedReport) {
 
     return (
       <>
-        {view.page !== 'DefaultReport' && (
+        {view.page !== 'CreateDefaultView' && (
           <div style={{ paddingTop: '10px' }}>
             <TextField
               label="Name"
@@ -208,17 +210,21 @@ export default function CreateReport(selectedReport) {
               type={Button.TYPE.PRIMARY}
               sizeType={Button.SIZE_TYPE.SMALL}
               onClick={async () => {
-                const res = await createReport();
+                const { res, runAt } = await createReport();
+
                 if (!res?.error && res !== false) {
                   setDataState({
                     view: {
                       page: 'ReportList',
                       title: 'Maturity Reports',
+                      props: {
+                        selected: runAt,
+                      },
                     },
                   });
                 }
               }}
-              loading={state.creatingReport}
+              loading={state.creatingView}
               disabled={
                 state.accounts.length === 0 ||
                 !state.name ||
@@ -326,23 +332,31 @@ export default function CreateReport(selectedReport) {
             </Grid>
           </div>
 
-          {view.page === 'DefaultReport' && (
+          {view.page === 'CreateDefaultView' && (
             <div style={{ textAlign: 'right', marginRight: '10px' }}>
               <Button
                 type={Button.TYPE.PRIMARY}
                 sizeType={Button.SIZE_TYPE.SMALL}
                 onClick={async () => {
-                  const res = await createReport();
+                  const { res, runAt } = await createReport();
+
+                  console.log(runAt);
+
                   if (!res?.error && res !== false) {
                     setDataState({
                       view: {
-                        page: 'ReportList',
-                        title: 'Maturity Reports',
+                        page: 'DefaultView',
+                        title: 'Maturity Scores',
+                        props: {
+                          selected: runAt,
+                          isUserDefault: true,
+                          ...(res?.data?.nerdStorageWriteDocument || {}),
+                        },
                       },
                     });
                   }
                 }}
-                loading={state.creatingReport}
+                loading={state.creatingView}
                 disabled={
                   state.accounts.length === 0 ||
                   !state.name ||

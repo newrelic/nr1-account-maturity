@@ -1,53 +1,100 @@
 import React, { useMemo, useContext, useState } from 'react';
 import DataContext from '../../context/data';
-import { Select, SelectItem, Button, AccountStorageMutation, Toast } from 'nr1';
+import {
+  Select,
+  SelectItem,
+  Button,
+  AccountStorageMutation,
+  UserStorageMutation,
+  Toast,
+} from 'nr1';
 import { ACCOUNT_USER_HISTORY_COLLECTION } from '../../constants';
 
 export default function HistorySelector(props) {
-  const { history, accountId } = props;
-  const { view, setDataState, fetchReportHistory } = useContext(DataContext);
+  const { history, accountId, isUserDefault } = props;
+  const { view, setDataState, fetchReportHistory, fetchUserViewHistory } =
+    useContext(DataContext);
   const [deleting, setDeleting] = useState(false);
 
   const deleteHistory = (runAt) => {
     setDeleting(true);
     const documentId = history.find((h) => h.document?.runAt === runAt)?.id;
+
     if (documentId) {
-      AccountStorageMutation.mutate({
-        accountId,
-        actionType: AccountStorageMutation.ACTION_TYPE.DELETE_DOCUMENT,
-        collection: ACCOUNT_USER_HISTORY_COLLECTION,
-        documentId,
-      }).then((res) => {
-        setDeleting(false);
+      if (isUserDefault) {
+        UserStorageMutation.mutate({
+          actionType: UserStorageMutation.ACTION_TYPE.DELETE_DOCUMENT,
+          collection: ACCOUNT_USER_HISTORY_COLLECTION,
+          documentId,
+        }).then((res) => {
+          setDeleting(false);
 
-        if (res.error) {
-          Toast.showToast({
-            title: 'Failed to delete',
-            type: Toast.TYPE.CRITICAL,
-          });
-        } else {
-          fetchReportHistory();
-          Toast.showToast({
-            title: 'Successfully deleted',
-            type: Toast.TYPE.NORMAL,
-          });
-
-          const newHistory = (view.props?.history || []).filter(
-            (h) => h.document?.runAt !== runAt
-          );
-
-          const selected = newHistory?.[0]?.document?.runAt;
-
-          if (selected) {
-            view.props = { ...view.props, history: newHistory, selected };
-            setDataState({ view });
-          } else {
-            setDataState({
-              view: { page: 'ReportList', title: 'Report List' },
+          if (res.error) {
+            Toast.showToast({
+              title: 'Failed to delete',
+              type: Toast.TYPE.CRITICAL,
             });
+          } else {
+            fetchUserViewHistory();
+            Toast.showToast({
+              title: 'Successfully deleted',
+              type: Toast.TYPE.NORMAL,
+            });
+
+            const newHistory = (history || []).filter(
+              (h) => h.document?.runAt !== runAt
+            );
+
+            const selected = newHistory?.[0]?.document?.runAt;
+
+            if (selected) {
+              view.props = { ...view.props, history: newHistory, selected };
+              setDataState({ view });
+            } else {
+              // setDataState({
+              //   view: { page: 'ReportList', title: 'Report List' },
+              // });
+            }
           }
-        }
-      });
+        });
+      } else {
+        AccountStorageMutation.mutate({
+          accountId,
+          actionType: AccountStorageMutation.ACTION_TYPE.DELETE_DOCUMENT,
+          collection: ACCOUNT_USER_HISTORY_COLLECTION,
+          documentId,
+        }).then((res) => {
+          setDeleting(false);
+
+          if (res.error) {
+            Toast.showToast({
+              title: 'Failed to delete',
+              type: Toast.TYPE.CRITICAL,
+            });
+          } else {
+            fetchReportHistory();
+            Toast.showToast({
+              title: 'Successfully deleted',
+              type: Toast.TYPE.NORMAL,
+            });
+
+            const newHistory = (view.props?.history || []).filter(
+              (h) => h.document?.runAt !== runAt
+            );
+
+            const selected = newHistory?.[0]?.document?.runAt;
+
+            if (selected) {
+              view.props = { ...view.props, history: newHistory, selected };
+              setDataState({ view });
+            } else {
+              setDataState({
+                view: { page: 'ReportList', title: 'Report List' },
+              });
+            }
+          }
+        });
+      }
     } else {
       console.log('documentId not found');
       setDeleting(false);

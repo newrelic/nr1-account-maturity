@@ -3,9 +3,10 @@ import { useSetState } from '@mantine/hooks';
 import {
   NerdGraphQuery,
   Toast,
+  UserStorageQuery,
+  UserStorageMutation,
   AccountStorageQuery,
   AccountStorageMutation,
-  UserStorageQuery,
 } from 'nr1';
 import {
   accountDataQuery,
@@ -56,7 +57,8 @@ export function useProvideData(props) {
     reportHistory: null,
     fetchingReportConfigs: false,
     fetchingReportHistory: false,
-    defaultReport: null,
+    defaultView: null,
+    userViewHistory: null,
     view: { page: 'ReportList', title: 'Maturity Reports' },
     sortBy: 'Lowest score',
   });
@@ -64,16 +66,31 @@ export function useProvideData(props) {
   // handle initial load
   useEffect(async () => {
     // eslint-disable-next-line
-    console.log("DataProvider loaded");
+    console.log("DataProvider initialized");
     const state = {};
-    const defaultReport = await getUserReport();
+    const defaultView = await getUserReport();
     await getUserSettings();
-    if (defaultReport) {
+
+    // default view not configured, request configuration
+    if (!defaultView || Object.keys(defaultView).length === 0) {
       state.view = {
-        page: 'DefaultReport',
+        page: 'CreateDefaultView',
         title: 'Setup default configuration',
       };
+    } else {
+      const userViewHistory = await fetchUserViewHistory();
+
+      state.view = {
+        page: 'DefaultView',
+        title: 'Maturity Scores',
+        props: {
+          ...defaultView,
+          isUserDefault: true,
+          selected: userViewHistory?.[0]?.document?.runAt || 0,
+        },
+      };
     }
+
     const user = await NerdGraphQuery.query({ query: userQuery });
     state.user = user?.data?.actor?.user;
     setDataState(state);
@@ -117,7 +134,7 @@ export function useProvideData(props) {
     return new Promise((resolve) => {
       UserStorageQuery.query({
         collection: 'userSettings',
-        documentId: 'settings',
+        documentId: 'main',
       }).then((res) => {
         const userSettings = res?.data || {};
         setDataState({ userSettings });
@@ -129,12 +146,12 @@ export function useProvideData(props) {
   const getUserReport = () => {
     return new Promise((resolve) => {
       UserStorageQuery.query({
-        collection: 'userSettings',
+        collection: 'userViews',
         documentId: 'default',
       }).then((res) => {
-        const defaultReport = res?.data || {};
-        setDataState({ defaultReport });
-        resolve(defaultReport);
+        const defaultView = res?.data || {};
+        setDataState({ defaultView });
+        resolve(defaultView);
       });
     });
   };
@@ -174,6 +191,8 @@ export function useProvideData(props) {
         0
       ) / accountSummaries.length;
 
+    const runAt = selectedReport?.runAt || new Date().getTime();
+
     const res = await AccountStorageMutation.mutate({
       accountId: dataState.selectedAccountId,
       actionType: AccountStorageMutation.ACTION_TYPE.WRITE_DOCUMENT,
@@ -181,7 +200,7 @@ export function useProvideData(props) {
       documentId: uuidv4(),
       document: {
         reportId: report.id,
-        runAt: new Date().getTime(),
+        runAt,
         totalScorePercentage,
         accountSummaries,
         entitySearchQuery: report.document?.entitySearchQuery,
@@ -209,6 +228,84 @@ export function useProvideData(props) {
     setDataState({
       runningReport: false,
       [`runningReport.${selectedReport.id}`]: false,
+      lastRunAt: runAt,
+      entitiesByAccount,
+      summarizedScores,
+      accountSummaries,
+    });
+  };
+
+  const runUserReport = async (selectedReport) => {
+    console.log('running user report', selectedReport);
+    setDataState({
+      runningReport: true,
+      [`runningReport.${selectedReport.id}`]: true,
+      entitiesByAccount: null,
+      summarizedScores: null,
+      accountSummaries: null,
+    });
+
+    const report = selectedReport || dataState.selectedReport;
+    const accounts = [...report.document.accounts].map((id) => ({
+      ...[...dataState.accounts].find((a) => a.id === id),
+    }));
+
+    const { entitiesByAccount, summarizedScores } =
+      await getEntitiesForAccounts(
+        accounts,
+        report.document?.entitySearchQuery || '',
+        dataState.agentReleases,
+        dataState.dataDictionary
+      );
+
+    const accountSummaries = generateAccountSummary(
+      entitiesByAccount,
+      dataState?.sortBy,
+      selectedReport
+    );
+
+    const totalScorePercentage =
+      accountSummaries.reduce(
+        (n, { scorePercentage }) => n + (scorePercentage || 0),
+        0
+      ) / accountSummaries.length;
+
+    const runAt = selectedReport?.runAt || new Date().getTime();
+
+    const res = await UserStorageMutation.mutate({
+      accountId: dataState.selectedAccountId,
+      actionType: UserStorageMutation.ACTION_TYPE.WRITE_DOCUMENT,
+      collection: ACCOUNT_USER_HISTORY_COLLECTION,
+      documentId: uuidv4(),
+      document: {
+        reportId: report.id,
+        runAt,
+        totalScorePercentage,
+        accountSummaries,
+        entitySearchQuery: report.document?.entitySearchQuery,
+      },
+    });
+
+    if (res.error) {
+      Toast.showToast({
+        title: 'Failed to save',
+        description: 'Check your permissions',
+        type: Toast.TYPE.CRITICAL,
+      });
+    } else {
+      Toast.showToast({
+        title: 'Saved result successfully',
+        description: 'Refreshing history...',
+        type: Toast.TYPE.NORMAL,
+      });
+    }
+
+    await fetchUserViewHistory();
+
+    setDataState({
+      runningReport: false,
+      [`runningReport.${selectedReport.id}`]: false,
+      lastRunAt: runAt,
       entitiesByAccount,
       summarizedScores,
       accountSummaries,
@@ -282,14 +379,35 @@ export function useProvideData(props) {
           (a, b) => b.document.runAt - a.document.runAt
         ),
       });
-      resolve();
+      resolve(reportHistory);
+    });
+  };
+
+  const fetchUserViewHistory = () => {
+    // eslint-disable-next-line
+    return new Promise(async (resolve) => {
+      setDataState({ fetchingReportHistory: true });
+
+      const userViewHistory = (
+        (
+          await UserStorageQuery.query({
+            collection: ACCOUNT_USER_HISTORY_COLLECTION,
+          })
+        )?.data || []
+      ).sort((a, b) => b?.document?.runAt - a?.document?.runAt);
+
+      setDataState({
+        fetchingReportHistory: false,
+        userViewHistory,
+      });
+      resolve(userViewHistory);
     });
   };
 
   const fetchReportConfigs = async () => {
     setDataState({ fetchingReports: true });
 
-    const defaultReport = await getUserReport();
+    const defaultView = await getUserReport();
 
     const reportConfigs =
       (
@@ -301,7 +419,7 @@ export function useProvideData(props) {
 
     setDataState({
       fetchingReports: false,
-      reportConfigs: [...reportConfigs, defaultReport],
+      reportConfigs: [...reportConfigs, defaultView],
     });
   };
 
@@ -681,5 +799,7 @@ export function useProvideData(props) {
     deleteReportConfig,
     checkUser,
     runReport,
+    runUserReport,
+    fetchUserViewHistory,
   };
 }

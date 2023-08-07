@@ -1,10 +1,9 @@
 import React, { useContext, useMemo } from 'react';
 import { Grid, GridItem, BillboardChart, LineChart, Spinner } from 'nr1';
 import rules from '../../rules';
-import MaturityContainer from './maturityContainer';
 import DataContext from '../../context/data';
 
-export default function ReportView(props) {
+export default function ScoreCharts(props) {
   const { selected, selectedAccountId, document, isUserDefault } = props;
   const { runningReport, userViewHistory } = useContext(DataContext);
   const accountHistory = props?.history;
@@ -129,14 +128,6 @@ export default function ReportView(props) {
         <br />
         <hr />
         <br />
-
-        <MaturityContainer
-          isUserDefault={isUserDefault}
-          history={history}
-          selected={selected}
-          selectedAccountId={selectedAccountId}
-          entitySearchQuery={document?.entitySearchQuery}
-        />
       </>
     );
   }, [props, history, runningReport]);

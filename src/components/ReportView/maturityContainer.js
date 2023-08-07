@@ -6,7 +6,13 @@ import rules from '../../rules';
 import HistorySelector from './historySelector';
 
 export default function MaturityContainer(props) {
-  const { history, selected, selectedAccountId, entitySearchQuery } = props;
+  const {
+    history,
+    selected,
+    selectedAccountId,
+    entitySearchQuery,
+    isUserDefault,
+  } = props;
 
   const selectedHistory = history.find(
     (h) => h.document.runAt === selected
@@ -47,12 +53,17 @@ export default function MaturityContainer(props) {
   return useMemo(() => {
     return (
       <>
-        <HistorySelector history={history} accountId={selectedAccountId} />
+        <HistorySelector
+          history={history}
+          accountId={selectedAccountId}
+          isUserDefault={isUserDefault}
+        />
         <MaturityElementList
           entitySearchQuery={entitySearchQuery}
           elements={scoredCollection}
           historyId={selectedHistory.id}
           selectedAccountId={selectedAccountId}
+          isUserDefault={isUserDefault}
         />
       </>
     );

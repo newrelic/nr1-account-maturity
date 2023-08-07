@@ -4,6 +4,7 @@ import {
   NerdletStateContext,
   AutoSizer,
   AccountStorageQuery,
+  UserStorageQuery,
 } from 'nr1';
 import { ProvideData } from '../../context/data';
 import { scoreToColor } from '../../utils';
@@ -21,6 +22,7 @@ export default function ScoreDetailRoot() {
     historyId,
     accountPercentage,
     entitySearchQuery,
+    isUserDefault,
   } = nerdletContext;
   const statusColor = scoreToColor(accountPercentage).color;
   const percentageDiff = 100 - accountPercentage;
@@ -35,19 +37,34 @@ export default function ScoreDetailRoot() {
   }, [historyId]);
 
   const fetchHistory = () => {
-    AccountStorageQuery.query({
-      accountId: selectedAccountId,
-      collection: ACCOUNT_USER_HISTORY_COLLECTION,
-      documentId: historyId,
-    }).then(({ data }) =>
-      setDataState({
-        fetchingHistory: false,
-        historyDocument: data,
-        selectedDocument: (data?.accountSummaries || []).find(
-          (a) => a.id === accountId
-        ),
-      })
-    );
+    if (isUserDefault) {
+      UserStorageQuery.query({
+        collection: ACCOUNT_USER_HISTORY_COLLECTION,
+        documentId: historyId,
+      }).then(({ data }) =>
+        setDataState({
+          fetchingHistory: false,
+          historyDocument: data,
+          selectedDocument: (data?.accountSummaries || []).find(
+            (a) => a.id === accountId
+          ),
+        })
+      );
+    } else {
+      AccountStorageQuery.query({
+        accountId: selectedAccountId,
+        collection: ACCOUNT_USER_HISTORY_COLLECTION,
+        documentId: historyId,
+      }).then(({ data }) =>
+        setDataState({
+          fetchingHistory: false,
+          historyDocument: data,
+          selectedDocument: (data?.accountSummaries || []).find(
+            (a) => a.id === accountId
+          ),
+        })
+      );
+    }
   };
 
   return (

@@ -12,7 +12,7 @@ import DataContext from '../../context/data';
 import MaturityElementList from '../MaturityElementList';
 import SortBy from '../SortBy';
 import ReportList from '../ReportList';
-import CreateReport from '../CreateReport';
+import CreateView from '../CreateView';
 import ReportView from '../ReportView';
 
 export default function AccountMaturity() {
@@ -24,14 +24,22 @@ export default function AccountMaturity() {
       case 'ReportList': {
         return <ReportList {...(view.props || {})} />;
       }
-      case 'CreateReport': {
-        return <CreateReport {...(view.props || {})} />;
+      case 'CreateView': {
+        return <CreateView {...(view.props || {})} />;
       }
-      case 'DefaultReport': {
-        return <CreateReport {...(view.props || {})} />;
+      case 'CreateDefaultView': {
+        return <CreateView {...(view.props || {})} />;
       }
       case 'EditReport': {
-        return <CreateReport {...(view.props || {})} />;
+        return <CreateView {...(view.props || {})} />;
+      }
+      case 'DefaultView': {
+        return (
+          <ReportView
+            {...(view.props || {})}
+            selectedAccountId={selectedAccountId}
+          />
+        );
       }
       case 'ReportView': {
         return (
@@ -65,7 +73,7 @@ export default function AccountMaturity() {
             sizeType={Button.SIZE_TYPE.SMALL}
             onClick={() =>
               setDataState({
-                view: { page: 'CreateReport', title: 'Create Report' },
+                view: { page: 'CreateView', title: 'Create Report' },
               })
             }
           >
@@ -74,7 +82,7 @@ export default function AccountMaturity() {
         );
       }
       case 'ReportView':
-      case 'CreateReport': {
+      case 'CreateView': {
         return (
           <Button
             style={{ marginRight: '10px' }}
@@ -121,15 +129,21 @@ export default function AccountMaturity() {
                   backgroundColor: 'white',
                 }}
               >
-                <div style={{ paddingBottom: '30px' }}>
-                  <div style={{ float: 'left' }}>
-                    <HeadingText type={HeadingText.TYPE.HEADING_3}>
-                      {view?.title || view?.page || 'Account Maturity Scores'}
-                    </HeadingText>
-                    {view.subtitle && <div>{view.subtitle}</div>}
-                  </div>
-                  <div style={{ float: 'right' }}>{renderTopRight()}</div>
-                </div>
+                {view.page !== 'DefaultView' && (
+                  <>
+                    <div style={{ paddingBottom: '30px' }}>
+                      <div style={{ float: 'left' }}>
+                        <HeadingText type={HeadingText.TYPE.HEADING_3}>
+                          {view?.title ||
+                            view?.page ||
+                            'Account Maturity Scores'}
+                        </HeadingText>
+                        {view.subtitle && <div>{view.subtitle}</div>}
+                      </div>
+                      <div style={{ float: 'right' }}>{renderTopRight()}</div>{' '}
+                    </div>
+                  </>
+                )}
                 <div>{renderView()}</div>
               </div>
             </LayoutItem>

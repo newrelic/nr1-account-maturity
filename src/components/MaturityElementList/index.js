@@ -8,6 +8,7 @@ const MaturityElementList = ({
   selectedAccountId = 0,
   historyId = '',
   elements = [],
+  isUserDefault,
   displayMode = DISPLAY_MODES.SUMMARY,
 }) => {
   return useMemo(() => {
@@ -23,6 +24,7 @@ const MaturityElementList = ({
               <ScoreCard
                 key={idx}
                 {...score}
+                isUserDefault={isUserDefault}
                 entitySearchQuery={entitySearchQuery}
                 historyId={historyId}
                 selectedAccountId={selectedAccountId}
@@ -31,7 +33,7 @@ const MaturityElementList = ({
           </div>
         );
     }
-  }, [elements, displayMode]);
+  }, [elements, displayMode, isUserDefault]);
 };
 
 MaturityElementList.propTypes = {
