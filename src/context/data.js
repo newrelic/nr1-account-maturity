@@ -406,7 +406,7 @@ export function useProvideData(props) {
           (a, b) => b.document.runAt - a.document.runAt
         ),
       });
-      console.log('reports', reportHistory.length);
+      console.log('report count', reportHistory.length);
       resolve(reportHistory);
     });
   };

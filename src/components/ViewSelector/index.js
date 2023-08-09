@@ -26,7 +26,6 @@ export default function ViewSelector(props) {
 
   const deleteReportConfig = async (documentId) => {
     setDeleting(true);
-    console.log(documentId);
     const res = await AccountStorageMutation.mutate({
       accountId: selectedAccountId,
       actionType: AccountStorageMutation.ACTION_TYPE.DELETE_DOCUMENT,
@@ -55,6 +54,7 @@ export default function ViewSelector(props) {
           page: 'DefaultView',
           title: 'Maturity Scores',
           props: {
+            ...defaultView,
             isUserDefault: true,
             selected: userViewHistory?.[0]?.document?.runAt || 0,
           },
@@ -97,6 +97,7 @@ export default function ViewSelector(props) {
                     page: 'DefaultView',
                     title: 'Maturity Scores',
                     props: {
+                      ...defaultView,
                       isUserDefault: true,
                       selected: userViewHistory?.[0]?.document?.runAt || 0,
                     },

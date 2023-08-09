@@ -33,14 +33,6 @@ export default function ReportView(props) {
           h.document.reportId === (view?.id || view?.props?.id) //eslint-disable-line
       );//eslint-disable-line
 
-    console.log(
-      reportHistory,
-      isUserDefault,
-      view?.id,
-      view?.props?.id,
-      history.length
-    );
-
     if (history.length === 0) {
       return (
         <div style={{ textAlign: 'center', paddingTop: '15px' }}>

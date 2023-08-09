@@ -113,8 +113,6 @@ export default function CreateReport(selectedReport) {
           document.products = state.products;
         }
 
-        console.log(selectedReport?.id, view?.id, view?.props?.id);
-
         const documentId =
           selectedReport?.id || view?.id || view?.props?.id || uuidv4();
 
@@ -355,7 +353,6 @@ export default function CreateReport(selectedReport) {
                     const { res, runAt, documentId } = await createReport();
 
                     if (!res?.error && res !== false) {
-                      console.log(selectedReport?.id, res, runAt);
                       setDataState({
                         view: {
                           page: 'ReportView',
