@@ -34,7 +34,7 @@ export default function CreateReport(selectedReport) {
   const [state, setState] = useSetState({
     creatingView: false,
     name:
-      view.page === 'CreateDefaultView'
+      view.page === 'CreateDefaultView' || view.page === 'EditDefaultView'
         ? 'default'
         : selectedReport?.document?.name || '',
     entitySearchQuery: selectedReport?.document?.entitySearchQuery || '',
@@ -113,9 +113,15 @@ export default function CreateReport(selectedReport) {
           document.products = state.products;
         }
 
-        const documentId = selectedReport?.id || uuidv4();
+        console.log(selectedReport?.id, view?.id, view?.props?.id);
 
-        if (view.page === 'CreateDefaultView') {
+        const documentId =
+          selectedReport?.id || view?.id || view?.props?.id || uuidv4();
+
+        if (
+          view.page === 'CreateDefaultView' ||
+          view.page === 'EditDefaultView'
+        ) {
           UserStorageMutation.mutate({
             actionType: UserStorageMutation.ACTION_TYPE.WRITE_DOCUMENT,
             collection: 'userViews',
@@ -133,13 +139,14 @@ export default function CreateReport(selectedReport) {
                 title: selectedReport ? 'Saved' : 'Created',
                 type: Toast.TYPE.NORMAL,
               });
+              setDataState({ defaultView: document });
             }
 
             // need new handling for default run
             runUserReport({ document, id: 'default', runAt });
             fetchReportConfigs().then(() => {
               setState({ creatingView: false });
-              resolve({ res, runAt });
+              resolve({ res, runAt, documentId });
             });
           });
         } else {
@@ -166,7 +173,7 @@ export default function CreateReport(selectedReport) {
             runReport({ document, id: documentId, runAt });
             fetchReportConfigs().then(() => {
               setState({ creatingView: false });
-              resolve({ res, runAt });
+              resolve({ res, runAt, documentId });
             });
           });
         }
@@ -196,46 +203,19 @@ export default function CreateReport(selectedReport) {
 
     return (
       <>
-        {view.page !== 'CreateDefaultView' && (
-          <div style={{ paddingTop: '10px' }}>
-            <TextField
-              label="Name"
-              value={state.name}
-              onChange={(e) => setState({ name: e.target.value })}
-              labelInline
-              placeholder="e.g. DevOps Team"
-            />
-            &nbsp;&nbsp;
-            <Button
-              type={Button.TYPE.PRIMARY}
-              sizeType={Button.SIZE_TYPE.SMALL}
-              onClick={async () => {
-                const { res, runAt } = await createReport();
-
-                if (!res?.error && res !== false) {
-                  setDataState({
-                    view: {
-                      page: 'ReportList',
-                      title: 'Maturity Reports',
-                      props: {
-                        selected: runAt,
-                      },
-                    },
-                  });
-                }
-              }}
-              loading={state.creatingView}
-              disabled={
-                state.accounts.length === 0 ||
-                !state.name ||
-                state.name.length <= 3 ||
-                (!state.allProducts && state.products.length === 0)
-              }
-            >
-              {selectedReport ? 'Save' : 'Create'}
-            </Button>
-          </div>
-        )}
+        {view.page !== 'CreateDefaultView' &&
+          view.page !== 'EditDefaultView' && (
+            <div style={{ paddingTop: '10px' }}>
+              <TextField
+                label="Name"
+                value={state.name}
+                onChange={(e) => setState({ name: e.target.value })}
+                labelInline
+                placeholder="e.g. DevOps Team"
+              />
+              &nbsp;&nbsp;
+            </div>
+          )}
 
         <br />
 
@@ -332,42 +312,75 @@ export default function CreateReport(selectedReport) {
             </Grid>
           </div>
 
-          {view.page === 'CreateDefaultView' && (
-            <div style={{ textAlign: 'right', marginRight: '10px' }}>
-              <Button
-                type={Button.TYPE.PRIMARY}
-                sizeType={Button.SIZE_TYPE.SMALL}
-                onClick={async () => {
-                  const { res, runAt } = await createReport();
+          {view.page === 'CreateDefaultView' ||
+            (view.page === 'EditDefaultView' ? (
+              <div style={{ textAlign: 'right', marginRight: '10px' }}>
+                <Button
+                  type={Button.TYPE.PRIMARY}
+                  sizeType={Button.SIZE_TYPE.SMALL}
+                  onClick={async () => {
+                    const { res, runAt } = await createReport();
 
-                  console.log(runAt);
-
-                  if (!res?.error && res !== false) {
-                    setDataState({
-                      view: {
-                        page: 'DefaultView',
-                        title: 'Maturity Scores',
-                        props: {
-                          selected: runAt,
-                          isUserDefault: true,
-                          ...(res?.data?.nerdStorageWriteDocument || {}),
+                    if (!res?.error && res !== false) {
+                      setDataState({
+                        view: {
+                          page: 'DefaultView',
+                          title: 'Maturity Scores',
+                          props: {
+                            selected: runAt,
+                            isUserDefault: true,
+                            ...(res?.data?.nerdStorageWriteDocument || {}),
+                          },
                         },
-                      },
-                    });
+                      });
+                    }
+                  }}
+                  loading={state.creatingView}
+                  disabled={
+                    state.accounts.length === 0 ||
+                    !state.name ||
+                    state.name.length <= 3 ||
+                    (!state.allProducts && state.products.length === 0)
                   }
-                }}
-                loading={state.creatingView}
-                disabled={
-                  state.accounts.length === 0 ||
-                  !state.name ||
-                  state.name.length <= 3 ||
-                  (!state.allProducts && state.products.length === 0)
-                }
-              >
-                Save
-              </Button>
-            </div>
-          )}
+                >
+                  Save
+                </Button>
+              </div>
+            ) : (
+              <>
+                <Button
+                  type={Button.TYPE.PRIMARY}
+                  sizeType={Button.SIZE_TYPE.SMALL}
+                  onClick={async () => {
+                    const { res, runAt, documentId } = await createReport();
+
+                    if (!res?.error && res !== false) {
+                      console.log(selectedReport?.id, res, runAt);
+                      setDataState({
+                        view: {
+                          page: 'ReportView',
+                          title: state.name,
+                          id: selectedReport?.id || documentId,
+                          props: {
+                            document: res?.data?.nerdStorageWriteDocument,
+                            selected: runAt,
+                          },
+                        },
+                      });
+                    }
+                  }}
+                  loading={state.creatingView}
+                  disabled={
+                    state.accounts.length === 0 ||
+                    !state.name ||
+                    state.name.length <= 3 ||
+                    (!state.allProducts && state.products.length === 0)
+                  }
+                >
+                  {selectedReport ? 'Save' : 'Create'}
+                </Button>
+              </>
+            ))}
         </div>
       </>
     );

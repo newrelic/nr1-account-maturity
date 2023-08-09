@@ -3,7 +3,6 @@ import MaturityElementList from '../MaturityElementList';
 import { percentageToStatus } from '../../utils';
 import { STATUSES } from '../../constants';
 import rules from '../../rules';
-import HistorySelector from './historySelector';
 
 export default function MaturityContainer(props) {
   const {
@@ -53,11 +52,11 @@ export default function MaturityContainer(props) {
   return useMemo(() => {
     return (
       <>
-        <HistorySelector
+        {/* <HistorySelector
           history={history}
           accountId={selectedAccountId}
           isUserDefault={isUserDefault}
-        />
+        /> */}
         <MaturityElementList
           entitySearchQuery={entitySearchQuery}
           elements={scoredCollection}

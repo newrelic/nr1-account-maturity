@@ -41,7 +41,7 @@ export default function ReportList() {
               label: 'Create Report',
               onClick: () =>
                 setDataState({
-                  view: { page: 'CreateReport', title: 'Create Report' },
+                  view: { page: 'CreateView', title: 'Create New View' },
                 }),
             }}
           />

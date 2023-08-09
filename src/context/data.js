@@ -110,7 +110,7 @@ export function useProvideData(props) {
         })
       )?.data || [];
 
-    await fetchReportHistory(accountId);
+    const reportHistory = await fetchReportHistory(accountId);
 
     const [accountsInit, agentReleases, dataDictionary] = await Promise.all([
       getAccounts(),
@@ -119,6 +119,8 @@ export function useProvideData(props) {
     ]);
 
     const accounts = await decorateAccountData(accountsInit);
+
+    deleteOrphanedReports(reportConfigs, reportHistory, accountId);
 
     setDataState({
       selectedAccountId: accountId,
@@ -223,7 +225,7 @@ export function useProvideData(props) {
 
     // console.log(accountSummaries, totalScorePercentage);
 
-    fetchReportHistory();
+    await fetchReportHistory();
 
     setDataState({
       runningReport: false,
@@ -360,6 +362,31 @@ export function useProvideData(props) {
     }
   };
 
+  const deleteOrphanedReports = (reportConfigs, reportHistory, accountId) => {
+    const reportsToDelete = reportHistory.filter(
+      (rh) => !reportConfigs.find((rc) => rc.id === rh?.document?.reportId)
+    );
+
+    if (reportsToDelete.length > 0) {
+      const deleteDocPromises = reportsToDelete.map((r) =>
+        AccountStorageMutation.mutate({
+          accountId,
+          actionType: AccountStorageMutation.ACTION_TYPE.DELETE_DOCUMENT,
+          collection: ACCOUNT_USER_HISTORY_COLLECTION,
+          documentId: r.id,
+        })
+      );
+
+      Promise.all(deleteDocPromises).then(() => {
+        console.log(
+          `Deleted ${reportsToDelete.length} orphaned history records`
+        );
+      });
+    } else {
+      console.log('no orphaned history records to delete');
+    }
+  };
+
   const fetchReportHistory = (accountId) => {
     // eslint-disable-next-line
     return new Promise(async (resolve) => {
@@ -379,6 +406,7 @@ export function useProvideData(props) {
           (a, b) => b.document.runAt - a.document.runAt
         ),
       });
+      console.log('reports', reportHistory.length);
       resolve(reportHistory);
     });
   };

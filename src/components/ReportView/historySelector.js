@@ -11,9 +11,25 @@ import {
 import { ACCOUNT_USER_HISTORY_COLLECTION } from '../../constants';
 
 export default function HistorySelector(props) {
-  const { history, accountId, isUserDefault } = props;
-  const { view, setDataState, fetchReportHistory, fetchUserViewHistory } =
-    useContext(DataContext);
+  const { accountId } = props;
+  const {
+    view,
+    runningReport,
+    setDataState,
+    reportHistory,
+    userViewHistory,
+    fetchReportHistory,
+    fetchUserViewHistory,
+  } = useContext(DataContext);
+  const isUserDefault = props?.isUserDefault || view?.props?.isUserDefault;
+  const history =
+    props?.history ||
+    (isUserDefault
+      ? userViewHistory
+      : reportHistory.filter(
+        (r) => r.document.reportId === (view?.id || view.props.id) // eslint-disable-line
+      )); // eslint-disable-line
+
   const [deleting, setDeleting] = useState(false);
 
   const deleteHistory = (runAt) => {
@@ -26,7 +42,7 @@ export default function HistorySelector(props) {
           actionType: UserStorageMutation.ACTION_TYPE.DELETE_DOCUMENT,
           collection: ACCOUNT_USER_HISTORY_COLLECTION,
           documentId,
-        }).then((res) => {
+        }).then(async (res) => {
           setDeleting(false);
 
           if (res.error) {
@@ -35,7 +51,7 @@ export default function HistorySelector(props) {
               type: Toast.TYPE.CRITICAL,
             });
           } else {
-            fetchUserViewHistory();
+            await fetchUserViewHistory();
             Toast.showToast({
               title: 'Successfully deleted',
               type: Toast.TYPE.NORMAL,
@@ -63,22 +79,24 @@ export default function HistorySelector(props) {
           actionType: AccountStorageMutation.ACTION_TYPE.DELETE_DOCUMENT,
           collection: ACCOUNT_USER_HISTORY_COLLECTION,
           documentId,
-        }).then((res) => {
-          setDeleting(false);
-
+        }).then(async (res) => {
           if (res.error) {
             Toast.showToast({
               title: 'Failed to delete',
               type: Toast.TYPE.CRITICAL,
             });
+            setDeleting(false);
           } else {
-            fetchReportHistory();
+            await fetchReportHistory();
+
             Toast.showToast({
               title: 'Successfully deleted',
               type: Toast.TYPE.NORMAL,
             });
 
-            const newHistory = (view.props?.history || []).filter(
+            setDeleting(false);
+
+            const newHistory = (history || []).filter(
               (h) => h.document?.runAt !== runAt
             );
 
@@ -88,9 +106,22 @@ export default function HistorySelector(props) {
               view.props = { ...view.props, history: newHistory, selected };
               setDataState({ view });
             } else {
-              setDataState({
-                view: { page: 'ReportList', title: 'Report List' },
-              });
+              // console.log(
+              //   'unable to find any prior history, going to default view',
+              //   documentId,
+              //   selected
+              // );
+              // setDataState({
+              //   view: {
+              //     page: 'DefaultView',
+              //     title: 'Maturity Scores',
+              //     id: 'DefaultView',
+              //     props: {
+              //       isUserDefault: true,
+              //       selected: userViewHistory?.[0]?.document?.runAt || 0,
+              //     },
+              //   },
+              // });
             }
           }
         });
@@ -102,11 +133,16 @@ export default function HistorySelector(props) {
   };
 
   return useMemo(() => {
+    if (history.length === 0) {
+      return <></>;
+    }
+
     return (
       <>
         <div>
           <Select
-            value={view.props.selected}
+            disabled={runningReport}
+            value={view?.props?.selected || undefined}
             label={'History'}
             labelInline
             onChange={(e, value) => {
@@ -127,11 +163,12 @@ export default function HistorySelector(props) {
           </Select>
           &nbsp;
           <Button
+            disabled={deleting || runningReport}
             loading={deleting}
             sizeType={Button.SIZE_TYPE.SMALL}
             type={Button.TYPE.DESTRUCTIVE}
             iconType={Button.ICON_TYPE.INTERFACE__OPERATIONS__TRASH}
-            onClick={() => deleteHistory(view.props.selected)}
+            onClick={() => deleteHistory(view?.props?.selected)}
           />
         </div>
       </>

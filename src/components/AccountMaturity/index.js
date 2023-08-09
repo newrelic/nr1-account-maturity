@@ -1,22 +1,16 @@
 import React, { useContext } from 'react';
-import {
-  Button,
-  EmptyState,
-  Layout,
-  LayoutItem,
-  CollapsibleLayoutItem,
-  HeadingText,
-} from 'nr1';
+import { EmptyState, Layout, LayoutItem, CollapsibleLayoutItem } from 'nr1';
 
 import DataContext from '../../context/data';
 import MaturityElementList from '../MaturityElementList';
-import SortBy from '../SortBy';
 import ReportList from '../ReportList';
 import CreateView from '../CreateView';
 import ReportView from '../ReportView';
+import ViewSelector from '../ViewSelector';
+import HistorySelector from '../ReportView/historySelector';
 
 export default function AccountMaturity() {
-  const { fetchingData, errorMsg, view, setDataState, selectedAccountId } =
+  const { fetchingData, errorMsg, view, selectedAccountId } =
     useContext(DataContext);
 
   const renderView = () => {
@@ -30,7 +24,10 @@ export default function AccountMaturity() {
       case 'CreateDefaultView': {
         return <CreateView {...(view.props || {})} />;
       }
-      case 'EditReport': {
+      case 'EditDefaultView': {
+        return <CreateView {...(view.props || {})} />;
+      }
+      case 'EditView': {
         return <CreateView {...(view.props || {})} />;
       }
       case 'DefaultView': {
@@ -63,52 +60,6 @@ export default function AccountMaturity() {
     }
   };
 
-  const renderTopRight = () => {
-    switch (view.page) {
-      case 'ReportList': {
-        return (
-          <Button
-            style={{ marginRight: '10px' }}
-            type={Button.TYPE.PRIMARY}
-            sizeType={Button.SIZE_TYPE.SMALL}
-            onClick={() =>
-              setDataState({
-                view: { page: 'CreateView', title: 'Create Report' },
-              })
-            }
-          >
-            Create Report
-          </Button>
-        );
-      }
-      case 'ReportView':
-      case 'CreateView': {
-        return (
-          <Button
-            style={{ marginRight: '10px' }}
-            sizeType={Button.SIZE_TYPE.SMALL}
-            iconType={
-              Button.ICON_TYPE.INTERFACE__ARROW__ARROW_LEFT__V_ALTERNATE
-            }
-            onClick={() =>
-              setDataState({
-                view: { page: 'ReportList', title: 'Report List' },
-              })
-            }
-          >
-            Back
-          </Button>
-        );
-      }
-      case 'MaturityAccountScores': {
-        return <SortBy />;
-      }
-      default: {
-        return '';
-      }
-    }
-  };
-
   return (
     <div>
       {fetchingData && (
@@ -121,29 +72,30 @@ export default function AccountMaturity() {
         <>
           <Layout fullHeight>
             <LayoutItem>
+              {(view.page === 'ReportView' || view.page === 'DefaultView') && (
+                <div
+                  style={{
+                    paddingBottom: '10px',
+                    paddingTop: '10px',
+                    paddingLeft: '5px',
+                    marginBottom: '25px',
+                  }}
+                >
+                  <div style={{ float: 'left' }}>
+                    <ViewSelector view={view} />
+                  </div>
+                  <div style={{ float: 'right' }}>
+                    <HistorySelector accountId={selectedAccountId} />
+                  </div>
+                </div>
+              )}
               <div
                 style={{
-                  paddingTop: '15px',
                   paddingBottom: '15px',
                   paddingLeft: '10px',
                   backgroundColor: 'white',
                 }}
               >
-                {view.page !== 'DefaultView' && (
-                  <>
-                    <div style={{ paddingBottom: '30px' }}>
-                      <div style={{ float: 'left' }}>
-                        <HeadingText type={HeadingText.TYPE.HEADING_3}>
-                          {view?.title ||
-                            view?.page ||
-                            'Account Maturity Scores'}
-                        </HeadingText>
-                        {view.subtitle && <div>{view.subtitle}</div>}
-                      </div>
-                      <div style={{ float: 'right' }}>{renderTopRight()}</div>{' '}
-                    </div>
-                  </>
-                )}
                 <div>{renderView()}</div>
               </div>
             </LayoutItem>
