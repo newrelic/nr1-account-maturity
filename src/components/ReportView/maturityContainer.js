@@ -1,8 +1,9 @@
-import React, { useMemo } from 'react';
+import React, { useMemo, useState } from 'react';
 import MaturityElementList from '../MaturityElementList';
 import { percentageToStatus } from '../../utils';
 import { STATUSES } from '../../constants';
 import rules from '../../rules';
+import { SegmentedControl, SegmentedControlItem } from 'nr1';
 
 export default function MaturityContainer(props) {
   const {
@@ -12,6 +13,7 @@ export default function MaturityContainer(props) {
     entitySearchQuery,
     isUserDefault,
   } = props;
+  const [view, setView] = useState('summary');
 
   const selectedHistory = history.find(
     (h) => h.document.runAt === selected
@@ -52,12 +54,35 @@ export default function MaturityContainer(props) {
   return useMemo(() => {
     return (
       <>
-        {/* <HistorySelector
-          history={history}
-          accountId={selectedAccountId}
-          isUserDefault={isUserDefault}
-        /> */}
+        <SegmentedControl
+          type={SegmentedControl.TYPE.ICONS_ONLY}
+          value={view}
+          onChange={(evt, value) => setView(value)}
+        >
+          <SegmentedControlItem
+            label="Summary"
+            value="summary"
+            iconType={
+              SegmentedControlItem.ICON_TYPE
+                .HARDWARE_AND_SOFTWARE__SOFTWARE__CONTROL_CENTER
+            }
+          />
+          <SegmentedControlItem
+            label="Scores"
+            value="charts"
+            iconType={
+              SegmentedControlItem.ICON_TYPE.DATAVIZ__DATAVIZ__LINE_CHART
+            }
+          />
+          <SegmentedControlItem
+            label="List"
+            value="list"
+            iconType={SegmentedControlItem.ICON_TYPE.INTERFACE__VIEW__LIST_VIEW}
+          />
+        </SegmentedControl>
+
         <MaturityElementList
+          view={view}
           entitySearchQuery={entitySearchQuery}
           elements={scoredCollection}
           historyId={selectedHistory.id}
@@ -66,5 +91,5 @@ export default function MaturityContainer(props) {
         />
       </>
     );
-  }, [history, selected]);
+  }, [history, selected, view]);
 }

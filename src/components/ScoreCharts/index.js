@@ -1,80 +1,23 @@
 import React, { useContext, useMemo } from 'react';
-import { Grid, GridItem, BillboardChart, LineChart, Spinner } from 'nr1';
 import rules from '../../rules';
 import DataContext from '../../context/data';
+import { Grid, GridItem, LineChart, HeadingText } from 'nr1';
 
-export default function ScoreCharts(props) {
-  const { selected, selectedAccountId, document, isUserDefault } = props;
-  const { runningReport, userViewHistory } = useContext(DataContext);
-  const accountHistory = props?.history;
+export default function ScoreCharts() {
+  const { view, reportHistory, userViewHistory } = useContext(DataContext);
+  const history =
+    view?.page === 'DefaultView'
+      ? userViewHistory
+      : reportHistory.filter((r) => r.document.reportId === view?.props?.id);
 
-  return useMemo(() => {
-    if (runningReport) {
-      return (
-        <>
-          <div style={{ textAlign: 'center', paddingBottom: '10px' }}>
-            Generating View
-          </div>
-          <Spinner />
-        </>
-      );
-    }
-
-    const history = isUserDefault ? userViewHistory : accountHistory;
-
-    const latestScorePerc = history?.[0]?.document?.totalScorePercentage;
-
-    const selectedHistory = (history || []).find(
-      (h) => h.document.runAt === selected
-    );
-
-    let selectedScorePerc = selectedHistory?.document?.totalScorePercentage;
-    selectedScorePerc = isNaN(selectedScorePerc)
-      ? latestScorePerc
-      : selectedScorePerc;
-
-    const billboardTitle =
-      history?.[0]?.document?.runAt === selectedHistory?.document?.runAt
-        ? 'Latest Score'
-        : 'Latest Score vs Selected Score';
-
-    const billboardData = [
-      {
-        metadata: {
-          id: 'LatestScore',
-          name: billboardTitle,
-          viz: 'main',
-          units_data: {
-            y: 'PERCENTAGE',
-          },
-        },
-        data: [
-          { y: selectedScorePerc / 100 }, // Previous value.
-          { y: latestScorePerc / 100 }, // Current value.
-        ],
-      },
-    ];
-
-    const lineData = [
-      {
-        metadata: {
-          id: 'scoreHistory',
-          name: 'Score History',
-          color: '#a35ebf',
-          viz: 'main',
-          units_data: {
-            x: 'TIMESTAMP',
-            y: 'COUNT',
-          },
-        },
-        data: (history || []).map((h) => ({
-          x: h?.document?.runAt,
-          y: h?.document?.totalScorePercentage,
-        })),
-      },
-    ];
-
+  const accountProductChartData = (
+    view?.props?.accounts ||
+    view?.props?.document?.accounts ||
+    []
+  ).map((a) => {
     const productLineData = [];
+    const chartData = {};
+
     Object.keys(rules).forEach((key) => {
       const series = {
         metadata: {
@@ -96,7 +39,9 @@ export default function ScoreCharts(props) {
         const data = { x: runAt, y: null };
 
         accountSummaries.forEach((s) => {
-          if (s[key]) {
+          if (s[key] !== null && s[key] !== undefined && s.id === a) {
+            chartData.accountName = s.name;
+            chartData.accountId = s.id;
             data.y += s[key];
           }
         });
@@ -110,25 +55,30 @@ export default function ScoreCharts(props) {
 
       productLineData.push(series);
     });
+    chartData.productLineData = productLineData;
+    return chartData;
+  });
 
+  console.log(accountProductChartData);
+
+  return useMemo(() => {
     return (
-      <>
-        <hr style={{ marginTop: '30px' }} />
+      <div>
         <Grid style={{ paddingTop: '10px' }}>
-          <GridItem columnSpan={4} style={{ padding: '5px' }}>
-            <BillboardChart data={billboardData} fullWidth />
-          </GridItem>
-          <GridItem columnSpan={4} style={{ padding: '5px' }}>
-            <LineChart data={lineData} fullWidth />
-          </GridItem>
-          <GridItem columnSpan={4} style={{ padding: '5px' }}>
-            <LineChart data={productLineData} fullWidth />
-          </GridItem>
+          {accountProductChartData.map((a) => {
+            return (
+              <GridItem
+                key={a.accountId}
+                columnSpan={4}
+                style={{ padding: '5px' }}
+              >
+                <HeadingText>{a.accountName}</HeadingText>
+                <LineChart data={a.productLineData} fullWidth />
+              </GridItem>
+            );
+          })}
         </Grid>
-        <br />
-        <hr />
-        <br />
-      </>
+      </div>
     );
-  }, [props, history, runningReport]);
+  }, [view]);
 }

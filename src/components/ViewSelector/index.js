@@ -196,17 +196,31 @@ export default function ViewSelector(props) {
           >
             Edit
           </Button>
-          &nbsp;&nbsp;&nbsp;
           {view.page !== 'DefaultView' && (
-            <Button
-              disabled={runningReport || deleting}
-              loading={deleting}
-              sizeType={Button.SIZE_TYPE.SMALL}
-              type={Button.TYPE.DESTRUCTIVE}
-              iconType={Button.ICON_TYPE.INTERFACE__OPERATIONS__TRASH}
-              onClick={() => deleteReportConfig(view?.id || view?.props?.id)}
-            />
+            <>
+              &nbsp;&nbsp;&nbsp;
+              <Button
+                disabled={runningReport || deleting}
+                loading={deleting}
+                sizeType={Button.SIZE_TYPE.SMALL}
+                type={Button.TYPE.DESTRUCTIVE}
+                iconType={Button.ICON_TYPE.INTERFACE__OPERATIONS__TRASH}
+                onClick={() => deleteReportConfig(view?.id || view?.props?.id)}
+              />
+            </>
           )}
+          &nbsp;
+          <Button
+            disabled={runningReport || deleting}
+            loading={deleting}
+            sizeType={Button.SIZE_TYPE.SMALL}
+            iconType={Button.ICON_TYPE.DATAVIZ__DATAVIZ__LINE_CHART}
+            onClick={() => {
+              //
+            }}
+          >
+            Scores
+          </Button>
         </div>
       </>
     );
