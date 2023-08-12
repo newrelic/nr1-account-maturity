@@ -209,7 +209,7 @@ export default function ViewSelector(props) {
               />
             </>
           )}
-          &nbsp;
+          {/* &nbsp;
           <Button
             disabled={runningReport || deleting}
             loading={deleting}
@@ -220,7 +220,7 @@ export default function ViewSelector(props) {
             }}
           >
             Scores
-          </Button>
+          </Button> */}
         </div>
       </>
     );

@@ -1,5 +1,5 @@
 import React, { useContext, useMemo } from 'react';
-import rules from '../../rules';
+import rules, { productColors } from '../../rules';
 import DataContext from '../../context/data';
 import { Grid, GridItem, LineChart, HeadingText } from 'nr1';
 
@@ -10,6 +10,8 @@ export default function ScoreCharts() {
       ? userViewHistory
       : reportHistory.filter((r) => r.document.reportId === view?.props?.id);
 
+  const selected = view?.props?.selected || view?.props?.document?.selected;
+
   const accountProductChartData = (
     view?.props?.accounts ||
     view?.props?.document?.accounts ||
@@ -17,13 +19,16 @@ export default function ScoreCharts() {
   ).map((a) => {
     const productLineData = [];
     const chartData = {};
+    let showHistoryMarker = false;
 
     Object.keys(rules).forEach((key) => {
       const series = {
         metadata: {
           id: key,
           name: key,
-          color: `#${Math.floor(Math.random() * 16777215).toString(16)}`,
+          color:
+            productColors[key] ||
+            `#${Math.floor(Math.random() * 16777215).toString(16)}`,
           viz: 'main',
           units_data: {
             x: 'TIMESTAMP',
@@ -53,13 +58,36 @@ export default function ScoreCharts() {
         }
       });
 
-      productLineData.push(series);
+      if (series.data.length > 0) {
+        productLineData.push(series);
+      }
+
+      if (series.data.length > 1) {
+        showHistoryMarker = true;
+      }
     });
+
+    // inject history marker
+    // more than 1 series should be present in any product category otherwise it will highlight the entire chart
+    if (showHistoryMarker) {
+      productLineData.push({
+        metadata: {
+          id: `History Marker`,
+          name: 'History Marker',
+          color: '#000000',
+          viz: 'event',
+        },
+        data: [
+          {
+            x0: selected,
+            x1: selected + 1,
+          },
+        ],
+      });
+    }
     chartData.productLineData = productLineData;
     return chartData;
   });
-
-  console.log(accountProductChartData);
 
   return useMemo(() => {
     return (
@@ -80,5 +108,5 @@ export default function ScoreCharts() {
         </Grid>
       </div>
     );
-  }, [view]);
+  }, [view, selected]);
 }

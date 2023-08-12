@@ -1,6 +1,5 @@
 import React, { useMemo } from 'react';
 import ScoreCard from '../ScoreCard';
-import { STATUSES, DISPLAY_MODES } from '../../constants';
 import ScoreCharts from '../ScoreCharts';
 
 export default function MaturityElementList({

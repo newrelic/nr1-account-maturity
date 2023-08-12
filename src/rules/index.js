@@ -24,3 +24,18 @@ export default {
   SLM: SLM,
   NPM: NPM,
 };
+
+// colors provided by @etantry
+export const productColors = {
+  APM: '#44CC29',
+  Browser: '#49AAAE',
+  Synthetics: '#B252A4',
+  Infrastructure: '#971A4E',
+  Kubernetes: '#D48E06',
+  Logs: '#6827A4',
+  Extensibility: '#6BB2FC',
+  Mobile: '#F82241',
+  Workloads: '#4831EC',
+  SLM: '#D25028',
+  NPM: '#F38A8A',
+};
