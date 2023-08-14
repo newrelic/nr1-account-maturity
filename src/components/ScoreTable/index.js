@@ -9,12 +9,16 @@ import {
   TableHeaderCell,
   TableRow,
   TableRowCell,
+  Modal,
+  HeadingText,
+  Button,
 } from 'nr1';
 import { percentageToStatus, scoreToColor } from '../../utils';
 import { ProgressBar } from '@newrelic/nr-labs-components';
 
 export default function ScoreTable() {
   const [column, setColumn] = useState(0);
+  const [modal, setModal] = useState(null);
   const [sortingType, setSortingType] = useState(
     TableHeaderCell.SORTING_TYPE.NONE
   );
@@ -73,6 +77,42 @@ export default function ScoreTable() {
 
     return (
       <div style={{ paddingTop: '10px' }}>
+        <Modal hidden={!modal} onClose={() => setModal(null)}>
+          <HeadingText type={HeadingText.TYPE.HEADING_3}>
+            {modal?.Account.replace('::', '-')}
+          </HeadingText>
+
+          <HeadingText type={HeadingText.TYPE.HEADING_4}>
+            {modal?.name}
+          </HeadingText>
+
+          <br />
+
+          <div>
+            {Object.keys(modal?.productSummary || {}).map((key) => {
+              const value = modal?.productSummary?.[key];
+
+              return (
+                <div key={key}>
+                  <HeadingText type={HeadingText.TYPE.HEADING_5}>
+                    {key}
+                  </HeadingText>
+
+                  {Object.keys(value || {}).map((subKey) => {
+                    return (
+                      <div key={subKey}>
+                        {subKey}: {value[subKey]}
+                      </div>
+                    );
+                  })}
+                  <br />
+                </div>
+              );
+            })}
+          </div>
+
+          <Button onClick={() => setModal(null)}>Close</Button>
+        </Modal>
         <Table items={rowData} multivalue>
           <TableHeader>
             <TableHeaderCell
@@ -86,6 +126,8 @@ export default function ScoreTable() {
               Account
             </TableHeaderCell>
             <TableHeaderCell
+              // set at 120px as the progress bar is set to 100px, if lower than 120px then it may not show and just be ellipses
+              width="120px"
               value={({ item }) => item['Account Score']}
               sortable
               sortingType={
@@ -178,9 +220,28 @@ export default function ScoreTable() {
                     }}
                   >
                     {item[h.name] !== undefined && item[h.name] !== null ? (
-                      <Tooltip text={item[h.name].toFixed(2)}>
-                        {Math.round(item[h.name])}
-                      </Tooltip>
+                      <div
+                        style={{ cursor: 'pointer' }}
+                        onClick={() => {
+                          const fullSummary =
+                            historyDoc.document.accountSummaries.find(
+                              (a) => a.id === parseInt(accountSplit[1])
+                            );
+
+                          const productSummary =
+                            fullSummary?.[`${h.name}.scoring`];
+
+                          setModal({
+                            name: h.name,
+                            ...item,
+                            productSummary,
+                          });
+                        }}
+                      >
+                        <Tooltip text={item[h.name].toFixed(2)}>
+                          {Math.round(item[h.name])}
+                        </Tooltip>
+                      </div>
                     ) : (
                       item[h.name]
                     )}
@@ -192,5 +253,5 @@ export default function ScoreTable() {
         </Table>
       </div>
     );
-  }, [view, selected, column, sortingType]);
+  }, [view, selected, column, sortingType, modal]);
 }
