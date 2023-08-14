@@ -75,8 +75,8 @@ export default function MaturityContainer(props) {
             }
           />
           <SegmentedControlItem
-            label="List"
-            value="list"
+            label="Table"
+            value="table"
             iconType={SegmentedControlItem.ICON_TYPE.INTERFACE__VIEW__LIST_VIEW}
           />
         </SegmentedControl>

@@ -1,6 +1,7 @@
 import React, { useMemo } from 'react';
 import ScoreCard from '../ScoreCard';
 import ScoreCharts from '../ScoreCharts';
+import ScoreTable from '../ScoreTable';
 
 export default function MaturityElementList({
   entitySearchQuery = '',
@@ -14,8 +15,8 @@ export default function MaturityElementList({
     if (elements.length === 0) return <div />;
 
     switch (view) {
-      case 'list':
-        return <>list</>;
+      case 'table':
+        return <ScoreTable />;
       case 'charts':
         return <ScoreCharts />;
       case 'summary':
