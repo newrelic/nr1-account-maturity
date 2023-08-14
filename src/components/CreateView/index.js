@@ -19,6 +19,8 @@ import { ACCOUNT_USER_CONFIG_COLLECTION } from '../../constants';
 
 export default function CreateReport(selectedReport) {
   const {
+    defaultView,
+    userViewHistory,
     accounts,
     user,
     selectedAccountId,
@@ -201,6 +203,37 @@ export default function CreateReport(selectedReport) {
 
     return (
       <>
+        {view.page !== 'CreateDefaultView' && (
+          <>
+            <div style={{ paddingTop: '10px' }}>
+              <Button
+                iconType={
+                  Button.ICON_TYPE.INTERFACE__ARROW__ARROW_LEFT__V_ALTERNATE
+                }
+                type={Button.TYPE.PRIMARY}
+                sizeType={Button.SIZE_TYPE.SMALL}
+                onClick={() =>
+                  setDataState({
+                    view: {
+                      page: 'DefaultView',
+                      title: 'Maturity Scores',
+                      props: {
+                        ...defaultView,
+                        isUserDefault: true,
+                        selected: userViewHistory?.[0]?.document?.runAt || 0,
+                      },
+                    },
+                  })
+                }
+              >
+                Back
+              </Button>
+              &nbsp;&nbsp;
+            </div>
+            <br />
+          </>
+        )}
+
         {view.page !== 'CreateDefaultView' &&
           view.page !== 'EditDefaultView' && (
             <div style={{ paddingTop: '10px' }}>
@@ -346,36 +379,38 @@ export default function CreateReport(selectedReport) {
               </div>
             ) : (
               <>
-                <Button
-                  type={Button.TYPE.PRIMARY}
-                  sizeType={Button.SIZE_TYPE.SMALL}
-                  onClick={async () => {
-                    const { res, runAt, documentId } = await createReport();
+                <div style={{ textAlign: 'right', marginRight: '10px' }}>
+                  <Button
+                    type={Button.TYPE.PRIMARY}
+                    sizeType={Button.SIZE_TYPE.SMALL}
+                    onClick={async () => {
+                      const { res, runAt, documentId } = await createReport();
 
-                    if (!res?.error && res !== false) {
-                      setDataState({
-                        view: {
-                          page: 'ReportView',
-                          title: state.name,
-                          id: selectedReport?.id || documentId,
-                          props: {
-                            document: res?.data?.nerdStorageWriteDocument,
-                            selected: runAt,
+                      if (!res?.error && res !== false) {
+                        setDataState({
+                          view: {
+                            page: 'ReportView',
+                            title: state.name,
+                            id: selectedReport?.id || documentId,
+                            props: {
+                              document: res?.data?.nerdStorageWriteDocument,
+                              selected: runAt,
+                            },
                           },
-                        },
-                      });
+                        });
+                      }
+                    }}
+                    loading={state.creatingView}
+                    disabled={
+                      state.accounts.length === 0 ||
+                      !state.name ||
+                      state.name.length <= 3 ||
+                      (!state.allProducts && state.products.length === 0)
                     }
-                  }}
-                  loading={state.creatingView}
-                  disabled={
-                    state.accounts.length === 0 ||
-                    !state.name ||
-                    state.name.length <= 3 ||
-                    (!state.allProducts && state.products.length === 0)
-                  }
-                >
-                  {selectedReport ? 'Save' : 'Create'}
-                </Button>
+                  >
+                    {selectedReport ? 'Save' : 'Create'}
+                  </Button>
+                </div>
               </>
             ))}
         </div>
