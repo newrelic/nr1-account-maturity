@@ -1,17 +1,16 @@
 import React, { useMemo } from 'react';
-import PropTypes from 'prop-types';
 import { HeadingText } from 'nr1';
 import { ProgressBar } from '@newrelic/nr-labs-components';
-import { STATUSES } from '../../constants';
 import ScoreList from '../ScoreList';
 
-const SummaryCard = ({
+export default function SummaryCard({
+  // groupBy,
   elementScores,
   rollUpStatus,
   rollUpScore,
   maxScore,
   elementListLabel,
-}) => {
+}) {
   return useMemo(() => {
     const elementSliceIndex =
       elementScores.length > 8
@@ -56,25 +55,4 @@ const SummaryCard = ({
       </>
     );
   }, [rollUpScore, maxScore, rollUpStatus, elementListLabel, elementScores]);
-};
-
-SummaryCard.PropTypes = {
-  /* the roll up score label */
-  rollUpScore: PropTypes.number,
-  /* the total possible score */
-  maxScore: PropTypes.number,
-  /* the overall status taking into account the scores for each element */
-  rollUpStatus: PropTypes.oneOf(Object.values(STATUSES)),
-  /* the title assigned to the list of scored elements */
-  elementListLabel: PropTypes.string,
-  /* the individual scored elements that contribute to the aggregate score */
-  elementScores: PropTypes.arrayOf(
-    PropTypes.shape({
-      name: PropTypes.string,
-      status: PropTypes.oneOf(Object.values(STATUSES)),
-      score: PropTypes.string,
-    })
-  ),
-};
-
-export default SummaryCard;
+}

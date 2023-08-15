@@ -14,42 +14,90 @@ export default function MaturityContainer(props) {
     isUserDefault,
   } = props;
   const [view, setView] = useState('summary');
+  const [groupBy, setGroupBy] = useState('account');
 
   const selectedHistory = history.find(
     (h) => h.document.runAt === selected
   ) || [selected];
 
   const { accountSummaries } = selectedHistory?.document || {};
-  const scoredCollection = (accountSummaries || []).map((a) => {
-    const elementScores = [];
 
-    Object.keys(rules).forEach((key) => {
-      const value = a[key];
+  let scoredCollection = [];
 
-      if (value !== undefined && value !== null) {
+  if (groupBy === 'account') {
+    scoredCollection = (accountSummaries || []).map((a) => {
+      const elementScores = [];
+
+      Object.keys(rules).forEach((key) => {
+        const value = a[key];
+
+        if (value !== undefined && value !== null) {
+          const payload = {
+            name: key,
+            status: percentageToStatus(value),
+            score: `${Math.round(value)}%`,
+          };
+
+          elementScores.push(payload);
+        }
+      });
+
+      const payload = {
+        title: a.name,
+        subtitle: a.id,
+        rollUpScore: Math.round((a.totalScore / a.maxScore) * 100),
+        rollUpStatus: STATUSES.UNKNOWN,
+        elementListLabel: 'Products',
+        elementScores,
+      };
+
+      payload.rollUpStatus = percentageToStatus(payload.rollUpScore);
+
+      return payload;
+    });
+  } else if (groupBy === 'product') {
+    scoredCollection = Object.keys(rules)
+      .filter((product) =>
+        accountSummaries.find(
+          (a) => a[product] !== null && a[product] !== undefined
+        )
+      )
+      .map((product) => {
+        const elementScores = [];
+        let totalScore = 0;
+
+        accountSummaries.forEach((account) => {
+          const value = account[product];
+          totalScore += value;
+
+          if (value !== undefined && value !== null) {
+            const payload = {
+              name: account.name,
+              id: account.id,
+              status: percentageToStatus(value),
+              score: `${Math.round(value)}%`,
+            };
+
+            elementScores.push(payload);
+          }
+        });
+
         const payload = {
-          name: key,
-          status: percentageToStatus(value),
-          score: `${Math.round(value)}%`,
+          title: product,
+          // subtitle: account.id,
+          rollUpScore: Math.round(
+            (totalScore / (accountSummaries.length * 100)) * 100
+          ),
+          rollUpStatus: STATUSES.UNKNOWN,
+          elementListLabel: 'Products',
+          elementScores,
         };
 
-        elementScores.push(payload);
-      }
-    });
+        payload.rollUpStatus = percentageToStatus(payload.rollUpScore);
 
-    const payload = {
-      title: a.name,
-      subtitle: a.id,
-      rollUpScore: Math.round((a.totalScore / a.maxScore) * 100),
-      rollUpStatus: STATUSES.UNKNOWN,
-      elementListLabel: 'Products',
-      elementScores,
-    };
-
-    payload.rollUpStatus = percentageToStatus(payload.rollUpScore);
-
-    return payload;
-  });
+        return payload;
+      });
+  }
 
   return useMemo(() => {
     return (
@@ -84,14 +132,45 @@ export default function MaturityContainer(props) {
               SegmentedControlItem.ICON_TYPE.DATAVIZ__DATAVIZ__LINE_CHART
             }
           />
+          {groupBy === 'account' && (
+            <SegmentedControlItem
+              label="Table"
+              value="table"
+              iconType={
+                SegmentedControlItem.ICON_TYPE.INTERFACE__VIEW__LIST_VIEW
+              }
+            />
+          )}
+        </SegmentedControl>
+        &nbsp;&nbsp;&nbsp;
+        <SegmentedControl
+          style={{ float: 'right', marginRight: '10px' }}
+          value={groupBy}
+          onChange={(evt, value) => {
+            if (value === 'product' && view === 'table') {
+              setView('summary');
+            }
+
+            setGroupBy(value);
+          }}
+        >
           <SegmentedControlItem
-            label="Table"
-            value="table"
-            iconType={SegmentedControlItem.ICON_TYPE.INTERFACE__VIEW__LIST_VIEW}
+            label="Account"
+            value="account"
+            iconType={SegmentedControlItem.ICON_TYPE.PROFILES__USERS__USER}
+          />
+
+          <SegmentedControlItem
+            label="Product"
+            value="product"
+            iconType={
+              SegmentedControlItem.ICON_TYPE
+                .HARDWARE_AND_SOFTWARE__SOFTWARE__BROWSER
+            }
           />
         </SegmentedControl>
-
         <MaturityElementList
+          groupBy={groupBy}
           view={view}
           entitySearchQuery={entitySearchQuery}
           elements={scoredCollection}
@@ -101,5 +180,5 @@ export default function MaturityContainer(props) {
         />
       </>
     );
-  }, [history, selected, view]);
+  }, [history, selected, view, groupBy]);
 }

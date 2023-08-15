@@ -17,25 +17,31 @@ const ScoreCard = ({
   elementScores,
   isUserDefault,
   view,
+  groupBy,
 }) => {
   return useMemo(() => {
     return (
       <div className={`score-card ${view}`}>
         <div
           style={{ cursor: 'pointer' }}
-          onClick={() =>
-            navigation.openStackedNerdlet({
-              id: 'score-details-nerdlet',
-              urlState: {
-                isUserDefault,
-                accountName: title,
-                accountId: subtitle,
-                accountPercentage: rollUpScore,
-                historyId,
-                selectedAccountId,
-                entitySearchQuery,
-              },
-            })
+          onClick={
+            groupBy === 'account'
+              ? () =>
+                /* eslint-disable */
+                navigation.openStackedNerdlet({
+                  id: 'score-details-nerdlet',
+                  urlState: {
+                    isUserDefault,
+                    accountName: title,
+                    accountId: subtitle,
+                    accountPercentage: rollUpScore,
+                    historyId,
+                    selectedAccountId,
+                    entitySearchQuery,
+                  },
+                })
+              : undefined
+            /* eslint-enable */
           }
         >
           <HeadingText className="title" type={HeadingText.TYPE.HEADING_3}>
@@ -51,11 +57,12 @@ const ScoreCard = ({
             rollUpStatus={rollUpStatus}
             elementListLabel={elementListLabel}
             elementScores={elementScores}
+            groupBy={groupBy}
           />
         )}
 
         {view === DISPLAY_MODES.NAVIGATOR && (
-          <NavigatorCard elementScores={elementScores} />
+          <NavigatorCard elementScores={elementScores} groupBy={groupBy} />
         )}
       </div>
     );

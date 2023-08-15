@@ -10,6 +10,7 @@ export default function MaturityElementList({
   elements = [],
   isUserDefault,
   view,
+  groupBy,
 }) {
   return useMemo(() => {
     if (elements.length === 0) return <div />;
@@ -20,6 +21,7 @@ export default function MaturityElementList({
           <div className="score-card-list" style={{ paddingTop: '10px' }}>
             {elements.map((score, idx) => (
               <ScoreCard
+                groupBy={groupBy}
                 key={idx}
                 {...score}
                 isUserDefault={isUserDefault}
@@ -32,14 +34,15 @@ export default function MaturityElementList({
           </div>
         );
       case 'table':
-        return <ScoreTable />;
+        return <ScoreTable groupBy={groupBy} />;
       case 'charts':
-        return <ScoreCharts />;
+        return <ScoreCharts groupBy={groupBy} />;
       case 'summary':
         return (
           <div className="score-card-list" style={{ paddingTop: '10px' }}>
             {elements.map((score, idx) => (
               <ScoreCard
+                groupBy={groupBy}
                 key={idx}
                 {...score}
                 isUserDefault={isUserDefault}

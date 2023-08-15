@@ -1,10 +1,8 @@
 import React from 'react';
-import PropTypes from 'prop-types';
 import { Tooltip } from 'nr1';
 import Score from '../Score';
-import { STATUSES } from '../../constants';
 
-const ScoreList = ({ idxBase, scores = [] }) => {
+export default function ScoreList({ idxBase, scores = [] }) {
   return (
     <div className="scores-list">
       {scores.map((score, i) => (
@@ -18,17 +16,4 @@ const ScoreList = ({ idxBase, scores = [] }) => {
       ))}
     </div>
   );
-};
-
-ScoreList.propTypes = {
-  idxBase: PropTypes.number,
-  scores: PropTypes.arrayOf(
-    PropTypes.shape({
-      name: PropTypes.string,
-      status: PropTypes.oneOf(Object.values(STATUSES)),
-      score: PropTypes.string,
-    })
-  ),
-};
-
-export default ScoreList;
+}
