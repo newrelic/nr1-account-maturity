@@ -67,6 +67,16 @@ export default function MaturityContainer(props) {
                 .HARDWARE_AND_SOFTWARE__SOFTWARE__CONTROL_CENTER
             }
           />
+
+          <SegmentedControlItem
+            label="Navigator"
+            value="navigator"
+            iconType={
+              SegmentedControlItem.ICON_TYPE
+                .HARDWARE_AND_SOFTWARE__KUBERNETES__K8S_SERVICE
+            }
+          />
+
           <SegmentedControlItem
             label="Scores"
             value="charts"

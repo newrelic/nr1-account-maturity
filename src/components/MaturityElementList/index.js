@@ -15,6 +15,22 @@ export default function MaturityElementList({
     if (elements.length === 0) return <div />;
 
     switch (view) {
+      case 'navigator':
+        return (
+          <div className="score-card-list" style={{ paddingTop: '10px' }}>
+            {elements.map((score, idx) => (
+              <ScoreCard
+                key={idx}
+                {...score}
+                isUserDefault={isUserDefault}
+                entitySearchQuery={entitySearchQuery}
+                historyId={historyId}
+                selectedAccountId={selectedAccountId}
+                view={view}
+              />
+            ))}
+          </div>
+        );
       case 'table':
         return <ScoreTable />;
       case 'charts':
@@ -30,6 +46,7 @@ export default function MaturityElementList({
                 entitySearchQuery={entitySearchQuery}
                 historyId={historyId}
                 selectedAccountId={selectedAccountId}
+                view={view}
               />
             ))}
           </div>

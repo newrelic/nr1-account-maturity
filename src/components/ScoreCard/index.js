@@ -1,9 +1,8 @@
 import React, { useMemo } from 'react';
-import PropTypes from 'prop-types';
 import { HeadingText, navigation } from 'nr1';
 import SummaryCard from './summary-card';
 import NavigatorCard from './navigator-card';
-import { STATUSES, DISPLAY_MODES } from '../../constants';
+import { DISPLAY_MODES } from '../../constants';
 
 const ScoreCard = ({
   selectedAccountId,
@@ -17,11 +16,11 @@ const ScoreCard = ({
   elementListLabel,
   elementScores,
   isUserDefault,
-  displayMode = DISPLAY_MODES.SUMMARY,
+  view,
 }) => {
   return useMemo(() => {
     return (
-      <div className={`score-card ${displayMode}`}>
+      <div className={`score-card ${view}`}>
         <div
           style={{ cursor: 'pointer' }}
           onClick={() =>
@@ -45,7 +44,7 @@ const ScoreCard = ({
           <div className="subtitle">{subtitle}</div>
         </div>
 
-        {displayMode === DISPLAY_MODES.SUMMARY && (
+        {view === DISPLAY_MODES.SUMMARY && (
           <SummaryCard
             rollUpScore={rollUpScore}
             maxScore={maxScore}
@@ -55,7 +54,7 @@ const ScoreCard = ({
           />
         )}
 
-        {displayMode === DISPLAY_MODES.NAVIGATOR && (
+        {view === DISPLAY_MODES.NAVIGATOR && (
           <NavigatorCard elementScores={elementScores} />
         )}
       </div>
@@ -68,30 +67,8 @@ const ScoreCard = ({
     rollUpStatus,
     elementListLabel,
     elementScores,
-    displayMode,
+    view,
   ]);
-};
-
-ScoreCard.propTypes = {
-  title: PropTypes.string,
-  subtitle: PropTypes.string,
-  /* the roll up score label */
-  rollUpScore: PropTypes.number,
-  /* the total possible score */
-  maxScore: PropTypes.number,
-  /* the overall status taking into account the scores for each element */
-  rollUpStatus: PropTypes.oneOf(Object.values(STATUSES)),
-  /* the title assigned to the list of scored elements */
-  elementListLabel: PropTypes.string,
-  /* the individual scored elements that contribute to the aggregate score */
-  elementScores: PropTypes.arrayOf(
-    PropTypes.shape({
-      name: PropTypes.string,
-      status: PropTypes.oneOf(Object.values(STATUSES)),
-      score: PropTypes.string,
-    })
-  ),
-  displayMode: PropTypes.oneOf(Object.values(DISPLAY_MODES)),
 };
 
 export default ScoreCard;
