@@ -344,7 +344,7 @@ export default function CreateReport(selectedReport) {
           </div>
 
           {view.page === 'CreateDefaultView' ||
-            view.page === 'EditDefaultView' ? (
+            view.page === 'EditDefaultView' ? ( // eslint-disable-line
             <div style={{ textAlign: 'right', marginRight: '10px' }}>
               <Button
                 type={Button.TYPE.PRIMARY}

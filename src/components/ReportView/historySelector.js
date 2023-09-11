@@ -133,7 +133,7 @@ export default function HistorySelector(props) {
   };
 
   return useMemo(() => {
-    if (history.length === 0) {
+    if ((history || []).length === 0) {
       return <></>;
     }
 
