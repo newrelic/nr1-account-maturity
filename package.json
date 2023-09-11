@@ -18,7 +18,8 @@
     "not dead"
   ],
   "nr1": {
-    "id": "b54addf7-3663-47e0-8862-3ec058588b58"
+    "id": "b54addf7-3663-47e0-8862-3ec058588b58",
+    "dv2": "ec734258-b5ca-41b2-84ef-d97352e0ea19"
   },
   "dependencies": {
     "@mantine/hooks": "^6.0.10",

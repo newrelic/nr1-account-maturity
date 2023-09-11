@@ -344,23 +344,57 @@ export default function CreateReport(selectedReport) {
           </div>
 
           {view.page === 'CreateDefaultView' ||
-            (view.page === 'EditDefaultView' ? (
+            view.page === 'EditDefaultView' ? (
+            <div style={{ textAlign: 'right', marginRight: '10px' }}>
+              <Button
+                type={Button.TYPE.PRIMARY}
+                sizeType={Button.SIZE_TYPE.SMALL}
+                onClick={async () => {
+                  const { res, runAt } = await createReport();
+
+                  if (!res?.error && res !== false) {
+                    setDataState({
+                      view: {
+                        page: 'DefaultView',
+                        title: 'Maturity Scores',
+                        props: {
+                          selected: runAt,
+                          isUserDefault: true,
+                          ...(res?.data?.nerdStorageWriteDocument || {}),
+                        },
+                      },
+                    });
+                  }
+                }}
+                loading={state.creatingView}
+                disabled={
+                  state.accounts.length === 0 ||
+                  !state.name ||
+                  state.name.length <= 3 ||
+                  (!state.allProducts && state.products.length === 0)
+                }
+              >
+                Save
+              </Button>
+            </div>
+          ) : (
+            <>
               <div style={{ textAlign: 'right', marginRight: '10px' }}>
                 <Button
                   type={Button.TYPE.PRIMARY}
                   sizeType={Button.SIZE_TYPE.SMALL}
                   onClick={async () => {
-                    const { res, runAt } = await createReport();
+                    const { res, runAt, documentId } = await createReport();
 
                     if (!res?.error && res !== false) {
                       setDataState({
                         view: {
-                          page: 'DefaultView',
-                          title: 'Maturity Scores',
+                          page: 'ReportView',
+                          title: state.name,
+                          id: selectedReport?.id || documentId,
                           props: {
+                            document: res?.data?.nerdStorageWriteDocument,
                             selected: runAt,
-                            isUserDefault: true,
-                            ...(res?.data?.nerdStorageWriteDocument || {}),
                           },
                         },
                       });
@@ -374,45 +408,11 @@ export default function CreateReport(selectedReport) {
                     (!state.allProducts && state.products.length === 0)
                   }
                 >
-                  Save
+                  {selectedReport ? 'Save' : 'Create'}
                 </Button>
               </div>
-            ) : (
-              <>
-                <div style={{ textAlign: 'right', marginRight: '10px' }}>
-                  <Button
-                    type={Button.TYPE.PRIMARY}
-                    sizeType={Button.SIZE_TYPE.SMALL}
-                    onClick={async () => {
-                      const { res, runAt, documentId } = await createReport();
-
-                      if (!res?.error && res !== false) {
-                        setDataState({
-                          view: {
-                            page: 'ReportView',
-                            title: state.name,
-                            id: selectedReport?.id || documentId,
-                            props: {
-                              document: res?.data?.nerdStorageWriteDocument,
-                              selected: runAt,
-                            },
-                          },
-                        });
-                      }
-                    }}
-                    loading={state.creatingView}
-                    disabled={
-                      state.accounts.length === 0 ||
-                      !state.name ||
-                      state.name.length <= 3 ||
-                      (!state.allProducts && state.products.length === 0)
-                    }
-                  >
-                    {selectedReport ? 'Save' : 'Create'}
-                  </Button>
-                </div>
-              </>
-            ))}
+            </>
+          )}
         </div>
       </>
     );
