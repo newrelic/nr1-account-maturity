@@ -1,9 +1,10 @@
 import React, { useMemo, useState } from 'react';
 import MaturityElementList from '../MaturityElementList';
-import { percentageToStatus } from '../../utils';
+import { flattenJSON, percentageToStatus } from '../../utils';
 import { STATUSES } from '../../constants';
 import rules from '../../rules';
 import { SegmentedControl, SegmentedControlItem } from 'nr1';
+import CsvDownloadButton from 'react-json-to-csv';
 
 export default function MaturityContainer(props) {
   const {
@@ -100,6 +101,26 @@ export default function MaturityContainer(props) {
   }
 
   return useMemo(() => {
+    const jsonCsvData = (selectedHistory?.document?.accountSummaries || []).map(
+      (a) => {
+        let accountData = {
+          id: a.id,
+          name: a.name,
+        };
+
+        Object.keys(rules).forEach((product) => {
+          const scoring = a[`${product}.scoring`];
+
+          if (scoring) {
+            const flatScoring = flattenJSON(scoring);
+            accountData = { ...accountData, ...flatScoring };
+          }
+        });
+
+        return accountData;
+      }
+    );
+
     return (
       <>
         <SegmentedControl
@@ -169,6 +190,12 @@ export default function MaturityContainer(props) {
             }
           />
         </SegmentedControl>
+        <br /> <br />
+        <CsvDownloadButton
+          data={jsonCsvData}
+          delimiter=","
+          filename={`${new Date().getTime()}-account-export.csv`}
+        />
         <MaturityElementList
           groupBy={groupBy}
           view={view}
