@@ -1,3 +1,26 @@
+.score {
+  display: flex;
+  flex-direction: row;
+  align-items: center;
+  gap: 8px;
+
+  .name {
+    font-weight: 400;
+    font-size: 12px;
+    line-height: 16px;
+    color: #293338;
+    max-width: 130px;
+
+    @include text-ellipsis;
+  }
+}
+
+.scores-list {
+  display: flex;
+  flex-direction: column;
+  gap: 4px;
+}
+
 .score-card {
   padding: 20px;
   box-shadow: 0px 4px 4px 4px rgba(0, 0, 0, 0.02),
@@ -69,4 +92,10 @@
   .critical {
     color: $critical;
   }
+}
+
+.score-card-list {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(340px, 340px));
+  grid-gap: 20px 17px;
 }

@@ -37,6 +37,10 @@ export default DataContext;
 
 export function useProvideData(props) {
   const [dataState, setDataState] = useSetState({
+    viewSegment: 'list',
+    viewGroupBy: 'account',
+    selectedView: null,
+    tempAllData: null,
     accounts: null,
     userConfirmed: null,
     fetchingData: true,
@@ -60,21 +64,45 @@ export function useProvideData(props) {
     defaultView: null,
     userViewHistory: null,
     view: { page: 'ReportList', title: 'Maturity Reports' },
+    // view: { page: 'ReportList', title: 'Maturity Reports' },
     sortBy: 'Lowest score',
   });
 
+  // for testing
+  // eslint-disable-next-line
+  const wipeUserDetails = async () => {
+    // wipe user default config
+    const userView = await UserStorageMutation.mutate({
+      actionType: UserStorageMutation.ACTION_TYPE.DELETE_DOCUMENT,
+      collection: 'userViews',
+      documentId: 'default',
+    });
+
+    // wipe user history
+    const userHistory = await UserStorageMutation.mutate({
+      actionType: UserStorageMutation.ACTION_TYPE.DELETE_DOCUMENT,
+      collection: ACCOUNT_USER_HISTORY_COLLECTION,
+    });
+
+    console.log(userView, userHistory);
+  };
+
   // handle initial load
   useEffect(async () => {
+    // await wipeUserDetails();
     // eslint-disable-next-line
-    console.log("DataProvider initialized");
+    console.log('DataProvider initialized');
     const state = {};
     const defaultView = await getUserReport();
     await getUserSettings();
+    const accounts = await getAccounts();
 
     // default view not configured, request configuration
     if (!defaultView || Object.keys(defaultView).length === 0) {
       state.view = {
         page: 'CreateDefaultView',
+        // page: 'ReportView', // revert delete
+
         title: 'Setup default configuration',
       };
     } else {
@@ -82,7 +110,7 @@ export function useProvideData(props) {
 
       state.view = {
         page: 'DefaultView',
-        title: 'Maturity Scores',
+        // title: 'Maturity Scores',
         props: {
           ...defaultView,
           isUserDefault: true,
@@ -93,6 +121,8 @@ export function useProvideData(props) {
 
     const user = await NerdGraphQuery.query({ query: userQuery });
     state.user = user?.data?.actor?.user;
+    state.accounts = accounts;
+    state.selectedAccountId = accounts[0].id;
     setDataState(state);
   }, []);
 
@@ -158,15 +188,118 @@ export function useProvideData(props) {
     });
   };
 
-  const runReport = async (selectedReport) => {
-    console.log('selected', selectedReport);
+  const runView = async (selectedView, selectedReport) => {
+    console.log('running', selectedView, selectedReport);
     setDataState({
       runningReport: true,
-      [`runningReport.${selectedReport.id}`]: true,
+      [`runningReport.${selectedReport?.id || selectedView.id}`]: true,
       entitiesByAccount: null,
       summarizedScores: null,
       accountSummaries: null,
+      selectedView: { id: 'allData', name: 'All data' },
+      view:
+        selectedView.id === 'allData' ? { page: 'Loading' } : dataState.view,
     });
+
+    let report = selectedReport || {};
+
+    if (selectedView.id === 'allData') {
+      report = {
+        id: 'allData',
+        document: {
+          accounts: dataState.accounts.map((a) => a.id),
+          allAccounts: true,
+          allProducts: true,
+        },
+      };
+    } else if (selectedView.type === 'user' && selectedReport) {
+      //
+    } else if (selectedView.type === 'account' && selectedReport) {
+      //
+    } else {
+      // unknown
+    }
+
+    // const selectedAccounts =
+    //   selectedView.id === 'allData'
+    //     ? dataState.accounts
+    //     : report.document.accounts;
+
+    const accounts = [...report.document.accounts].map((id) => ({
+      ...[...dataState.accounts].find((a) => a.id === id),
+    }));
+
+    console.log(accounts);
+
+    const { entitiesByAccount, summarizedScores } =
+      await getEntitiesForAccounts(
+        accounts,
+        report.document?.entitySearchQuery || '',
+        dataState.agentReleases,
+        dataState.dataDictionary
+      );
+
+    console.log(summarizedScores);
+
+    const accountSummaries = generateAccountSummary(
+      entitiesByAccount,
+      dataState?.sortBy,
+      report
+    );
+
+    console.log(accountSummaries);
+
+    let allTotalMaxScore = 0;
+    let allTotalScore = 0;
+    accountSummaries.forEach((a) => {
+      allTotalScore += a.totalScore;
+      allTotalMaxScore += a.maxScore;
+    });
+    const totalPercentage = (allTotalScore / allTotalMaxScore) * 100;
+
+    const totalScorePercentage =
+      accountSummaries.reduce(
+        (n, { scorePercentage }) => n + (scorePercentage || 0),
+        0
+      ) / accountSummaries.length;
+
+    const runAt = report?.runAt || new Date().getTime();
+
+    console.log(totalScorePercentage, runAt);
+
+    const prepareState = {
+      runningReport: false,
+      [`runningReport.${report?.id || selectedView.id}`]: true,
+      lastRunAt: runAt,
+      entitiesByAccount,
+      summarizedScores,
+      accountSummaries,
+      totalPercentage,
+      view: { page: 'MaturityView' },
+    };
+
+    if (report.id === 'allData') {
+      prepareState.tempAllData = {
+        entitiesByAccount,
+        summarizedScores,
+        accountSummaries,
+        totalPercentage,
+        runAt,
+      };
+    }
+
+    setDataState(prepareState);
+  };
+
+  const runReport = async (selectedReport) => {
+    // console.log('selected', selectedReport);
+    // setDataState({
+    //   runningReport: true,
+    //   [`runningReport.${selectedReport.id}`]: true,
+    //   entitiesByAccount: null,
+    //   summarizedScores: null,
+    //   accountSummaries: null,
+    // });
 
     const report = selectedReport || dataState.selectedReport;
     const accounts = [...report.document.accounts].map((id) => ({
@@ -486,13 +619,26 @@ export function useProvideData(props) {
     return new Promise((resolve) => {
       let completedAccounts = [];
       // eslint-disable-next-line
-      let completedPercentage = 0;
+      let completedPercentageTotal = 0;
+      let completedAccountTotal = 0;
+
+      // start an interval to track updates
+      const pollJobStatus = setInterval(() => {
+        setDataState({
+          completedPercentageTotal,
+          completedAccountTotal,
+          accountTotal: accounts.length,
+        });
+      }, 500);
 
       const q = async.queue((task, callback) => {
         getEntitiesByAccount(task, entitySearchQuery).then((entities) => {
           task.entities = entities;
           completedAccounts.push(task);
-          completedPercentage = (completedAccounts / accounts.length) * 100;
+
+          completedAccountTotal = completedAccounts.length;
+          completedPercentageTotal =
+            (completedAccounts.length / accounts.length) * 100;
           callback();
         });
       }, 5);
@@ -500,7 +646,8 @@ export function useProvideData(props) {
       q.push(accounts);
 
       q.drain(() => {
-        setDataState({ gettingEntities: false });
+        clearInterval(pollJobStatus);
+        setDataState({ gettingEntities: false, completedPercentageTotal: 100 });
         evaluateAccounts(completedAccounts, agentReleases, dataDictionary).then(
           ({ accounts, summarizedScores }) => {
             resolve({ entitiesByAccount: accounts, summarizedScores });
@@ -532,6 +679,12 @@ export function useProvideData(props) {
             };
           }
 
+          const foundEntities = account.entities.filter(
+            (e) =>
+              e.entityType === rules[key].entityType &&
+              (rules[key].type ? rules[key].type === e.type : true)
+          );
+
           scores.forEach((score) => {
             const { name, entityCheck, accountCheck, valueCheck } = score;
 
@@ -541,6 +694,10 @@ export function useProvideData(props) {
 
             if (!account.scores[key].offendingEntities) {
               account.scores[key].offendingEntities = {};
+            }
+
+            if (!account.scores[key].passingEntities) {
+              account.scores[key].passingEntities = {};
             }
 
             if (!account.scores[key][name]) {
@@ -583,12 +740,6 @@ export function useProvideData(props) {
             }
 
             if (rules[key].entityType) {
-              const foundEntities = account.entities.filter(
-                (e) =>
-                  e.entityType === rules[key].entityType &&
-                  (rules[key].type ? rules[key].type === e.type : true)
-              );
-
               foundEntities.forEach((entity) => {
                 if (entityCheck) {
                   if (entityCheck(entity, agentReleases)) {
@@ -620,6 +771,14 @@ export function useProvideData(props) {
               }
             }
           });
+
+          foundEntities.forEach((entity) => {
+            if (!account.scores[key].offendingEntities[entity.guid]) {
+              account.scores[key].passingEntities[entity.guid] = {
+                name: entity.name,
+              };
+            }
+          });
         });
       });
 
@@ -632,6 +791,11 @@ export function useProvideData(props) {
       let completedEntities = [];
       let totalEntityCount = 0;
       let completedPercentage = 0;
+      let currentLoadingAccount = null;
+
+      const pollJobStatus = setInterval(() => {
+        setDataState({ currentLoadingAccount, completedPercentage });
+      }, 1500);
 
       const q = async.queue((task, callback) => {
         const entityClause = entitySearchQuery
@@ -660,7 +824,9 @@ export function useProvideData(props) {
             completedPercentage =
               (completedEntities.length / totalEntityCount) * 100;
 
-            console.log(account.id, completedPercentage);
+            if (currentLoadingAccount !== account) {
+              currentLoadingAccount = account;
+            }
 
             const nextCursor = entitySearch?.results?.nextCursor;
             if (nextCursor) {
@@ -675,6 +841,8 @@ export function useProvideData(props) {
       q.push({ cursor: null });
 
       q.drain(() => {
+        clearInterval(pollJobStatus);
+
         decorateEntities(completedEntities).then((decoratedEntities) => {
           resolve(decoratedEntities);
         });
@@ -822,6 +990,7 @@ export function useProvideData(props) {
   return {
     ...dataState,
     setDataState,
+    runView,
     fetchReportConfigs,
     fetchReportHistory,
     deleteReportConfig,

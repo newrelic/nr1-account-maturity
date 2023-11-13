@@ -1,13 +1,14 @@
 import React, { useContext } from 'react';
-import { EmptyState, Layout, LayoutItem, CollapsibleLayoutItem } from 'nr1';
+import { EmptyState, Layout, LayoutItem } from 'nr1';
 
-import DataContext from '../../context/data';
-import MaturityElementList from '../MaturityElementList';
-import ReportList from '../ReportList';
+import DataContext from '../../../src/context/data';
 import CreateView from '../CreateView';
-import ReportView from '../ReportView';
+import MaturityView from '../MaturityView';
+import Loading from '../Loading';
+//
+import ReportList from '../../../src/components/ReportList';
+import ViewSegmentSelector from '../ViewSegmentSelector';
 import ViewSelector from '../ViewSelector';
-import HistorySelector from '../ReportView/historySelector';
 
 export default function AccountMaturity() {
   const { fetchingData, errorMsg, view, selectedAccountId } =
@@ -15,6 +16,17 @@ export default function AccountMaturity() {
 
   const renderView = () => {
     switch (view.page) {
+      case 'Loading': {
+        return <Loading {...(view.props || {})} />;
+      }
+      case 'MaturityView': {
+        return (
+          <MaturityView
+            {...(view.props || {})}
+            selectedAccountId={selectedAccountId}
+          />
+        );
+      }
       case 'ReportList': {
         return <ReportList {...(view.props || {})} />;
       }
@@ -32,28 +44,13 @@ export default function AccountMaturity() {
       }
       case 'DefaultView': {
         return (
-          <ReportView
+          <MaturityView
             {...(view.props || {})}
             selectedAccountId={selectedAccountId}
           />
         );
       }
-      case 'ReportView': {
-        return (
-          <ReportView
-            {...(view.props || {})}
-            selectedAccountId={selectedAccountId}
-          />
-        );
-      }
-      case 'MaturityAccountScores': {
-        return (
-          <MaturityElementList
-            // elements={scoredCollection}
-            {...(view.props || {})}
-          />
-        );
-      }
+
       default: {
         return 'Unknown View';
       }
@@ -72,45 +69,35 @@ export default function AccountMaturity() {
         <>
           <Layout fullHeight>
             <LayoutItem>
-              {(view.page === 'ReportView' || view.page === 'DefaultView') && (
+              {(view.page === 'MaturityView' ||
+                view.page === 'DefaultView') && (
                 <div
                   style={{
-                    paddingBottom: '10px',
-                    paddingTop: '10px',
+                    paddingBottom: '30px',
+                    paddingTop: '5px',
                     paddingLeft: '5px',
-                    marginBottom: '25px',
+                    marginBottom: '5px',
+                    backgroundColor: 'white',
                   }}
                 >
                   <div style={{ float: 'left' }}>
-                    <ViewSelector view={view} />
+                    <ViewSegmentSelector />
                   </div>
                   <div style={{ float: 'right' }}>
-                    <HistorySelector accountId={selectedAccountId} />
+                    <ViewSelector />
                   </div>
                 </div>
               )}
               <div
                 style={{
                   paddingBottom: '15px',
-                  paddingLeft: '10px',
+                  paddingLeft: '20px',
                   backgroundColor: 'white',
                 }}
               >
                 <div>{renderView()}</div>
               </div>
             </LayoutItem>
-
-            <CollapsibleLayoutItem
-              // collapsed={!detailsOpen}
-              collapsed={true}
-              triggerType={CollapsibleLayoutItem.TRIGGER_TYPE.CUSTOM}
-              type={LayoutItem.TYPE.SPLIT_RIGHT}
-            >
-              <div style={{ paddingTop: '25px' }}>
-                another pane
-                {/* <DetailsPane height={tableHeight} /> */}
-              </div>
-            </CollapsibleLayoutItem>
           </Layout>
         </>
       )}

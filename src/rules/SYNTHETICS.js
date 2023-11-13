@@ -1,4 +1,5 @@
 export default {
+  short: 'Monitors',
   // what entity types to check against
   entityType: 'SYNTHETIC_MONITOR_ENTITY',
   // some entities require additional data that can only be performed with a direct guid query

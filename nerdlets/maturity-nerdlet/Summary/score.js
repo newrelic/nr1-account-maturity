@@ -1,8 +1,5 @@
 import React from 'react';
-import PropTypes from 'prop-types';
-
 import { StatusIcon } from '@newrelic/nr-labs-components';
-import { STATUSES } from '../../constants';
 
 const Score = ({ name, status, score, onClick }) => {
   return (
@@ -17,14 +14,6 @@ const Score = ({ name, status, score, onClick }) => {
       <span className="name">{name}</span>
     </div>
   );
-};
-
-Score.propTypes = {
-  id: PropTypes.string,
-  name: PropTypes.string,
-  status: PropTypes.oneOf(Object.values(STATUSES)),
-  score: PropTypes.string,
-  onClick: PropTypes.func,
 };
 
 export default Score;

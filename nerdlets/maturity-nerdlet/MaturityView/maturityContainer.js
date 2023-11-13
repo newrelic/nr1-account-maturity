@@ -1,4 +1,5 @@
 import React, { useMemo, useState } from 'react';
+import MaturityElementList from '../MaturityElementList';
 import { flattenJSON, percentageToStatus } from '../../utils';
 import { STATUSES } from '../../constants';
 import rules from '../../rules';
@@ -9,9 +10,9 @@ export default function MaturityContainer(props) {
   const {
     history,
     selected,
-    // selectedAccountId,
-    // entitySearchQuery,
-    // isUserDefault,
+    selectedAccountId,
+    entitySearchQuery,
+    isUserDefault,
   } = props;
   const [view, setView] = useState('summary');
   const [groupBy, setGroupBy] = useState('account');
@@ -56,7 +57,6 @@ export default function MaturityContainer(props) {
       return payload;
     });
   } else if (groupBy === 'product') {
-    // eslint-disable-next-line
     scoredCollection = Object.keys(rules)
       .filter((product) =>
         accountSummaries.find(
@@ -195,6 +195,15 @@ export default function MaturityContainer(props) {
           data={jsonCsvData}
           delimiter=","
           filename={`${new Date().getTime()}-account-export.csv`}
+        />
+        <MaturityElementList
+          groupBy={groupBy}
+          view={view}
+          entitySearchQuery={entitySearchQuery}
+          elements={scoredCollection}
+          historyId={selectedHistory.id}
+          selectedAccountId={selectedAccountId}
+          isUserDefault={isUserDefault}
         />
       </>
     );

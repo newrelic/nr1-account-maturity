@@ -1,14 +1,14 @@
 import React, { useMemo } from 'react';
 import { HeadingText } from 'nr1';
 import { ProgressBar } from '@newrelic/nr-labs-components';
-import ScoreList from '../ScoreList';
+import ScoreList from './scoreList';
 
 export default function SummaryCard({
   // groupBy,
   elementScores,
   rollUpStatus,
   rollUpScore,
-  maxScore,
+  maxScore = 100,
   elementListLabel,
 }) {
   return useMemo(() => {

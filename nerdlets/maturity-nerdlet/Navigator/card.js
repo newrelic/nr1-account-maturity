@@ -1,5 +1,4 @@
 import React, { useState, useEffect, useRef, useLayoutEffect } from 'react';
-import PropTypes from 'prop-types';
 import {
   Popover,
   PopoverTrigger,
@@ -9,9 +8,9 @@ import {
   HeadingText,
 } from 'nr1';
 import { StatusIcon } from '@newrelic/nr-labs-components';
-import { STATUSES } from '../../constants';
+// import { STATUSES } from '../../../src/constants';
 
-const NavigatorCard = ({ elementScores = [] }) => {
+export default function NavigatorCard({ elementScores = [] }) {
   const [hexagons, setHexagons] = useState(null);
   const [width, setWidth] = useState(null);
   const wrapperRef = useRef();
@@ -63,16 +62,4 @@ const NavigatorCard = ({ elementScores = [] }) => {
       </div>
     </div>
   );
-};
-
-NavigatorCard.propTypes = {
-  elementScores: PropTypes.arrayOf(
-    PropTypes.shape({
-      name: PropTypes.string,
-      status: PropTypes.oneOf(Object.values(STATUSES)),
-      score: PropTypes.string,
-    })
-  ),
-};
-
-export default NavigatorCard;
+}

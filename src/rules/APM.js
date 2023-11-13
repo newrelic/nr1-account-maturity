@@ -1,6 +1,7 @@
 import semver from 'semver';
 
 export default {
+  short: 'Apps',
   // what entity types to check against
   entityType: 'APM_APPLICATION_ENTITY',
   // some entities require additional data that can only be performed with a direct guid query

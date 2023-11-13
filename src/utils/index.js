@@ -13,13 +13,19 @@ export const scoreToColor = (value) => {
   } else if (value >= 0 && value <= 50) {
     return { color: '#f5554b', fontColor: '#FAFBFB' };
   } else if (value >= 51 && value < 70) {
-    return { color: '#f07a0e', fontColor: '#293338' };
+    return { color: '#FFD23D', fontColor: '#293338' };
   } else if (value >= 70 && value < 80) {
     return { color: '#ffd23d', fontColor: '#FAFBFB' };
   } else if (value >= 80) {
     return { color: '#01a76a', fontColor: '#FAFBFB' };
   }
 };
+
+// $success: #01A76A;
+// $warning: #FFD23D;
+// $critical: #F5554B;
+// $unknown: #9EA5A9;
+// $blank: transparent;
 
 export const percentageToStatus = (value) => {
   if (value !== null && value !== undefined) {
@@ -47,7 +53,8 @@ export const generateAccountSummary = (accounts, sortBy, report) => {
         report?.document?.allProducts ||
         (report?.document?.products || []).includes(key)
       ) {
-        const { overallScore, maxScore, offendingEntities } = scores[key];
+        const { overallScore, maxScore, offendingEntities, passingEntities } =
+          scores[key];
 
         (rules[key].scores || []).forEach((scoreKey) => {
           if (!summary[`${key}.scoring`]) {
@@ -58,6 +65,7 @@ export const generateAccountSummary = (accounts, sortBy, report) => {
         });
 
         summary[`${key}.entities`] = offendingEntities;
+        summary[`${key}.entitiesPassing`] = passingEntities;
 
         if (overallScore !== null && maxScore !== null) {
           summary[key] = (overallScore / maxScore) * 100;

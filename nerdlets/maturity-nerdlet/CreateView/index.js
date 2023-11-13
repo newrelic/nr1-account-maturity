@@ -3,24 +3,32 @@ import {
   EmptyState,
   TextField,
   Toast,
-  Switch,
+  Checkbox,
   Grid,
   GridItem,
   Button,
   AccountStorageMutation,
   UserStorageMutation,
   NerdGraphQuery,
+  HeadingText,
+  BlockText,
+  Select,
+  SelectItem,
+  Card,
+  CardBody,
+  CardHeader,
 } from 'nr1';
-import DataContext from '../../context/data';
+import DataContext from '../../../src/context/data';
 import { useSetState } from '@mantine/hooks';
 import { v4 as uuidv4 } from 'uuid';
-import rules from '../../rules';
-import { ACCOUNT_USER_CONFIG_COLLECTION } from '../../constants';
+import rules from '../../../src/rules';
+import { ACCOUNT_USER_CONFIG_COLLECTION } from '../../../src/constants';
 
-export default function CreateReport(selectedReport) {
+export default function CreateView(selectedReport) {
   const {
-    defaultView,
-    userViewHistory,
+    runView,
+    // defaultView,
+    // userViewHistory,
     accounts,
     user,
     selectedAccountId,
@@ -85,7 +93,7 @@ export default function CreateReport(selectedReport) {
     });
   };
 
-  const createReport = () => {
+  const createView = () => {
     // eslint-disable-next-line
     return new Promise(async (resolve) => {
       const runAt = new Date().getTime();
@@ -203,7 +211,49 @@ export default function CreateReport(selectedReport) {
 
     return (
       <>
-        {view.page !== 'CreateDefaultView' && (
+        <br />
+        <Button
+          type={Button.TYPE.SECONDARY}
+          onClick={() => runView({ id: 'allData', name: 'All data' })}
+        >
+          Skip this step
+        </Button>
+        <br />
+        <br />
+        <HeadingText>Create View Configuration</HeadingText>
+        <BlockText style={{ paddingTop: '5px' }}>
+          Use views to create saved filter sets that you can return to at
+          anytime; letting you create shortcuts to product, account, environment
+          or team specific views.
+        </BlockText>
+        <br />
+        <TextField
+          label="Name"
+          value={state.name}
+          onChange={(e) => setState({ name: e.target.value })}
+          placeholder="e.g. DevOps Team"
+        />
+        &nbsp;&nbsp;
+        {accounts && accounts.length > 0 && (
+          <>
+            <Select
+              value={selectedAccountId}
+              label="Select an account"
+              info="Your view will be stored into this account, but can access other accounts if selected below"
+              onChange={(evt, value) =>
+                setDataState({ selectedAccountId: value })
+              }
+            >
+              {accounts.map((a) => (
+                <SelectItem key={a.id} value={a.id}>
+                  {a.name}
+                </SelectItem>
+              ))}
+            </Select>
+          </>
+        )}
+        <br />
+        {/* {view.page !== 'CreateDefaultView' && (
           <>
             <div style={{ paddingTop: '10px' }}>
               <Button
@@ -232,8 +282,7 @@ export default function CreateReport(selectedReport) {
             </div>
             <br />
           </>
-        )}
-
+        )} */}
         {view.page !== 'CreateDefaultView' &&
           view.page !== 'EditDefaultView' && (
             <div style={{ paddingTop: '10px' }}>
@@ -247,64 +296,64 @@ export default function CreateReport(selectedReport) {
               &nbsp;&nbsp;
             </div>
           )}
-
         <br />
-
-        <div>
-          <TextField
-            label="Entity Search Query (optional)"
-            value={state.entitySearchQuery}
-            onChange={(e) => setState({ entitySearchQuery: e.target.value })}
-            labelInline
-            placeholder="e.g. tags.team = 'labs'"
-          />
-          &nbsp;&nbsp;
-        </div>
-
-        <br />
-        <div>
-          <span style={{ fontWeight: 'bold', fontSize: '16px' }}>Products</span>
-          &nbsp;&nbsp;&nbsp;
-          <Switch
-            label={'All Products'}
-            checked={state.allProducts}
-            style={{ paddingBottom: '0px' }}
-            onChange={() => setState({ allProducts: !state.allProducts })}
-          />
-        </div>
-
-        <div style={{ paddingTop: '10px' }}>
-          <Grid>
-            {Object.keys(rules).map((key) => (
-              <GridItem columnSpan={3} key={key}>
-                <Switch
-                  key={key}
-                  label={key}
-                  style={{ paddingBottom: '0px' }}
-                  disabled={state.allProducts}
-                  checked={state.allProducts || state.products.includes(key)}
-                  onChange={() => {
-                    if (state.products.includes(key)) {
-                      setState({
-                        products: state.products.filter((id) => id !== key),
-                      });
-                    } else {
-                      setState({ products: [...state.products, key] });
-                    }
-                  }}
-                />
-              </GridItem>
-            ))}
-          </Grid>
-        </div>
-        <div style={{ paddingTop: '10px' }}>
-          <br />
-          <div>
-            <span style={{ fontWeight: 'bold', fontSize: '16px' }}>
-              Accounts
-            </span>
-            &nbsp;&nbsp;&nbsp;
-            <Switch
+        <Card collapsible>
+          <CardHeader
+            style={{
+              fontSize: '16px',
+              fontWeight: 'bold',
+              marginBottom: '5px',
+            }}
+          >
+            <div>
+              Capabilities &nbsp;&nbsp;&nbsp;
+              <Checkbox
+                label={'All Products'}
+                checked={state.allProducts}
+                style={{ paddingBottom: '0px' }}
+                onChange={() => setState({ allProducts: !state.allProducts })}
+              />
+            </div>
+          </CardHeader>
+          <CardBody style={{ paddingLeft: '20px', marginTop: '5px' }}>
+            <div style={{ paddingTop: '10px' }}>
+              <Grid>
+                {Object.keys(rules).map((key) => (
+                  <GridItem columnSpan={3} key={key}>
+                    <Checkbox
+                      key={key}
+                      label={key}
+                      style={{ paddingBottom: '0px' }}
+                      disabled={state.allProducts}
+                      checked={
+                        state.allProducts || state.products.includes(key)
+                      }
+                      onChange={() => {
+                        if (state.products.includes(key)) {
+                          setState({
+                            products: state.products.filter((id) => id !== key),
+                          });
+                        } else {
+                          setState({ products: [...state.products, key] });
+                        }
+                      }}
+                    />
+                  </GridItem>
+                ))}
+              </Grid>
+            </div>
+          </CardBody>
+        </Card>
+        <Card collapsible>
+          <CardHeader
+            style={{
+              fontSize: '16px',
+              fontWeight: 'bold',
+              marginBottom: '5px',
+            }}
+          >
+            Accounts&nbsp;&nbsp;&nbsp;
+            <Checkbox
               label={'All Accounts'}
               checked={state.accounts.length === accounts.length}
               style={{ paddingBottom: '0px' }}
@@ -316,41 +365,73 @@ export default function CreateReport(selectedReport) {
                 }
               }}
             />
-          </div>
-
-          <div style={{ paddingTop: '10px' }}>
-            <Grid>
-              {accounts.map((a) => (
-                <GridItem columnSpan={3} key={a.id}>
-                  <Switch
-                    description={`${a.id}`}
-                    label={a.name}
-                    style={{ paddingBottom: '0px' }}
-                    checked={state.accounts.includes(a.id)}
-                    disabled={state.accounts.length === accounts.length}
-                    onChange={() => {
-                      if (state.accounts.includes(a.id)) {
-                        setState({
-                          accounts: state.accounts.filter((id) => id !== a.id),
-                        });
-                      } else {
-                        setState({ accounts: [...state.accounts, a.id] });
-                      }
-                    }}
-                  />
-                </GridItem>
-              ))}
-            </Grid>
-          </div>
-
-          {view.page === 'CreateDefaultView' ||
+          </CardHeader>
+          <CardBody style={{ paddingLeft: '20px', marginTop: '5px' }}>
+            <div style={{ paddingTop: '10px' }}>
+              <Grid>
+                {accounts.map((a) => (
+                  <GridItem columnSpan={3} key={a.id}>
+                    <Checkbox
+                      // description={`${a.id}`}
+                      label={`${a.name} (${a.id})`}
+                      style={{ paddingBottom: '0px' }}
+                      checked={state.accounts.includes(a.id)}
+                      disabled={state.accounts.length === accounts.length}
+                      onChange={() => {
+                        if (state.accounts.includes(a.id)) {
+                          setState({
+                            accounts: state.accounts.filter(
+                              (id) => id !== a.id
+                            ),
+                          });
+                        } else {
+                          setState({ accounts: [...state.accounts, a.id] });
+                        }
+                      }}
+                    />
+                  </GridItem>
+                ))}
+              </Grid>
+            </div>
+          </CardBody>
+        </Card>
+        <Card collapsible>
+          <CardHeader
+            style={{
+              fontSize: '16px',
+              fontWeight: 'bold',
+              marginBottom: '5px',
+            }}
+          >
+            Advanced Filtering
+          </CardHeader>
+          <CardBody style={{ paddingLeft: '20px', marginTop: '5px' }}>
+            <TextField
+              label="Entity Filter"
+              value={state.entitySearchQuery}
+              onChange={(e) => setState({ entitySearchQuery: e.target.value })}
+              placeholder="e.g. tags.team = 'labs'"
+            />
+          </CardBody>
+        </Card>
+        <div style={{ paddingTop: '10px' }}>
+          <br />
+          <Button
+            type={Button.TYPE.PRIMARY}
+            // style={{ backgroundColor: '#293338' }}
+          >
+            Save and run
+          </Button>
+          &nbsp;&nbsp;
+          <Button>Run</Button>
+          {/* {view.page === 'CreateDefaultView' ||
             view.page === 'EditDefaultView' ? ( // eslint-disable-line
             <div style={{ textAlign: 'right', marginRight: '10px' }}>
               <Button
                 type={Button.TYPE.PRIMARY}
                 sizeType={Button.SIZE_TYPE.SMALL}
                 onClick={async () => {
-                  const { res, runAt } = await createReport();
+                  const { res, runAt } = await createView();
 
                   if (!res?.error && res !== false) {
                     setDataState({
@@ -384,7 +465,7 @@ export default function CreateReport(selectedReport) {
                   type={Button.TYPE.PRIMARY}
                   sizeType={Button.SIZE_TYPE.SMALL}
                   onClick={async () => {
-                    const { res, runAt, documentId } = await createReport();
+                    const { res, runAt, documentId } = await createView();
 
                     if (!res?.error && res !== false) {
                       setDataState({
@@ -412,7 +493,7 @@ export default function CreateReport(selectedReport) {
                 </Button>
               </div>
             </>
-          )}
+          )} */}
         </div>
       </>
     );

@@ -1,6 +1,6 @@
 import React from 'react';
 import { Tooltip } from 'nr1';
-import Score from '../Score';
+import Score from './score';
 
 export default function ScoreList({ idxBase, scores = [] }) {
   return (
