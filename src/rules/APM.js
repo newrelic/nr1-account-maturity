@@ -2,6 +2,7 @@ import semver from 'semver';
 
 export default {
   short: 'Apps',
+  long: 'Applications',
   // what entity types to check against
   entityType: 'APM_APPLICATION_ENTITY',
   // some entities require additional data that can only be performed with a direct guid query
@@ -40,6 +41,10 @@ export default {
         }
       }
     }`,
+  tagMeta: [
+    { key: 'language', name: 'Language' },
+    { key: 'agentVersion', name: 'Version' },
+  ],
   // scores and values to run and display
   scores: [
     {

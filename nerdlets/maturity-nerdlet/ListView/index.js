@@ -163,21 +163,16 @@ export default function ListView(props) {
                       // eslint-disable-next-line
                     }`,
                   }}
-                  //
                   onClick={() =>
                     navigation.openStackedNerdlet({
-                      id: 'score-details-nerdlet',
+                      id: 'account-details-nerdlet',
                       urlState: {
-                        // isUserDefault: view?.page === 'DefaultView',
                         accountName: accountSplit[0],
                         accountId: parseInt(accountSplit[1]),
                         accountPercentage: item['Account Score'],
                         accountSummary: (props.accountSummaries || []).find(
                           (a) => a.id === parseInt(accountSplit[1])
                         ),
-                        // historyId: historyDoc.id,
-                        // selectedAccountId,
-                        // entitySearchQuery: props?.entitySearchQuery,
                       },
                     })
                   }

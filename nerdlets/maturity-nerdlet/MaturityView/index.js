@@ -77,12 +77,17 @@ export default function MaturityView(props) {
           const value = account[product];
           totalScore += value;
 
+          console.log(account);
+
           if (value !== undefined && value !== null) {
             const payload = {
               name: account.name,
               id: account.id,
               status: percentageToStatus(value),
               score: `${Math.round(value)}%`,
+              entities: account[`${product}.entities`],
+              entitiesPassing: account[`${product}.entitiesPassing`],
+              scoring: account[`${product}.scoring`],
             };
 
             elementScores.push(payload);

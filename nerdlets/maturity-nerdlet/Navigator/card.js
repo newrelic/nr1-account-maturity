@@ -8,7 +8,6 @@ import {
   HeadingText,
 } from 'nr1';
 import { StatusIcon } from '@newrelic/nr-labs-components';
-// import { STATUSES } from '../../../src/constants';
 
 export default function NavigatorCard({ elementScores = [] }) {
   const [hexagons, setHexagons] = useState(null);

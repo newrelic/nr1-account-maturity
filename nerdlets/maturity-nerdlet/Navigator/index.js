@@ -1,5 +1,5 @@
 import React, { useMemo, useContext } from 'react';
-import { HeadingText } from 'nr1';
+import { navigation, HeadingText } from 'nr1';
 import DataContext from '../../../src/context/data';
 import NavigatorCard from './card';
 import ScoreBar from '../ScoreBar';
@@ -19,7 +19,7 @@ export default function Navigator(props) {
 
         <div className="score-card-list" style={{ paddingTop: '10px' }}>
           {scoredCollection.map((collection, i) => {
-            const { elementScores, title, subtitle } = collection;
+            const { elementScores, title, subtitle, rollUpScore } = collection;
 
             return (
               <React.Fragment key={i}>
@@ -31,18 +31,23 @@ export default function Navigator(props) {
                         ? () =>
                             /* eslint-disable */
                             navigation.openStackedNerdlet({
-                              id: 'score-details-nerdlet',
+                              id: 'account-details-nerdlet',
                               urlState: {
-                                isUserDefault,
                                 accountName: title,
                                 accountId: subtitle,
                                 accountPercentage: rollUpScore,
-                                historyId,
-                                selectedAccountId,
-                                entitySearchQuery,
+                                accountSummary: (
+                                  props.accountSummaries || []
+                                ).find((a) => a.id === parseInt(subtitle)),
                               },
                             })
-                        : undefined
+                        : () =>
+                            navigation.openStackedNerdlet({
+                              id: 'capability-details-nerdlet',
+                              urlState: {
+                                ...collection,
+                              },
+                            })
                       /* eslint-enable */
                     }
                   >

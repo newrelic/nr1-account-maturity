@@ -1,5 +1,5 @@
 import React, { useMemo, useContext } from 'react';
-import { HeadingText } from 'nr1';
+import { navigation, HeadingText } from 'nr1';
 import DataContext from '../../../src/context/data';
 import ScoreBar from '../ScoreBar';
 import SummaryCard from './card';
@@ -31,18 +31,23 @@ export default function Summary(props) {
                         ? () =>
                             /* eslint-disable */
                             navigation.openStackedNerdlet({
-                              id: 'score-details-nerdlet',
+                              id: 'account-details-nerdlet',
                               urlState: {
-                                isUserDefault,
                                 accountName: title,
                                 accountId: subtitle,
                                 accountPercentage: rollUpScore,
-                                historyId,
-                                selectedAccountId,
-                                entitySearchQuery,
+                                accountSummary: (
+                                  props.accountSummaries || []
+                                ).find((a) => a.id === parseInt(subtitle)),
                               },
                             })
-                        : undefined
+                        : () =>
+                            navigation.openStackedNerdlet({
+                              id: 'capability-details-nerdlet',
+                              urlState: {
+                                ...collection,
+                              },
+                            })
                       /* eslint-enable */
                     }
                   >

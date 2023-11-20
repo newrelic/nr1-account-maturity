@@ -751,6 +751,19 @@ export function useProvideData(props) {
                         name: entity.name,
                         [name]: false,
                       };
+
+                      if (rules[key].tagMeta) {
+                        rules[key].tagMeta.forEach((t) => {
+                          const foundTag = entity.tags.find(
+                            (tag) => tag.key === t.key
+                          );
+                          if (foundTag) {
+                            account.scores[key].offendingEntities[entity.guid][
+                              t.key
+                            ] = foundTag?.values?.[0];
+                          }
+                        });
+                      }
                     } else {
                       account.scores[key].offendingEntities[entity.guid][
                         name
@@ -777,6 +790,16 @@ export function useProvideData(props) {
               account.scores[key].passingEntities[entity.guid] = {
                 name: entity.name,
               };
+
+              if (rules[key].tagMeta) {
+                rules[key].tagMeta.forEach((t) => {
+                  const foundTag = entity.tags.find((tag) => tag.key === t.key);
+                  if (foundTag) {
+                    account.scores[key].passingEntities[entity.guid][t.key] =
+                      foundTag?.values?.[0];
+                  }
+                });
+              }
             }
           });
         });

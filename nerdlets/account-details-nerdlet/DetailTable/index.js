@@ -10,7 +10,7 @@ import rules from '../../../src/rules';
 
 export default function DetailsTable(props) {
   const { accountSummary, sortBy } = props;
-  const [dataState, setDataState] = useSetState({ sortBy: 'Default' });
+  const [dataState, setDataState] = useSetState({});
 
   useEffect(() => {
     let categories = [];
@@ -36,6 +36,8 @@ export default function DetailsTable(props) {
     } else if (sortBy === 'Highest score') {
       categories = categories.sort((a, b) => b.score - a.score);
     }
+
+    state.categories = categories;
 
     setDataState(state);
   }, [accountSummary, sortBy]);
@@ -177,6 +179,13 @@ export default function DetailsTable(props) {
                     {Object.keys(accountSummary[`${cat.name}.entities`])
                       .length > 0 && (
                       <EntityTable
+                        categoryName={cat.name}
+                        accountId={accountSummary.id}
+                        accountName={accountSummary.name}
+                        totalEntities={totalEntities}
+                        entitiesPassing={
+                          accountSummary[`${cat.name}.entitiesPassing`]
+                        }
                         entities={accountSummary[`${cat.name}.entities`]}
                       />
                     )}

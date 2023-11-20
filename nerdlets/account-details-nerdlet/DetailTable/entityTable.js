@@ -9,7 +9,14 @@ import {
 } from 'nr1';
 
 export default function EntityTable(props) {
-  const { entities } = props;
+  const {
+    entities,
+    entitiesPassing,
+    totalEntities,
+    accountId,
+    accountName,
+    categoryName,
+  } = props;
   const [column, setColumn] = useState(0);
   const [sortingType, setSortingType] = useState(
     TableHeaderCell.SORTING_TYPE.NONE
@@ -51,7 +58,7 @@ export default function EntityTable(props) {
 
   return (
     <div style={{ paddingTop: '15px' }}>
-      <Table items={items}>
+      <Table items={items.length > 5 ? items.slice(0, 5) : items}>
         <TableHeader>
           {headers.map((h, i) => (
             // eslint-disable-next-line react/jsx-key
@@ -87,6 +94,30 @@ export default function EntityTable(props) {
           );
         }}
       </Table>
+      {totalEntities > 1 && (
+        <>
+          <div style={{ paddingLeft: '20px', paddingTop: '10px' }}>
+            <a
+              onClick={() =>
+                navigation.openStackedNerdlet({
+                  id: 'details-table-nerdlet',
+                  urlState: {
+                    categoryName,
+                    accountId,
+                    accountName,
+                    entities,
+                    entitiesPassing,
+                  },
+                })
+              }
+            >
+              {totalEntities === 1
+                ? 'View all entity data'
+                : `View all ${totalEntities} entities`}{' '}
+            </a>
+          </div>
+        </>
+      )}
     </div>
   );
 }

@@ -163,14 +163,15 @@ export default function ScoreTable() {
                   style={{
                     cursor: 'pointer',
                     // eslint-disable-next-line
-                    borderLeft: `5px solid ${scoreToColor(item['Account Score']).color
+                    borderLeft: `5px solid ${
+                      scoreToColor(item['Account Score']).color
                       // eslint-disable-next-line
-                      }`,
+                    }`,
                   }}
                   //
                   onClick={() =>
                     navigation.openStackedNerdlet({
-                      id: 'score-details-nerdlet',
+                      id: 'account-details-nerdlet',
                       urlState: {
                         isUserDefault: view?.page === 'DefaultView',
                         accountName: accountSplit[0],

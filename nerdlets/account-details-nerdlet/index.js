@@ -11,7 +11,7 @@ import { scoreToColor } from '../../src/utils';
 import { useSetState } from '@mantine/hooks';
 import DetailsTable from './DetailTable';
 
-export default function ScoreDetailRoot() {
+export default function AccountDetailsNerdlet() {
   const platformContext = useContext(PlatformStateContext);
   const nerdletContext = useContext(NerdletStateContext);
   const { accountName, accountId, accountSummary, accountPercentage } =
@@ -24,8 +24,6 @@ export default function ScoreDetailRoot() {
     selectedDocument: null,
     sortBy: 'Lowest score',
   });
-
-  console.log(nerdletContext);
 
   const updateSortBy = (sortBy) => {
     setDataState({ sortBy });
