@@ -18,8 +18,6 @@ import { percentageToStatus, scoreToColor } from '../../../src/utils';
 import { ProgressBar } from '@newrelic/nr-labs-components';
 
 export default function ListView(props) {
-  console.log(props);
-  // const dataContext = useContext(DataContext);
   const [column, setColumn] = useState(0);
   const [modal, setModal] = useState(null);
   const [sortingType, setSortingType] = useState(
@@ -69,7 +67,7 @@ export default function ListView(props) {
 
     return (
       <div>
-        <ScoreBar {...props} />
+        <ScoreBar {...props} data={rowData} />
 
         <Modal hidden={!modal} onClose={() => setModal(null)}>
           <HeadingText type={HeadingText.TYPE.HEADING_3}>

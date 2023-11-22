@@ -20,11 +20,11 @@ export default function DetailsTable(props) {
     const state = { categories: elementScores };
 
     if (sortBy === 'Lowest score') {
-      categories = elementScores.sort(
+      categories = (elementScores || []).sort(
         (a, b) => parseInt(a.score) - parseInt(b.score)
       );
     } else if (sortBy === 'Highest score') {
-      categories = elementScores.sort(
+      categories = (elementScores || []).sort(
         (a, b) => parseInt(b.score) - parseInt(a.score)
       );
     }

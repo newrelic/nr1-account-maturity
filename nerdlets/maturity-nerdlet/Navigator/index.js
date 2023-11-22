@@ -15,7 +15,11 @@ export default function Navigator(props) {
 
     return (
       <>
-        <ScoreBar {...props} />
+        <ScoreBar
+          {...props}
+          data={scoredCollection}
+          viewGroupBy={viewGroupBy}
+        />
 
         <div className="score-card-list" style={{ paddingTop: '10px' }}>
           {scoredCollection.map((collection, i) => {

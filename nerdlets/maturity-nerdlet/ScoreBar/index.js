@@ -1,11 +1,44 @@
 import React from 'react';
-import CsvDownloadButton from 'react-json-to-csv';
+import { Button } from 'nr1';
 import { ProgressBar } from '@newrelic/nr-labs-components';
 import { percentageToStatus, scoreToColor } from '../../../src/utils';
+import csvDownload from 'json-to-csv-export';
 
 export default function ScoreBar(props) {
   const status = percentageToStatus(props?.totalPercentage);
   const scoreColor = scoreToColor(props?.totalPercentage);
+
+  // copy data to avoid manipulating original obj
+  const data = JSON.parse(JSON.stringify(props?.data || [])).map((d) => {
+    if ((d?.Account || '').includes(' :: ')) {
+      const accountSplit = d.Account.split(' :: ');
+      d.accountName = accountSplit[0];
+      d.accountId = accountSplit[1];
+    }
+
+    if (d.elementScores) {
+      d.elementScores.forEach((s) => {
+        d[s.name] = parseFloat(s.score);
+      });
+    }
+    if (d.title) {
+      d[props.viewGroupBy === 'capability' ? 'capability' : 'accountName'] =
+        d.title;
+      delete d.title;
+    }
+
+    if (d.subtitle) {
+      d.accountId = d.subtitle;
+      delete d.subtitle;
+    }
+
+    delete d.elementListLabel;
+    delete d.elementScores;
+
+    return d;
+  });
+
+  console.log(data);
 
   return (
     <>
@@ -33,31 +66,29 @@ export default function ScoreBar(props) {
             />
           </td>
           <td style={{ textAlign: 'right' }}>
-            <CsvDownloadButton
-              data={{}}
-              delimiter=","
-              filename={`${new Date().getTime()}-account-export.csv`}
-            />
+            {data && data.length > 0 && (
+              <>
+                <Button
+                  iconType={Button.ICON_TYPE.INTERFACE__OPERATIONS__DOWNLOAD}
+                  onClick={() =>
+                    csvDownload({
+                      data: data,
+                      filename: `${new Date().getTime()}-${
+                        props.viewGroupBy || 'account'
+                      }-summary-export.csv`,
+                      delimiter: ',',
+                    })
+                  }
+                  type={Button.TYPE.PRIMARY}
+                  sizeType={Button.SIZE_TYPE.SMALL}
+                >
+                  Download CSV
+                </Button>
+              </>
+            )}
           </td>
         </tr>
       </table>
     </>
   );
-
-  // return useMemo(() => {
-  //   return (
-  //     <>
-  //       <EmptyState
-  //         title={`Analyzing Accounts & Capabilities ${value}%`}
-  //         type={EmptyState.TYPE.LOADING}
-  //       />
-  //     </>
-  //   );
-  // }, [
-  //   currentLoadingAccount,
-  //   completedPercentage,
-  //   completedPercentageTotal,
-  //   accountTotal,
-  //   completedAccountTotal,
-  // ]);
 }
