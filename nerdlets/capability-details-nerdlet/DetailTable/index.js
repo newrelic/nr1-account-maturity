@@ -1,18 +1,17 @@
 // eslint-disable-next-line eslint-comments/disable-enable-pair
 /* eslint-disable prettier/prettier */
 import React, { useEffect } from 'react';
-import { Card, CardHeader, CardBody } from 'nr1';
+import { Button, Card, CardHeader, CardBody } from 'nr1';
 import { ProgressBar } from '@newrelic/nr-labs-components';
 import { useSetState } from '@mantine/hooks';
 import EntityTable from './entityTable';
 import { percentageToStatus, scoreToColor } from '../../../src/utils';
 import rules from '../../../src/rules';
+import csvDownload from 'json-to-csv-export';
 
 export default function DetailsTable(props) {
   const { sortBy, elementScores, title } = props;
   const [dataState, setDataState] = useSetState({});
-
-  const ruleSet = rules[title];
 
   useEffect(() => {
     let categories = [];
@@ -47,11 +46,42 @@ export default function DetailsTable(props) {
     >
       <div>
         {(dataState.categories || []).map((cat) => {
+          const ruleSet = rules[title];
           const tdWidth = (1 / (ruleSet.scores || []).length) * 100;
 
           const totalEntities =
             Object.keys(cat.entities).length +
             Object.keys(cat.entitiesPassing).length;
+
+          const allEntities = [];
+          Object.keys(cat.entities).forEach((guid) => {
+            const value = cat.entities[guid];
+            allEntities.push({
+              guid,
+              ...value,
+            });
+          });
+
+          Object.keys(cat.entitiesPassing).forEach((guid) => {
+            const value = cat.entitiesPassing[guid];
+            allEntities.push({
+              guid,
+              ...value,
+            });
+          });
+
+          ruleSet.scores.forEach((s) => {
+            if (
+              s.name !== 'name' &&
+              !(ruleSet?.tagMeta || []).some((t) => t.key === s.name)
+            ) {
+              allEntities.forEach((i) => {
+                if (i[s.name] === undefined) {
+                  i[s.name] = true;
+                }
+              });
+            }
+          });
 
           return (
             <div
@@ -89,6 +119,26 @@ export default function DetailsTable(props) {
                       >
                         &nbsp;{Math.round(parseInt(cat.score))}%
                       </span>
+                      <div style={{ float: 'right', paddingRight: '0px' }}>
+                        <Button
+                          iconType={
+                            Button.ICON_TYPE.INTERFACE__OPERATIONS__DOWNLOAD
+                          }
+                          onClick={() =>
+                            csvDownload({
+                              data: allEntities,
+                              filename: `${new Date().getTime()}-${
+                                cat.name
+                              }-export.csv`,
+                              delimiter: ',',
+                            })
+                          }
+                          type={Button.TYPE.PRIMARY}
+                          sizeType={Button.SIZE_TYPE.SMALL}
+                        >
+                          Download CSV
+                        </Button>
+                      </div>
                       <br /> <br />
                       <div>
                         <div
@@ -170,12 +220,11 @@ export default function DetailsTable(props) {
                   <div>
                     {Object.keys(cat.entities).length > 0 && (
                       <EntityTable
+                        isCapability={true}
                         categoryName={title}
                         accountId={cat.id}
                         accountName={cat.name}
-                        totalEntities={totalEntities}
-                        entitiesPassing={cat.entitiesPassing}
-                        entities={cat.entities}
+                        allEntities={allEntities}
                       />
                     )}
                   </div>

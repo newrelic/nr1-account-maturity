@@ -14,10 +14,13 @@ import {
 import rules from '../../src/rules';
 import csvDownload from 'json-to-csv-export';
 
-export default function ExtendedDetailsTable() {
+export default function ExtendedDetailsTable(props) {
+  const { limit, noMeta, hideDownload } = props;
   const nerdletContext = useContext(NerdletStateContext);
-  const { entities, entitiesPassing, categoryName, accountId, accountName } =
-    nerdletContext;
+  const {
+    allEntities = props?.allEntities,
+    categoryName = props?.categoryName,
+  } = nerdletContext;
 
   const [column, setColumn] = useState(0);
   const [sortingType, setSortingType] = useState(
@@ -35,36 +38,27 @@ export default function ExtendedDetailsTable() {
     }
   };
 
-  const tagMetaHeaders = (ruleSet?.tagMeta || []).map((t) => ({
-    key: t.name,
-    value: ({ item }) => item[t.key],
-  }));
+  let tagMetaHeaders = [];
+  if (!noMeta) {
+    tagMetaHeaders = (ruleSet?.tagMeta || []).map((t) => ({
+      key: t.name,
+      value: ({ item }) => item[t.key],
+    }));
+  }
 
   const headers = [
     { key: 'Name', value: ({ item }) => item.name },
     ...tagMetaHeaders,
   ];
 
-  const items = [];
-
   let tempHeaders = [];
-
-  Object.keys(entities).forEach((guid) => {
-    const value = entities[guid];
-    items.push({ guid, accountId, accountName, ...value });
-  });
-
-  Object.keys(entitiesPassing).forEach((guid) => {
-    const value = entitiesPassing[guid];
-    items.push({ guid, accountId, accountName, ...value });
-  });
 
   ruleSet.scores.forEach((s) => {
     if (
       s.name !== 'name' &&
       !(ruleSet?.tagMeta || []).some((t) => t.key === s.name)
     ) {
-      items.forEach((i) => {
+      allEntities.forEach((i) => {
         if (i[s.name] === undefined) {
           i[s.name] = true;
         }
@@ -86,30 +80,32 @@ export default function ExtendedDetailsTable() {
     <div
       style={{ paddingTop: '15px', paddingLeft: '15px', paddingRight: '10px' }}
     >
-      <div style={{ marginBottom: '35px' }}>
-        <div style={{ float: 'left', paddingLeft: '2px' }}>
-          <span style={{ fontSize: '24px', fontWeight: 600 }}>
-            {ruleSet?.long || 'Extended'} Info
-          </span>
+      {!hideDownload && (
+        <div style={{ marginBottom: '35px' }}>
+          <div style={{ float: 'left', paddingLeft: '2px' }}>
+            <span style={{ fontSize: '24px', fontWeight: 600 }}>
+              {ruleSet?.long || 'Extended'} Info
+            </span>
+          </div>
+          <div style={{ float: 'right', paddingRight: '17px' }}>
+            <Button
+              iconType={Button.ICON_TYPE.INTERFACE__OPERATIONS__DOWNLOAD}
+              onClick={() =>
+                csvDownload({
+                  data: allEntities,
+                  filename: `${new Date().getTime()}-${categoryName}-export.csv`,
+                  delimiter: ',',
+                })
+              }
+              type={Button.TYPE.PRIMARY}
+              sizeType={Button.SIZE_TYPE.SMALL}
+            >
+              Download CSV
+            </Button>
+          </div>
         </div>
-        <div style={{ float: 'right', paddingRight: '17px' }}>
-          <Button
-            iconType={Button.ICON_TYPE.INTERFACE__OPERATIONS__DOWNLOAD}
-            onClick={() =>
-              csvDownload({
-                data: items,
-                filename: `${new Date().getTime()}-${categoryName}-export.csv`,
-                delimiter: ',',
-              })
-            }
-            type={Button.TYPE.PRIMARY}
-            sizeType={Button.SIZE_TYPE.SMALL}
-          >
-            Download CSV
-          </Button>
-        </div>
-      </div>
-      <Table items={items}>
+      )}
+      <Table items={limit ? allEntities.slice(0, limit) : allEntities}>
         <TableHeader>
           {headers.map((h, i) => (
             // eslint-disable-next-line react/jsx-key

@@ -1,12 +1,13 @@
 // eslint-disable-next-line eslint-comments/disable-enable-pair
 /* eslint-disable prettier/prettier */
 import React, { useEffect } from 'react';
-import { Card, CardHeader, CardBody } from 'nr1';
+import { Button, Card, CardHeader, CardBody } from 'nr1';
 import { ProgressBar } from '@newrelic/nr-labs-components';
 import { useSetState } from '@mantine/hooks';
 import EntityTable from './entityTable';
 import { percentageToStatus, scoreToColor } from '../../../src/utils';
 import rules from '../../../src/rules';
+import csvDownload from 'json-to-csv-export';
 
 export default function DetailsTable(props) {
   const { accountSummary, sortBy } = props;
@@ -53,11 +54,50 @@ export default function DetailsTable(props) {
     >
       <div>
         {(dataState.categories || []).map((cat) => {
-          const tdWidth = (1 / rules[cat.name].scores.length) * 100;
+          const ruleSet = rules[cat.name];
+          const tdWidth = (1 / (ruleSet.scores || []).length) * 100;
 
           const totalEntities =
             Object.keys(accountSummary[`${cat.name}.entities`]).length +
             Object.keys(accountSummary[`${cat.name}.entitiesPassing`]).length;
+
+          const allEntities = [];
+          Object.keys(accountSummary[`${cat.name}.entities`]).forEach(
+            (guid) => {
+              const value = accountSummary[`${cat.name}.entities`][guid];
+              allEntities.push({
+                guid,
+                accountId: accountSummary.id,
+                accountName: accountSummary.name,
+                ...value,
+              });
+            }
+          );
+
+          Object.keys(accountSummary[`${cat.name}.entitiesPassing`]).forEach(
+            (guid) => {
+              const value = accountSummary[`${cat.name}.entitiesPassing`][guid];
+              allEntities.push({
+                guid,
+                accountId: accountSummary.id,
+                accountName: accountSummary.name,
+                ...value,
+              });
+            }
+          );
+
+          ruleSet.scores.forEach((s) => {
+            if (
+              s.name !== 'name' &&
+              !(ruleSet?.tagMeta || []).some((t) => t.key === s.name)
+            ) {
+              allEntities.forEach((i) => {
+                if (i[s.name] === undefined) {
+                  i[s.name] = true;
+                }
+              });
+            }
+          });
 
           return (
             <div
@@ -95,6 +135,26 @@ export default function DetailsTable(props) {
                       >
                         &nbsp;{Math.round(cat.score)}%
                       </span>
+                      <div style={{ float: 'right', paddingRight: '0px' }}>
+                        <Button
+                          iconType={
+                            Button.ICON_TYPE.INTERFACE__OPERATIONS__DOWNLOAD
+                          }
+                          onClick={() =>
+                            csvDownload({
+                              data: allEntities,
+                              filename: `${new Date().getTime()}-${
+                                cat.name
+                              }-export.csv`,
+                              delimiter: ',',
+                            })
+                          }
+                          type={Button.TYPE.PRIMARY}
+                          sizeType={Button.SIZE_TYPE.SMALL}
+                        >
+                          Download CSV
+                        </Button>
+                      </div>
                       <br /> <br />
                       <div>
                         <div
@@ -182,11 +242,7 @@ export default function DetailsTable(props) {
                         categoryName={cat.name}
                         accountId={accountSummary.id}
                         accountName={accountSummary.name}
-                        totalEntities={totalEntities}
-                        entitiesPassing={
-                          accountSummary[`${cat.name}.entitiesPassing`]
-                        }
-                        entities={accountSummary[`${cat.name}.entities`]}
+                        allEntities={allEntities}
                       />
                     )}
                   </div>
