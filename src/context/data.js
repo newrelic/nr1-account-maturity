@@ -37,6 +37,7 @@ export default DataContext;
 
 export function useProvideData(props) {
   const [dataState, setDataState] = useSetState({
+    saveViewModalOpen: false,
     viewSegment: 'list',
     viewGroupBy: 'account',
     selectedView: null,
@@ -66,6 +67,7 @@ export function useProvideData(props) {
     view: { page: 'ReportList', title: 'Maturity Reports' },
     // view: { page: 'ReportList', title: 'Maturity Reports' },
     sortBy: 'Lowest score',
+    savingView: false,
   });
 
   // for testing
@@ -190,15 +192,18 @@ export function useProvideData(props) {
 
   const runView = async (selectedView, selectedReport) => {
     console.log('running', selectedView, selectedReport);
+    const documentId = selectedReport?.id || selectedView.id || uuidv4();
+
     setDataState({
       runningReport: true,
-      [`runningReport.${selectedReport?.id || selectedView.id}`]: true,
+      [`runningReport.${documentId}`]: true,
       entitiesByAccount: null,
       summarizedScores: null,
       accountSummaries: null,
-      selectedView: { id: 'allData', name: 'All data' },
-      view:
-        selectedView.id === 'allData' ? { page: 'Loading' } : dataState.view,
+      selectedView: { ...selectedView, id: documentId },
+      view: { page: 'Loading' },
+      // view:
+      //   selectedView.id === 'allData' ? { page: 'Loading' } : dataState.view,
     });
 
     let report = selectedReport || {};
@@ -214,8 +219,10 @@ export function useProvideData(props) {
       };
     } else if (selectedView.type === 'user' && selectedReport) {
       //
-    } else if (selectedView.type === 'account' && selectedReport) {
-      //
+    } else if (selectedView.account && selectedReport) {
+      report.id = documentId;
+      console.log('this is an account based run');
+      console.log(selectedReport);
     } else {
       // unknown
     }
@@ -276,17 +283,19 @@ export function useProvideData(props) {
       accountSummaries,
       totalPercentage,
       view: { page: 'MaturityView' },
+      selectedReport: report,
+      unsavedRun: selectedView?.unsavedRun,
     };
 
-    if (report.id === 'allData') {
-      prepareState.tempAllData = {
-        entitiesByAccount,
-        summarizedScores,
-        accountSummaries,
-        totalPercentage,
-        runAt,
-      };
-    }
+    // if (report.id === 'allData') {
+    prepareState.tempAllData = {
+      entitiesByAccount,
+      summarizedScores,
+      accountSummaries,
+      totalPercentage,
+      runAt,
+    };
+    // }
 
     setDataState(prepareState);
   };
@@ -1010,6 +1019,14 @@ export function useProvideData(props) {
     });
   };
 
+  // todo!
+  const saveView = () => {
+    setDataState({ savingView: true });
+    //
+    const prepareState = { saveViewModalOpen: false, savingView: false };
+    setDataState(prepareState);
+  };
+
   return {
     ...dataState,
     setDataState,
@@ -1021,5 +1038,6 @@ export function useProvideData(props) {
     runReport,
     runUserReport,
     fetchUserViewHistory,
+    saveView,
   };
 }

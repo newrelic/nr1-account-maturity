@@ -7,6 +7,7 @@ import { percentageToStatus } from '../../../src/utils';
 import { STATUSES } from '../../../src/constants';
 import Navigator from '../Navigator';
 import Summary from '../Summary';
+import SaveView from '../SaveView';
 
 export default function MaturityView(props) {
   // const { selected, selectedAccountId, document, isUserDefault } = props;
@@ -23,9 +24,9 @@ export default function MaturityView(props) {
 
   let selectedData = null;
 
-  if (selectedView.id === 'allData') {
-    selectedData = { ...tempAllData };
-  }
+  // if (selectedView.id === 'allData') {
+  selectedData = { ...tempAllData };
+  // }
 
   const { accountSummaries } = selectedData;
 
@@ -166,6 +167,7 @@ export default function MaturityView(props) {
     };
     return (
       <div style={{ paddingTop: '10px' }}>
+        <SaveView />
         {renderSegment(selectedData, scoredCollection)}
       </div>
     );

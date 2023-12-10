@@ -1,10 +1,11 @@
 import React, { useContext, useMemo, useState } from 'react';
-import { Dropdown, DropdownItem, DropdownSection } from 'nr1';
+import { Button, Dropdown, DropdownItem, DropdownSection } from 'nr1';
 
 import DataContext from '../../../src/context/data';
 
 export default function ViewSelector() {
-  const { view, selectedView, setDataState } = useContext(DataContext);
+  const { view, selectedView, setDataState, unsavedRun } =
+    useContext(DataContext);
   const [viewSearch, setViewSearch] = useState('');
 
   return useMemo(() => {
@@ -49,6 +50,19 @@ export default function ViewSelector() {
             </DropdownItem>
           </DropdownSection>
         </Dropdown>
+        {unsavedRun === true && (
+          <>
+            &nbsp; &nbsp;
+            <Button
+              sizeType={Button.SIZE_TYPE.SMALL}
+              type={Button.TYPE.OUTLINE}
+              iconType={Button.ICON_TYPE.DOCUMENTS__DOCUMENTS__NOTES__A_ADD}
+              onClick={() => setDataState({ saveViewModalOpen: true })}
+            >
+              Save
+            </Button>
+          </>
+        )}
         <Dropdown
           iconType={Dropdown.ICON_TYPE.INTERFACE__OPERATIONS__MORE}
           label={<>&nbsp;</>}

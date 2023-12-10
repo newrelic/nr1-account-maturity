@@ -45,14 +45,19 @@ export default function CreateView(selectedReport) {
     creatingView: false,
     name:
       view.page === 'CreateDefaultView' || view.page === 'EditDefaultView'
-        ? 'default'
+        ? 'Untitled'
         : selectedReport?.document?.name || '',
     entitySearchQuery: selectedReport?.document?.entitySearchQuery || '',
     allProducts:
       allProducts !== undefined && allProducts !== null ? true : allProducts,
     accounts: selectedReport?.document?.accounts || [],
+    accountsFilter: selectedReport?.document?.accountsFilter,
     products: selectedReport?.document?.products || [],
   });
+
+  const runDisabled =
+    (state.products.length === 0 && !state.allProducts) ||
+    (state.accounts.length === 0 && !state.accountsFilter);
 
   const validateEntitySearchQuery = () => {
     return new Promise((resolve) => {
@@ -368,7 +373,7 @@ export default function CreateView(selectedReport) {
           </CardHeader>
           <CardBody style={{ paddingLeft: '20px', marginTop: '5px' }}>
             <div style={{ paddingTop: '10px' }}>
-              <Grid>
+              <Grid style={{ maxHeight: '100px' }}>
                 {accounts.map((a) => (
                   <GridItem columnSpan={3} key={a.id}>
                     <Checkbox
@@ -418,12 +423,36 @@ export default function CreateView(selectedReport) {
           <br />
           <Button
             type={Button.TYPE.PRIMARY}
+            disabled={runDisabled}
             // style={{ backgroundColor: '#293338' }}
           >
             Save and run
           </Button>
           &nbsp;&nbsp;
-          <Button>Run</Button>
+          <Button
+            disabled={runDisabled}
+            onClick={() => {
+              runView(
+                {
+                  name: state.name,
+                  account: selectedAccountId,
+                  unsavedRun: true,
+                },
+                {
+                  document: {
+                    name: state.name,
+                    accounts: state.accounts,
+                    allAccounts: state.accounts.length === accounts.length,
+                    accountsFilter: state.accountsFilter,
+                    allProducts: state.allProducts,
+                    products: state.products,
+                  },
+                }
+              );
+            }}
+          >
+            Run
+          </Button>
           {/* {view.page === 'CreateDefaultView' ||
             view.page === 'EditDefaultView' ? ( // eslint-disable-line
             <div style={{ textAlign: 'right', marginRight: '10px' }}>
