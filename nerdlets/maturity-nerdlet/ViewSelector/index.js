@@ -68,11 +68,29 @@ export default function ViewSelector() {
           label={<>&nbsp;</>}
           labelInline={true}
         >
-          <DropdownItem>Update view</DropdownItem>
+          <DropdownItem
+            onClick={() => {
+              if (unsavedRun) {
+                setDataState({
+                  view: {
+                    page: 'CreateView',
+                    title: 'Create New View',
+                  },
+                });
+              } else {
+                // take to some edit screen
+                // todo!
+              }
+            }}
+          >
+            Update view
+          </DropdownItem>
           <DropdownItem>Set as default view</DropdownItem>
-          <DropdownItem style={{ color: 'red' }}>Delete view</DropdownItem>
+          {!unsavedRun && (
+            <DropdownItem style={{ color: 'red' }}>Delete view</DropdownItem>
+          )}
         </Dropdown>
       </div>
     );
-  }, [view, viewSearch, selectedView]);
+  }, [view, viewSearch, selectedView, unsavedRun]);
 }

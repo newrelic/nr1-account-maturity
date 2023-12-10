@@ -24,11 +24,12 @@ import { v4 as uuidv4 } from 'uuid';
 import rules from '../../../src/rules';
 import { ACCOUNT_USER_CONFIG_COLLECTION } from '../../../src/constants';
 
-export default function CreateView(selectedReport) {
+export default function CreateView() {
   const {
     runView,
     // defaultView,
     // userViewHistory,
+    selectedReport,
     accounts,
     user,
     selectedAccountId,

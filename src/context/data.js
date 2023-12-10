@@ -62,6 +62,7 @@ export function useProvideData(props) {
     reportHistory: null,
     fetchingReportConfigs: false,
     fetchingReportHistory: false,
+    defaultViewId: null,
     defaultView: null,
     userViewHistory: null,
     view: { page: 'ReportList', title: 'Maturity Reports' },
@@ -1023,8 +1024,17 @@ export function useProvideData(props) {
   const saveView = () => {
     setDataState({ savingView: true });
     //
-    const prepareState = { saveViewModalOpen: false, savingView: false };
+    const prepareState = {
+      saveViewModalOpen: false,
+      savingView: false,
+      unsavedRun: false,
+    };
+
     setDataState(prepareState);
+  };
+
+  const setAsDefaultView = () => {
+    //
   };
 
   return {
