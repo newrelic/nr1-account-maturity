@@ -33,7 +33,7 @@ export default function CreateView() {
     accounts,
     user,
     selectedAccountId,
-    fetchReportConfigs,
+    fetchViewConfigs,
     setDataState,
     runReport,
     runUserReport,
@@ -158,7 +158,7 @@ export default function CreateView() {
 
             // need new handling for default run
             runUserReport({ document, id: 'default', runAt });
-            fetchReportConfigs().then(() => {
+            fetchViewConfigs().then(() => {
               setState({ creatingView: false });
               resolve({ res, runAt, documentId });
             });
@@ -185,7 +185,7 @@ export default function CreateView() {
             }
 
             runReport({ document, id: documentId, runAt });
-            fetchReportConfigs().then(() => {
+            fetchViewConfigs().then(() => {
               setState({ creatingView: false });
               resolve({ res, runAt, documentId });
             });
@@ -240,6 +240,13 @@ export default function CreateView() {
           placeholder="e.g. DevOps Team"
         />
         &nbsp;&nbsp;
+        <TextField
+          label="Description (optional)"
+          value={state.description}
+          onChange={(e) => setState({ description: e.target.value })}
+          placeholder="Add context to the view"
+        />
+        &nbsp;&nbsp;
         {accounts && accounts.length > 0 && (
           <>
             <Select
@@ -259,49 +266,6 @@ export default function CreateView() {
           </>
         )}
         <br />
-        {/* {view.page !== 'CreateDefaultView' && (
-          <>
-            <div style={{ paddingTop: '10px' }}>
-              <Button
-                iconType={
-                  Button.ICON_TYPE.INTERFACE__ARROW__ARROW_LEFT__V_ALTERNATE
-                }
-                type={Button.TYPE.PRIMARY}
-                sizeType={Button.SIZE_TYPE.SMALL}
-                onClick={() =>
-                  setDataState({
-                    view: {
-                      page: 'DefaultView',
-                      title: 'Maturity Scores',
-                      props: {
-                        ...defaultView,
-                        isUserDefault: true,
-                        selected: userViewHistory?.[0]?.document?.runAt || 0,
-                      },
-                    },
-                  })
-                }
-              >
-                Back
-              </Button>
-              &nbsp;&nbsp;
-            </div>
-            <br />
-          </>
-        )} */}
-        {view.page !== 'CreateDefaultView' &&
-          view.page !== 'EditDefaultView' && (
-            <div style={{ paddingTop: '10px' }}>
-              <TextField
-                label="Name"
-                value={state.name}
-                onChange={(e) => setState({ name: e.target.value })}
-                labelInline
-                placeholder="e.g. DevOps Team"
-              />
-              &nbsp;&nbsp;
-            </div>
-          )}
         <br />
         <Card collapsible>
           <CardHeader
@@ -425,7 +389,26 @@ export default function CreateView() {
           <Button
             type={Button.TYPE.PRIMARY}
             disabled={runDisabled}
-            // style={{ backgroundColor: '#293338' }}
+            onClick={() => {
+              runView(
+                {
+                  name: state.name,
+                  account: selectedAccountId,
+                },
+                {
+                  document: {
+                    name: state.name,
+                    description: state.description,
+                    accounts: state.accounts,
+                    allAccounts: state.accounts.length === accounts.length,
+                    accountsFilter: state.accountsFilter,
+                    allProducts: state.allProducts,
+                    products: state.products,
+                  },
+                },
+                true
+              );
+            }}
           >
             Save and run
           </Button>
@@ -442,6 +425,7 @@ export default function CreateView() {
                 {
                   document: {
                     name: state.name,
+                    description: state.description,
                     accounts: state.accounts,
                     allAccounts: state.accounts.length === accounts.length,
                     accountsFilter: state.accountsFilter,
@@ -454,76 +438,6 @@ export default function CreateView() {
           >
             Run
           </Button>
-          {/* {view.page === 'CreateDefaultView' ||
-            view.page === 'EditDefaultView' ? ( // eslint-disable-line
-            <div style={{ textAlign: 'right', marginRight: '10px' }}>
-              <Button
-                type={Button.TYPE.PRIMARY}
-                sizeType={Button.SIZE_TYPE.SMALL}
-                onClick={async () => {
-                  const { res, runAt } = await createView();
-
-                  if (!res?.error && res !== false) {
-                    setDataState({
-                      view: {
-                        page: 'DefaultView',
-                        title: 'Maturity Scores',
-                        props: {
-                          selected: runAt,
-                          isUserDefault: true,
-                          ...(res?.data?.nerdStorageWriteDocument || {}),
-                        },
-                      },
-                    });
-                  }
-                }}
-                loading={state.creatingView}
-                disabled={
-                  state.accounts.length === 0 ||
-                  !state.name ||
-                  state.name.length <= 3 ||
-                  (!state.allProducts && state.products.length === 0)
-                }
-              >
-                Save
-              </Button>
-            </div>
-          ) : (
-            <>
-              <div style={{ textAlign: 'right', marginRight: '10px' }}>
-                <Button
-                  type={Button.TYPE.PRIMARY}
-                  sizeType={Button.SIZE_TYPE.SMALL}
-                  onClick={async () => {
-                    const { res, runAt, documentId } = await createView();
-
-                    if (!res?.error && res !== false) {
-                      setDataState({
-                        view: {
-                          page: 'ReportView',
-                          title: state.name,
-                          id: selectedReport?.id || documentId,
-                          props: {
-                            document: res?.data?.nerdStorageWriteDocument,
-                            selected: runAt,
-                          },
-                        },
-                      });
-                    }
-                  }}
-                  loading={state.creatingView}
-                  disabled={
-                    state.accounts.length === 0 ||
-                    !state.name ||
-                    state.name.length <= 3 ||
-                    (!state.allProducts && state.products.length === 0)
-                  }
-                >
-                  {selectedReport ? 'Save' : 'Create'}
-                </Button>
-              </div>
-            </>
-          )} */}
         </div>
       </>
     );

@@ -5,11 +5,11 @@ import { Grid, GridItem, LineChart, HeadingText } from 'nr1';
 
 export default function ScoreCharts(props) {
   const { groupBy } = props;
-  const { view, reportHistory, userViewHistory } = useContext(DataContext);
+  const { view, viewHistory, userViewHistory } = useContext(DataContext);
   const history =
     view?.page === 'DefaultView'
       ? userViewHistory
-      : reportHistory.filter((r) => r.document.reportId === view?.props?.id);
+      : viewHistory.filter((r) => r.document.reportId === view?.props?.id);
 
   const selected = view?.props?.selected || view?.props?.document?.selected;
   const accounts =

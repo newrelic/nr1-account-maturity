@@ -10,10 +10,10 @@ export default function ViewSelector(props) {
     runningReport,
     selectedAccountId,
     setDataState,
-    reportHistory,
+    viewHistory,
     userViewHistory,
-    reportConfigs,
-    fetchReportConfigs,
+    viewConfigs,
+    fetchViewConfigs,
     runReport,
     runUserReport,
   } = useContext(DataContext);
@@ -47,7 +47,7 @@ export default function ViewSelector(props) {
       });
 
       setDeleting(false);
-      await fetchReportConfigs();
+      await fetchViewConfigs();
 
       setDataState({
         view: {
@@ -64,9 +64,9 @@ export default function ViewSelector(props) {
   };
 
   return useMemo(() => {
-    const sortedReportConfigs = reportConfigs.map((r) => ({
+    const sortedReportConfigs = viewConfigs.map((r) => ({
       ...r,
-      history: reportHistory.filter((h) => h.document.reportId === r.id),
+      history: viewHistory.filter((h) => h.document.reportId === r.id),
     }));
 
     return (
@@ -224,5 +224,5 @@ export default function ViewSelector(props) {
         </div>
       </>
     );
-  }, [view, runningReport, reportConfigs, selectedView]);
+  }, [view, runningReport, viewConfigs, selectedView]);
 }

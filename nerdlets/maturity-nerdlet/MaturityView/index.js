@@ -132,7 +132,7 @@ export default function MaturityView(props) {
 
     // const history = isUserDefault
     //   ? userViewHistory
-    //   : reportHistory.filter(
+    //   : viewHistory.filter(
     //       (
     //         h //eslint-disable-line
     //       ) => h.document.reportId === (view?.id || view?.props?.id) //eslint-disable-line

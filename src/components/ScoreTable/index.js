@@ -22,12 +22,12 @@ export default function ScoreTable() {
   const [sortingType, setSortingType] = useState(
     TableHeaderCell.SORTING_TYPE.NONE
   );
-  const { view, reportHistory, userViewHistory, selectedAccountId } =
+  const { view, viewHistory, userViewHistory, selectedAccountId } =
     useContext(DataContext);
   const history =
     view?.page === 'DefaultView'
       ? userViewHistory
-      : reportHistory.filter((r) => r.document.reportId === view?.props?.id);
+      : viewHistory.filter((r) => r.document.reportId === view?.props?.id);
 
   const selected = view?.props?.selected || view?.props?.document?.selected;
   const historyDoc = history.find((h) => h.document.runAt === selected);

@@ -6,11 +6,13 @@ import CreateView from '../CreateView';
 import MaturityView from '../MaturityView';
 import Loading from '../Loading';
 //
-import ReportList from '../../../src/components/ReportList';
 import ViewSegmentSelector from '../ViewSegmentSelector';
 import ViewSelector from '../ViewSelector';
+import ViewList from '../ViewList';
+import SearchBar from '../SearchBar';
+import DeleteView from '../DeleteView';
 
-export default function AccountMaturity() {
+export default function AccountMaturity(props) {
   const { fetchingData, errorMsg, view, selectedAccountId } =
     useContext(DataContext);
 
@@ -27,11 +29,11 @@ export default function AccountMaturity() {
           />
         );
       }
-      case 'ReportList': {
-        return <ReportList {...(view.props || {})} />;
-      }
       case 'CreateView': {
         return <CreateView {...(view.props || {})} />;
+      }
+      case 'ViewList': {
+        return <ViewList {...(view.props || {})} {...props} />;
       }
       case 'CreateDefaultView': {
         return <CreateView {...(view.props || {})} />;
@@ -59,6 +61,7 @@ export default function AccountMaturity() {
 
   return (
     <div>
+      <DeleteView />
       {fetchingData && (
         <EmptyState title="Fetching data..." type={EmptyState.TYPE.LOADING} />
       )}
@@ -88,6 +91,8 @@ export default function AccountMaturity() {
                   </div>
                 </div>
               )}
+              {view.page === 'ViewList' && <SearchBar width={props?.width} />}
+
               <div
                 style={{
                   paddingBottom: '15px',

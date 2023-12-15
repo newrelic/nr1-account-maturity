@@ -4,20 +4,25 @@ import { Button, Dropdown, DropdownItem, DropdownSection } from 'nr1';
 import DataContext from '../../../src/context/data';
 
 export default function ViewSelector() {
-  const { view, selectedView, setDataState, unsavedRun } =
+  const { view, selectedView, setDataState, unsavedRun, viewConfigs } =
     useContext(DataContext);
   const [viewSearch, setViewSearch] = useState('');
 
   return useMemo(() => {
-    const items = [
-      { id: 'allData', name: 'All data' },
-      { id: 'f5a3', name: 'Finley Mendez' },
-      { id: '93bc', name: 'Coleen Salinas' },
-    ];
+    const configs = viewConfigs
+      .filter((v) => v && Object.keys(v).length > 0)
+      .map((v) => ({
+        id: v.id,
+        name: v.document?.name,
+      }));
+
+    const items = [{ id: 'allData', name: 'All data' }, ...configs];
 
     const filteredItems = items.filter(({ name }) =>
       name.toLowerCase().includes(viewSearch.toLowerCase())
     );
+
+    console.log(selectedView, view);
 
     return (
       <div style={{ paddingRight: '5px' }}>
@@ -25,14 +30,18 @@ export default function ViewSelector() {
           sectioned
           label={'Views'}
           labelInline={true}
-          title={selectedView?.name || 'Select'}
+          title={unsavedRun ? 'Select' : selectedView?.name || 'Select'}
           search={viewSearch}
           onSearch={(e) => setViewSearch(e.target.value)}
         >
           <DropdownSection title="Views">
             {filteredItems.map((item) => (
               <DropdownItem
-                onClick={() => setDataState({ selectedView: item })}
+                onClick={() => {
+                  if (item.id !== selectedView.id) {
+                    setDataState({ selectedView: item });
+                  }
+                }}
                 key={item.id}
                 style={{
                   fontWeight: selectedView?.id === item.id ? 'bold' : 'none',
@@ -87,10 +96,22 @@ export default function ViewSelector() {
           </DropdownItem>
           <DropdownItem>Set as default view</DropdownItem>
           {!unsavedRun && (
-            <DropdownItem style={{ color: 'red' }}>Delete view</DropdownItem>
+            <DropdownItem
+              style={{ color: 'red' }}
+              onClick={() =>
+                setDataState({
+                  deleteViewModalOpen: {
+                    id: selectedView?.id,
+                    document: { name: selectedView?.name },
+                  },
+                })
+              }
+            >
+              Delete view
+            </DropdownItem>
           )}
         </Dropdown>
       </div>
     );
-  }, [view, viewSearch, selectedView, unsavedRun]);
+  }, [view, viewSearch, selectedView, unsavedRun, viewConfigs]);
 }

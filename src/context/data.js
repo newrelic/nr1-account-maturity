@@ -21,6 +21,7 @@ import rules from '../rules';
 import { v4 as uuidv4 } from 'uuid';
 import { chunk, generateAccountSummary } from '../utils';
 import {
+  ACCOUNT_HISTORY_COLLECTION,
   ACCOUNT_USER_CONFIG_COLLECTION,
   ACCOUNT_USER_HISTORY_COLLECTION,
 } from '../constants';
@@ -37,6 +38,8 @@ export default DataContext;
 
 export function useProvideData(props) {
   const [dataState, setDataState] = useSetState({
+    deleteViewModalOpen: null,
+    search: '',
     saveViewModalOpen: false,
     viewSegment: 'list',
     viewGroupBy: 'account',
@@ -58,10 +61,10 @@ export function useProvideData(props) {
     selectedAccountId: null,
     runningReport: false,
     selectedReport: null,
-    reportConfigs: null,
-    reportHistory: null,
+    viewConfigs: null,
+    viewHistory: null,
     fetchingReportConfigs: false,
-    fetchingReportHistory: false,
+    fetchingViewHistory: false,
     defaultViewId: null,
     defaultView: null,
     userViewHistory: null,
@@ -96,12 +99,17 @@ export function useProvideData(props) {
     // eslint-disable-next-line
     console.log('DataProvider initialized');
     const state = {};
-    const defaultView = await getUserReport();
-    await getUserSettings();
+    const defaultView = await getUserReport(); // needs to be removed
+    const userSettings = await getUserSettings();
+    const viewConfigs = await fetchViewConfigs();
     const accounts = await getAccounts();
 
     // default view not configured, request configuration
-    if (!defaultView || Object.keys(defaultView).length === 0) {
+    if (viewConfigs.length > 0) {
+      state.view = {
+        page: 'ViewList',
+      };
+    } else if (!defaultView || Object.keys(defaultView).length === 0) {
       state.view = {
         page: 'CreateDefaultView',
         // page: 'ReportView', // revert delete
@@ -135,7 +143,7 @@ export function useProvideData(props) {
     console.log('account id changed => ', accountId);
     setDataState({ fetchingData: true, selectedAccountId: accountId });
 
-    const reportConfigs =
+    const viewConfigs =
       (
         await AccountStorageQuery.query({
           accountId,
@@ -143,7 +151,7 @@ export function useProvideData(props) {
         })
       )?.data || [];
 
-    const reportHistory = await fetchReportHistory(accountId);
+    const viewHistory = await fetchViewHistory(accountId);
 
     const [accountsInit, agentReleases, dataDictionary] = await Promise.all([
       getAccounts(),
@@ -153,14 +161,14 @@ export function useProvideData(props) {
 
     const accounts = await decorateAccountData(accountsInit);
 
-    deleteOrphanedReports(reportConfigs, reportHistory, accountId);
+    deleteOrphanedReports(viewConfigs, viewHistory, accountId);
 
     setDataState({
       selectedAccountId: accountId,
       accounts,
       agentReleases,
       dataDictionary,
-      reportConfigs,
+      viewConfigs,
       fetchingData: false,
     });
   }, [props.accountId]);
@@ -191,8 +199,8 @@ export function useProvideData(props) {
     });
   };
 
-  const runView = async (selectedView, selectedReport) => {
-    console.log('running', selectedView, selectedReport);
+  const runView = async (selectedView, selectedReport, save) => {
+    console.log('running', selectedView, selectedReport, save);
     const documentId = selectedReport?.id || selectedView.id || uuidv4();
 
     setDataState({
@@ -222,10 +230,15 @@ export function useProvideData(props) {
       //
     } else if (selectedView.account && selectedReport) {
       report.id = documentId;
+
       console.log('this is an account based run');
       console.log(selectedReport);
     } else {
       // unknown
+    }
+
+    if (save) {
+      saveView(report);
     }
 
     // const selectedAccounts =
@@ -368,7 +381,7 @@ export function useProvideData(props) {
 
     // console.log(accountSummaries, totalScorePercentage);
 
-    await fetchReportHistory();
+    await fetchViewHistory();
 
     setDataState({
       runningReport: false,
@@ -378,6 +391,11 @@ export function useProvideData(props) {
       summarizedScores,
       accountSummaries,
     });
+  };
+
+  // todo!
+  const saveResult = () => {
+    //
   };
 
   const runUserReport = async (selectedReport) => {
@@ -505,9 +523,30 @@ export function useProvideData(props) {
     }
   };
 
-  const deleteOrphanedReports = (reportConfigs, reportHistory, accountId) => {
-    const reportsToDelete = reportHistory.filter(
-      (rh) => !reportConfigs.find((rc) => rc.id === rh?.document?.reportId)
+  const deleteView = () => {
+    return new Promise((resolve) => {
+      setDataState({ deletingView: true });
+      AccountStorageMutation.mutate({
+        accountId: dataState?.selectedAccountId,
+        actionType: AccountStorageMutation.ACTION_TYPE.DELETE_DOCUMENT,
+        collection: ACCOUNT_USER_CONFIG_COLLECTION,
+        documentId: dataState?.deleteViewModalOpen.id,
+      }).then((res) => {
+        fetchViewConfigs().then(() => {
+          setDataState({
+            deletingView: false,
+            deleteViewModalOpen: null,
+            view: { page: 'ViewList' },
+          });
+          resolve(res);
+        });
+      });
+    });
+  };
+
+  const deleteOrphanedReports = (viewConfigs, viewHistory, accountId) => {
+    const reportsToDelete = viewHistory.filter(
+      (rh) => !viewConfigs.find((rc) => rc.id === rh?.document?.reportId)
     );
 
     if (reportsToDelete.length > 0) {
@@ -530,34 +569,35 @@ export function useProvideData(props) {
     }
   };
 
-  const fetchReportHistory = (accountId) => {
+  const fetchViewHistory = (accountId) => {
     // eslint-disable-next-line
     return new Promise(async (resolve) => {
-      setDataState({ fetchingReportHistory: true });
+      setDataState({ fetchingViewHistory: true });
 
-      const reportHistory =
+      const viewHistory =
         (
           await AccountStorageQuery.query({
-            accountId: accountId || dataState.selectedAccountId,
+            accountId:
+              accountId || dataState.selectedAccountId || props?.accountId,
             collection: ACCOUNT_USER_HISTORY_COLLECTION,
           })
         )?.data || [];
 
       setDataState({
-        fetchingReportHistory: false,
-        reportHistory: reportHistory.sort(
+        fetchingViewHistory: false,
+        viewHistory: viewHistory.sort(
           (a, b) => b.document.runAt - a.document.runAt
         ),
       });
-      console.log('report count', reportHistory.length);
-      resolve(reportHistory);
+      console.log('history count', viewHistory.length);
+      resolve(viewHistory);
     });
   };
 
   const fetchUserViewHistory = () => {
     // eslint-disable-next-line
     return new Promise(async (resolve) => {
-      setDataState({ fetchingReportHistory: true });
+      setDataState({ fetchingViewHistory: true });
 
       const userViewHistory = (
         (
@@ -568,29 +608,38 @@ export function useProvideData(props) {
       ).sort((a, b) => b?.document?.runAt - a?.document?.runAt);
 
       setDataState({
-        fetchingReportHistory: false,
+        fetchingViewHistory: false,
         userViewHistory,
       });
       resolve(userViewHistory);
     });
   };
 
-  const fetchReportConfigs = async () => {
-    setDataState({ fetchingReports: true });
+  const fetchViewConfigs = () => {
+    // eslint-disable-next-line no-async-promise-executor
+    return new Promise(async (resolve) => {
+      setDataState({ fetchingReports: true });
 
-    const defaultView = await getUserReport();
+      const viewHistory = await fetchViewHistory();
+      console.log(viewHistory);
 
-    const reportConfigs =
-      (
-        await AccountStorageQuery.query({
-          accountId: dataState.selectedAccountId,
-          collection: ACCOUNT_USER_CONFIG_COLLECTION,
-        })
-      )?.data || [];
+      // const defaultView = await getUserReport();
 
-    setDataState({
-      fetchingReports: false,
-      reportConfigs: [...reportConfigs, defaultView],
+      const viewConfigs =
+        (
+          await AccountStorageQuery.query({
+            accountId: dataState.selectedAccountId || props.accountId,
+            collection: ACCOUNT_USER_CONFIG_COLLECTION,
+          })
+        )?.data || [];
+
+      setDataState({
+        fetchingReports: false,
+        viewConfigs: [...viewConfigs],
+        // viewConfigs: [...viewConfigs, defaultView],
+      });
+
+      resolve(viewConfigs);
     });
   };
 
@@ -614,7 +663,7 @@ export function useProvideData(props) {
         type: Toast.TYPE.NORMAL,
       });
 
-      await fetchReportConfigs();
+      await fetchViewConfigs();
     }
   };
 
@@ -1021,28 +1070,58 @@ export function useProvideData(props) {
   };
 
   // todo!
-  const saveView = () => {
+  const saveView = async (report) => {
     setDataState({ savingView: true });
-    //
+
     const prepareState = {
       saveViewModalOpen: false,
       savingView: false,
       unsavedRun: false,
     };
 
-    setDataState(prepareState);
+    const res = await AccountStorageMutation.mutate({
+      accountId: dataState.selectedAccountId,
+      actionType: AccountStorageMutation.ACTION_TYPE.WRITE_DOCUMENT,
+      collection: ACCOUNT_USER_CONFIG_COLLECTION,
+      documentId: report?.id || dataState.selectedReport.id,
+      document: report?.document || dataState.selectedReport.document,
+    });
+
+    if (res.error) {
+      Toast.showToast({
+        title: 'Failed to save',
+        description: 'Check your permissions',
+        type: Toast.TYPE.CRITICAL,
+      });
+    } else {
+      Toast.showToast({
+        title: 'Saved view successfully',
+        // description: 'Refreshing...',
+        type: Toast.TYPE.NORMAL,
+      });
+
+      if (
+        dataState.defaultViewId === (report?.id || dataState.selectedReport.id)
+      ) {
+        setDefaultView(dataState.defaultViewId);
+      }
+      fetchViewConfigs();
+      setDataState(prepareState);
+    }
   };
 
-  const setAsDefaultView = () => {
+  // store in user settings
+  const setDefaultView = (viewId) => {
     //
   };
 
   return {
     ...dataState,
     setDataState,
+    deleteView,
     runView,
-    fetchReportConfigs,
-    fetchReportHistory,
+    fetchViewConfigs,
+    fetchViewHistory,
     deleteReportConfig,
     checkUser,
     runReport,

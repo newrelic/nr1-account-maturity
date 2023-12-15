@@ -5,7 +5,7 @@ import DataContext from '../../context/data';
 
 export default function ReportView(props) {
   const { selected, selectedAccountId, document, isUserDefault } = props;
-  const { runningReport, userViewHistory, reportHistory, view } =
+  const { runningReport, userViewHistory, viewHistory, view } =
     useContext(DataContext);
 
   return useMemo(() => {
@@ -28,10 +28,11 @@ export default function ReportView(props) {
 
     const history = isUserDefault
       ? userViewHistory
-      : reportHistory.filter(
-        (h) => //eslint-disable-line
-          h.document.reportId === (view?.id || view?.props?.id) //eslint-disable-line
-      );//eslint-disable-line
+      : viewHistory.filter(
+          (
+            h //eslint-disable-line
+          ) => h.document.reportId === (view?.id || view?.props?.id) //eslint-disable-line
+        ); //eslint-disable-line
 
     if (history.length === 0) {
       return (

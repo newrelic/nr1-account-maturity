@@ -16,9 +16,9 @@ export default function HistorySelector(props) {
     view,
     runningReport,
     setDataState,
-    reportHistory,
+    viewHistory,
     userViewHistory,
-    fetchReportHistory,
+    fetchViewHistory,
     fetchUserViewHistory,
   } = useContext(DataContext);
   const isUserDefault = props?.isUserDefault || view?.props?.isUserDefault;
@@ -26,9 +26,9 @@ export default function HistorySelector(props) {
     props?.history ||
     (isUserDefault
       ? userViewHistory
-      : reportHistory.filter(
-        (r) => r.document.reportId === (view?.id || view.props.id) // eslint-disable-line
-      )); // eslint-disable-line
+      : viewHistory.filter(
+          (r) => r.document.reportId === (view?.id || view.props.id) // eslint-disable-line
+        )); // eslint-disable-line
 
   const [deleting, setDeleting] = useState(false);
 
@@ -87,7 +87,7 @@ export default function HistorySelector(props) {
             });
             setDeleting(false);
           } else {
-            await fetchReportHistory();
+            await fetchViewHistory();
 
             Toast.showToast({
               title: 'Successfully deleted',
