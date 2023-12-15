@@ -20,6 +20,7 @@ export default function SaveView() {
     defaultViewId,
     saveView,
     savingView,
+    selectedReport,
   } = useContext(DataContext);
 
   return (
@@ -31,12 +32,22 @@ export default function SaveView() {
         <HeadingText type={HeadingText.TYPE.HEADING_3}>Save view</HeadingText>
         <TextField
           label="View name"
-          value={selectedView.name}
+          value={selectedReport?.document?.name}
           onChange={(e) => {
-            selectedView.name = e.target.value;
-            setDataState({ selectedView });
+            selectedReport.document.name = e.target.value;
+            setDataState({ selectedReport });
           }}
           placeholder="e.g. DevOps Team"
+        />
+        <br />
+        <TextField
+          label="Description (optional)"
+          value={selectedReport?.document?.description}
+          onChange={(e) => {
+            selectedReport.document.description = e.target.value;
+            setDataState({ selectedReport });
+          }}
+          placeholder="Add context to the view"
         />
         <br /> <br />
         <Checkbox

@@ -9,9 +9,11 @@ import {
 } from 'nr1';
 
 import DataContext from '../../../src/context/data';
+import { calculatePercentageChange } from '../../../src/utils';
 
 export default function ViewList() {
-  const { viewConfigs, search, setDataState } = useContext(DataContext);
+  const { viewConfigs, search, setDataState, runView, loadHistoricalResult } =
+    useContext(DataContext);
   const [column, setColumn] = useState(0);
   const [sortingType, setSortingType] = useState(
     TableHeaderCell.SORTING_TYPE.NONE
@@ -29,13 +31,56 @@ export default function ViewList() {
   const headers = [
     { key: 'View', value: ({ item }) => item.document?.name },
     { key: 'Description', value: ({ item }) => item.document?.description },
-    { key: 'Last run', value: ({ item }) => item.document?.name },
-    { key: 'Last score', value: ({ item }) => item.document?.name },
-    { key: 'Last % score change', value: ({ item }) => item.document?.name },
-    { key: 'Created by', value: ({ item }) => item.document?.name },
+    {
+      key: 'Last run',
+      value: ({ item }) => {
+        console.log(item);
+        const runAt = item?.history?.[0]?.document?.runAt;
+        if (runAt) {
+          return new Date(runAt).toLocaleString();
+        } else {
+          return '';
+        }
+      },
+    },
+    {
+      key: 'Last score',
+      value: ({ item }) =>
+        Math.round(item?.history?.[0]?.document?.totalPercentage || 0),
+    },
+    {
+      key: 'Last % score change',
+      value: ({ item }) => {
+        const latestScore = item?.history?.[0]?.document?.totalPercentage || 0;
+        const previousSCore =
+          item?.history?.[1]?.document?.totalPercentage || 0;
+
+        if (latestScore && previousSCore) {
+          const change = calculatePercentageChange(latestScore, previousSCore);
+          return `${Math.round(change)}%`;
+        } else {
+          return '';
+        }
+      },
+    },
+    { key: 'Created by', value: ({ item }) => item.document?.owner },
   ];
 
   const actions = [
+    {
+      label: 'Run',
+      onClick: (evt, { item }) => {
+        runView(
+          {
+            name: item.document.name,
+            account: true,
+          },
+          { ...item },
+          false,
+          true
+        );
+      },
+    },
     {
       label: 'Edit',
       onClick: (evt, { item, index }) => {
@@ -79,6 +124,22 @@ export default function ViewList() {
             return (
               <TableRow actions={actions}>
                 {headers.map((header) => {
+                  if (header.key === 'View') {
+                    const previousResult = item?.history?.[0]?.document;
+                    let onClickHandler = undefined;
+
+                    if (previousResult) {
+                      onClickHandler = () =>
+                        loadHistoricalResult(item, previousResult);
+                    }
+
+                    return (
+                      <TableRowCell key={header.key} onClick={onClickHandler}>
+                        {header.value({ item })}
+                      </TableRowCell>
+                    );
+                  }
+
                   return (
                     <TableRowCell key={header}>
                       {header.value({ item })}

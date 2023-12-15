@@ -148,7 +148,6 @@ export default function ListView(props) {
 
           {({ item }) => {
             const accountSplit = item.Account.split(' :: ');
-            console.log(item);
             return (
               <TableRow>
                 <TableRowCell

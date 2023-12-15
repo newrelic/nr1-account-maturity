@@ -98,3 +98,11 @@ export const flattenJSON = (obj = {}, res = {}, extraKey = '') => {
   }
   return res;
 };
+
+export const calculatePercentageChange = (previousScore, latestScore) => {
+  // Calculate the percentage change
+  const change = latestScore - previousScore;
+  const percentageChange = (change / Math.abs(previousScore)) * 100;
+
+  return percentageChange;
+};

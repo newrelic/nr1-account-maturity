@@ -21,9 +21,8 @@ import rules from '../rules';
 import { v4 as uuidv4 } from 'uuid';
 import { chunk, generateAccountSummary } from '../utils';
 import {
+  ACCOUNT_CONFIG_COLLECTION,
   ACCOUNT_HISTORY_COLLECTION,
-  ACCOUNT_USER_CONFIG_COLLECTION,
-  ACCOUNT_USER_HISTORY_COLLECTION,
 } from '../constants';
 
 const DataContext = createContext();
@@ -38,6 +37,7 @@ export default DataContext;
 
 export function useProvideData(props) {
   const [dataState, setDataState] = useSetState({
+    email: null,
     deleteViewModalOpen: null,
     search: '',
     saveViewModalOpen: false,
@@ -87,7 +87,7 @@ export function useProvideData(props) {
     // wipe user history
     const userHistory = await UserStorageMutation.mutate({
       actionType: UserStorageMutation.ACTION_TYPE.DELETE_DOCUMENT,
-      collection: ACCOUNT_USER_HISTORY_COLLECTION,
+      collection: ACCOUNT_HISTORY_COLLECTION,
     });
 
     console.log(userView, userHistory);
@@ -99,6 +99,8 @@ export function useProvideData(props) {
     // eslint-disable-next-line
     console.log('DataProvider initialized');
     const state = {};
+    await getUserEmail();
+
     const defaultView = await getUserReport(); // needs to be removed
     const userSettings = await getUserSettings();
     const viewConfigs = await fetchViewConfigs();
@@ -143,14 +145,7 @@ export function useProvideData(props) {
     console.log('account id changed => ', accountId);
     setDataState({ fetchingData: true, selectedAccountId: accountId });
 
-    const viewConfigs =
-      (
-        await AccountStorageQuery.query({
-          accountId,
-          collection: ACCOUNT_USER_CONFIG_COLLECTION,
-        })
-      )?.data || [];
-
+    const viewConfigs = await fetchViewConfigs();
     const viewHistory = await fetchViewHistory(accountId);
 
     const [accountsInit, agentReleases, dataDictionary] = await Promise.all([
@@ -172,6 +167,38 @@ export function useProvideData(props) {
       fetchingData: false,
     });
   }, [props.accountId]);
+
+  const loadHistoricalResult = (report, result) => {
+    setDataState({
+      tempAllData: result,
+      lastRunAt: result?.runAt,
+      entitiesByAccount: result?.entitiesByAccount,
+      summarizedScores: result?.summarizedScores,
+      accountSummaries: result?.accountSummaries,
+      totalPercentage: result?.totalPercentage,
+      selectedView: { ...report, id: report.id, name: report?.document?.name },
+      selectedReport: report,
+      view: { page: 'MaturityView' },
+    });
+  };
+
+  const getUserEmail = () => {
+    return new Promise((resolve) => {
+      NerdGraphQuery.query({
+        query: `{
+        actor {
+          user {
+            email
+          }
+        }
+      }`,
+      }).then((res) => {
+        const email = res?.data?.actor?.user?.email;
+        setDataState({ email });
+        resolve(email);
+      });
+    });
+  };
 
   const getUserSettings = () => {
     return new Promise((resolve) => {
@@ -199,8 +226,19 @@ export function useProvideData(props) {
     });
   };
 
-  const runView = async (selectedView, selectedReport, save) => {
-    console.log('running', selectedView, selectedReport, save);
+  const runView = async (
+    selectedView,
+    selectedReport,
+    doSaveView,
+    saveHistory
+  ) => {
+    console.log(
+      'running',
+      selectedView,
+      selectedReport,
+      doSaveView,
+      saveHistory
+    );
     const documentId = selectedReport?.id || selectedView.id || uuidv4();
 
     setDataState({
@@ -235,10 +273,6 @@ export function useProvideData(props) {
       console.log(selectedReport);
     } else {
       // unknown
-    }
-
-    if (save) {
-      saveView(report);
     }
 
     // const selectedAccounts =
@@ -303,6 +337,7 @@ export function useProvideData(props) {
 
     // if (report.id === 'allData') {
     prepareState.tempAllData = {
+      documentId,
       entitiesByAccount,
       summarizedScores,
       accountSummaries,
@@ -310,6 +345,12 @@ export function useProvideData(props) {
       runAt,
     };
     // }
+
+    if (doSaveView) {
+      saveView(report, prepareState.tempAllData);
+    } else if (!doSaveView && saveHistory) {
+      saveResult(prepareState.tempAllData);
+    }
 
     setDataState(prepareState);
   };
@@ -354,7 +395,7 @@ export function useProvideData(props) {
     const res = await AccountStorageMutation.mutate({
       accountId: dataState.selectedAccountId,
       actionType: AccountStorageMutation.ACTION_TYPE.WRITE_DOCUMENT,
-      collection: ACCOUNT_USER_HISTORY_COLLECTION,
+      collection: ACCOUNT_HISTORY_COLLECTION,
       documentId: uuidv4(),
       document: {
         reportId: report.id,
@@ -393,9 +434,26 @@ export function useProvideData(props) {
     });
   };
 
-  // todo!
-  const saveResult = () => {
-    //
+  const saveResult = (runData) => {
+    // eslint-disable-next-line
+    return new Promise(async (resolve) => {
+      const data = runData || dataState?.tempAllData;
+      const accountId = dataState.selectedAccountId || props?.accountId;
+
+      if (data) {
+        await AccountStorageMutation.mutate({
+          accountId,
+          actionType: AccountStorageMutation.ACTION_TYPE.WRITE_DOCUMENT,
+          collection: ACCOUNT_HISTORY_COLLECTION,
+          documentId: uuidv4(),
+          document: {
+            accountId,
+            ...data,
+          },
+        });
+      }
+      resolve();
+    });
   };
 
   const runUserReport = async (selectedReport) => {
@@ -438,7 +496,7 @@ export function useProvideData(props) {
     const res = await UserStorageMutation.mutate({
       accountId: dataState.selectedAccountId,
       actionType: UserStorageMutation.ACTION_TYPE.WRITE_DOCUMENT,
-      collection: ACCOUNT_USER_HISTORY_COLLECTION,
+      collection: ACCOUNT_HISTORY_COLLECTION,
       documentId: uuidv4(),
       document: {
         reportId: report.id,
@@ -529,7 +587,7 @@ export function useProvideData(props) {
       AccountStorageMutation.mutate({
         accountId: dataState?.selectedAccountId,
         actionType: AccountStorageMutation.ACTION_TYPE.DELETE_DOCUMENT,
-        collection: ACCOUNT_USER_CONFIG_COLLECTION,
+        collection: ACCOUNT_CONFIG_COLLECTION,
         documentId: dataState?.deleteViewModalOpen.id,
       }).then((res) => {
         fetchViewConfigs().then(() => {
@@ -545,8 +603,8 @@ export function useProvideData(props) {
   };
 
   const deleteOrphanedReports = (viewConfigs, viewHistory, accountId) => {
-    const reportsToDelete = viewHistory.filter(
-      (rh) => !viewConfigs.find((rc) => rc.id === rh?.document?.reportId)
+    let reportsToDelete = viewHistory.filter(
+      (vh) => !viewConfigs.find((rc) => rc.id === vh?.document?.documentId)
     );
 
     if (reportsToDelete.length > 0) {
@@ -554,7 +612,7 @@ export function useProvideData(props) {
         AccountStorageMutation.mutate({
           accountId,
           actionType: AccountStorageMutation.ACTION_TYPE.DELETE_DOCUMENT,
-          collection: ACCOUNT_USER_HISTORY_COLLECTION,
+          collection: ACCOUNT_HISTORY_COLLECTION,
           documentId: r.id,
         })
       );
@@ -569,17 +627,19 @@ export function useProvideData(props) {
     }
   };
 
-  const fetchViewHistory = (accountId) => {
+  const fetchViewHistory = (incomingAccountId) => {
     // eslint-disable-next-line
     return new Promise(async (resolve) => {
       setDataState({ fetchingViewHistory: true });
 
+      const accountId =
+        incomingAccountId || dataState.selectedAccountId || props?.accountId;
+
       const viewHistory =
         (
           await AccountStorageQuery.query({
-            accountId:
-              accountId || dataState.selectedAccountId || props?.accountId,
-            collection: ACCOUNT_USER_HISTORY_COLLECTION,
+            accountId,
+            collection: ACCOUNT_HISTORY_COLLECTION,
           })
         )?.data || [];
 
@@ -602,7 +662,7 @@ export function useProvideData(props) {
       const userViewHistory = (
         (
           await UserStorageQuery.query({
-            collection: ACCOUNT_USER_HISTORY_COLLECTION,
+            collection: ACCOUNT_HISTORY_COLLECTION,
           })
         )?.data || []
       ).sort((a, b) => b?.document?.runAt - a?.document?.runAt);
@@ -621,17 +681,24 @@ export function useProvideData(props) {
       setDataState({ fetchingReports: true });
 
       const viewHistory = await fetchViewHistory();
-      console.log(viewHistory);
 
       // const defaultView = await getUserReport();
 
-      const viewConfigs =
+      let viewConfigs =
         (
           await AccountStorageQuery.query({
             accountId: dataState.selectedAccountId || props.accountId,
-            collection: ACCOUNT_USER_CONFIG_COLLECTION,
+            collection: ACCOUNT_CONFIG_COLLECTION,
           })
         )?.data || [];
+
+      // stitch history to config
+      viewConfigs = viewConfigs.map((vc) => {
+        const history = viewHistory.filter(
+          (vh) => vh.document.documentId === vc.id
+        );
+        return { ...vc, history };
+      });
 
       setDataState({
         fetchingReports: false,
@@ -647,7 +714,7 @@ export function useProvideData(props) {
     const res = await AccountStorageMutation.mutate({
       accountId: dataState.selectedAccountId,
       actionType: AccountStorageMutation.ACTION_TYPE.DELETE_DOCUMENT,
-      collection: ACCOUNT_USER_CONFIG_COLLECTION,
+      collection: ACCOUNT_CONFIG_COLLECTION,
       documentId,
     });
 
@@ -1069,23 +1136,32 @@ export function useProvideData(props) {
     });
   };
 
-  // todo!
-  const saveView = async (report) => {
+  const saveView = async (report, runData) => {
     setDataState({ savingView: true });
+
+    const documentId = report?.id || dataState.selectedReport.id;
+    const document = report?.document || dataState.selectedReport.document;
 
     const prepareState = {
       saveViewModalOpen: false,
       savingView: false,
       unsavedRun: false,
+      selectedView: { ...report, id: documentId, name: document.name },
     };
 
     const res = await AccountStorageMutation.mutate({
       accountId: dataState.selectedAccountId,
       actionType: AccountStorageMutation.ACTION_TYPE.WRITE_DOCUMENT,
-      collection: ACCOUNT_USER_CONFIG_COLLECTION,
-      documentId: report?.id || dataState.selectedReport.id,
-      document: report?.document || dataState.selectedReport.document,
+      collection: ACCOUNT_CONFIG_COLLECTION,
+      documentId,
+      document,
     });
+
+    // save if this was trigged from a run view
+    if (runData) {
+      runData.documentId = documentId;
+      await saveResult(runData);
+    }
 
     if (res.error) {
       Toast.showToast({
@@ -1128,5 +1204,6 @@ export function useProvideData(props) {
     runUserReport,
     fetchUserViewHistory,
     saveView,
+    loadHistoricalResult,
   };
 }

@@ -7,8 +7,6 @@ import {
   Grid,
   GridItem,
   Button,
-  AccountStorageMutation,
-  UserStorageMutation,
   NerdGraphQuery,
   HeadingText,
   BlockText,
@@ -20,23 +18,17 @@ import {
 } from 'nr1';
 import DataContext from '../../../src/context/data';
 import { useSetState } from '@mantine/hooks';
-import { v4 as uuidv4 } from 'uuid';
 import rules from '../../../src/rules';
-import { ACCOUNT_USER_CONFIG_COLLECTION } from '../../../src/constants';
 
 export default function CreateView() {
   const {
     runView,
-    // defaultView,
-    // userViewHistory,
+    email,
     selectedReport,
     accounts,
     user,
     selectedAccountId,
-    fetchViewConfigs,
     setDataState,
-    runReport,
-    runUserReport,
     view,
   } = useContext(DataContext);
 
@@ -99,104 +91,104 @@ export default function CreateView() {
     });
   };
 
-  const createView = () => {
-    // eslint-disable-next-line
-    return new Promise(async (resolve) => {
-      const runAt = new Date().getTime();
+  // const createView = () => {
+  //   // eslint-disable-next-line
+  //   return new Promise(async (resolve) => {
+  //     const runAt = new Date().getTime();
 
-      setState({ creatingView: true });
+  //     setState({ creatingView: true });
 
-      let esqPassed = false;
-      if (state.entitySearchQuery) {
-        esqPassed = await validateEntitySearchQuery();
-      } else {
-        esqPassed = true;
-      }
+  //     let esqPassed = false;
+  //     if (state.entitySearchQuery) {
+  //       esqPassed = await validateEntitySearchQuery();
+  //     } else {
+  //       esqPassed = true;
+  //     }
 
-      if (esqPassed) {
-        const document = {
-          name: state.name,
-          owner: user,
-          accounts: state.accounts,
-        };
-        if (state.entitySearchQuery) {
-          document.entitySearchQuery = state.entitySearchQuery;
-        }
+  //     if (esqPassed) {
+  //       const document = {
+  //         name: state.name,
+  //         owner: user,
+  //         accounts: state.accounts,
+  //       };
+  //       if (state.entitySearchQuery) {
+  //         document.entitySearchQuery = state.entitySearchQuery;
+  //       }
 
-        if (state.allProducts) {
-          document.allProducts = true;
-        } else {
-          document.products = state.products;
-        }
+  //       if (state.allProducts) {
+  //         document.allProducts = true;
+  //       } else {
+  //         document.products = state.products;
+  //       }
 
-        const documentId =
-          selectedReport?.id || view?.id || view?.props?.id || uuidv4();
+  //       const documentId =
+  //         selectedReport?.id || view?.id || view?.props?.id || uuidv4();
 
-        if (
-          view.page === 'CreateDefaultView' ||
-          view.page === 'EditDefaultView'
-        ) {
-          UserStorageMutation.mutate({
-            actionType: UserStorageMutation.ACTION_TYPE.WRITE_DOCUMENT,
-            collection: 'userViews',
-            documentId: 'default',
-            document,
-          }).then(async (res) => {
-            if (res.error) {
-              Toast.showToast({
-                title: 'Failed to save',
-                description: 'Check your permissions',
-                type: Toast.TYPE.CRITICAL,
-              });
-            } else {
-              Toast.showToast({
-                title: selectedReport ? 'Saved' : 'Created',
-                type: Toast.TYPE.NORMAL,
-              });
-              setDataState({ defaultView: document });
-            }
+  //       if (
+  //         view.page === 'CreateDefaultView' ||
+  //         view.page === 'EditDefaultView'
+  //       ) {
+  //         UserStorageMutation.mutate({
+  //           actionType: UserStorageMutation.ACTION_TYPE.WRITE_DOCUMENT,
+  //           collection: 'userViews',
+  //           documentId: 'default',
+  //           document,
+  //         }).then(async (res) => {
+  //           if (res.error) {
+  //             Toast.showToast({
+  //               title: 'Failed to save',
+  //               description: 'Check your permissions',
+  //               type: Toast.TYPE.CRITICAL,
+  //             });
+  //           } else {
+  //             Toast.showToast({
+  //               title: selectedReport ? 'Saved' : 'Created',
+  //               type: Toast.TYPE.NORMAL,
+  //             });
+  //             setDataState({ defaultView: document });
+  //           }
 
-            // need new handling for default run
-            runUserReport({ document, id: 'default', runAt });
-            fetchViewConfigs().then(() => {
-              setState({ creatingView: false });
-              resolve({ res, runAt, documentId });
-            });
-          });
-        } else {
-          AccountStorageMutation.mutate({
-            accountId: selectedAccountId,
-            actionType: AccountStorageMutation.ACTION_TYPE.WRITE_DOCUMENT,
-            collection: ACCOUNT_USER_CONFIG_COLLECTION,
-            documentId,
-            document,
-          }).then((res) => {
-            if (res.error) {
-              Toast.showToast({
-                title: 'Failed to save',
-                description: 'Check your permissions',
-                type: Toast.TYPE.CRITICAL,
-              });
-            } else {
-              Toast.showToast({
-                title: selectedReport ? 'Saved' : 'Created',
-                type: Toast.TYPE.NORMAL,
-              });
-            }
+  //           // need new handling for default run
+  //           runUserReport({ document, id: 'default', runAt });
+  //           fetchViewConfigs().then(() => {
+  //             setState({ creatingView: false });
+  //             resolve({ res, runAt, documentId });
+  //           });
+  //         });
+  //       } else {
+  //         AccountStorageMutation.mutate({
+  //           accountId: selectedAccountId,
+  //           actionType: AccountStorageMutation.ACTION_TYPE.WRITE_DOCUMENT,
+  //           collection: ACCOUNT_USER_CONFIG_COLLECTION,
+  //           documentId,
+  //           document,
+  //         }).then((res) => {
+  //           if (res.error) {
+  //             Toast.showToast({
+  //               title: 'Failed to save',
+  //               description: 'Check your permissions',
+  //               type: Toast.TYPE.CRITICAL,
+  //             });
+  //           } else {
+  //             Toast.showToast({
+  //               title: selectedReport ? 'Saved' : 'Created',
+  //               type: Toast.TYPE.NORMAL,
+  //             });
+  //           }
 
-            runReport({ document, id: documentId, runAt });
-            fetchViewConfigs().then(() => {
-              setState({ creatingView: false });
-              resolve({ res, runAt, documentId });
-            });
-          });
-        }
-      } else {
-        setState({ creatingView: false });
-        resolve(false);
-      }
-    });
-  };
+  //           runReport({ document, id: documentId, runAt });
+  //           fetchViewConfigs().then(() => {
+  //             setState({ creatingView: false });
+  //             resolve({ res, runAt, documentId });
+  //           });
+  //         });
+  //       }
+  //     } else {
+  //       setState({ creatingView: false });
+  //       resolve(false);
+  //     }
+  //   });
+  // };
 
   return useMemo(() => {
     if ((accounts || []).length === 0) {
@@ -397,6 +389,7 @@ export default function CreateView() {
                 },
                 {
                   document: {
+                    owner: email,
                     name: state.name,
                     description: state.description,
                     accounts: state.accounts,
@@ -424,6 +417,7 @@ export default function CreateView() {
                 },
                 {
                   document: {
+                    owner: email,
                     name: state.name,
                     description: state.description,
                     accounts: state.accounts,
@@ -441,5 +435,5 @@ export default function CreateView() {
         </div>
       </>
     );
-  }, [accounts, user, state, selectedReport]);
+  }, [accounts, user, state, selectedReport, email]);
 }
