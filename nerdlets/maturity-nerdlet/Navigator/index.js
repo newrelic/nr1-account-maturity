@@ -6,7 +6,7 @@ import ScoreBar from '../ScoreBar';
 
 export default function Navigator(props) {
   const { scoredCollection } = props;
-  const { viewGroupBy } = useContext(DataContext);
+  const { viewGroupBy, selectedReport } = useContext(DataContext);
 
   return useMemo(() => {
     if (!scoredCollection || scoredCollection.length === 0) {
@@ -19,6 +19,7 @@ export default function Navigator(props) {
           {...props}
           data={scoredCollection}
           viewGroupBy={viewGroupBy}
+          selectedReport={selectedReport}
         />
 
         <div className="score-card-list" style={{ paddingTop: '10px' }}>

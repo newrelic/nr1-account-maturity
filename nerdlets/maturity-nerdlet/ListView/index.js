@@ -24,7 +24,7 @@ export default function ListView(props) {
   const [sortingType, setSortingType] = useState(
     TableHeaderCell.SORTING_TYPE.NONE
   );
-  const { selectedView } = useContext(DataContext);
+  const { selectedView, selectedReport } = useContext(DataContext);
 
   const onClickTableHeaderCell = (nextColumn, { nextSortingType }) => {
     if (nextColumn === column) {
@@ -69,7 +69,7 @@ export default function ListView(props) {
 
     return (
       <div>
-        <ScoreBar {...props} data={rowData} />
+        <ScoreBar {...props} data={rowData} selectedReport={selectedReport}/>
 
         <Modal hidden={!modal} onClose={() => setModal(null)}>
           <HeadingText type={HeadingText.TYPE.HEADING_3}>
