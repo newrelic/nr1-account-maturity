@@ -299,43 +299,20 @@ export default function CreateView() {
           <Button
             type={Button.TYPE.PRIMARY}
             disabled={runDisabled}
-            onClick={() => {
-              runView(
-                {
-                  name: state.name,
-                  account: selectedAccountId,
-                },
-                {
-                  id: selectedReport?.id,
-                  document: {
-                    owner: email,
-                    name: state.name,
-                    description: state.description,
-                    accounts: state.accounts,
-                    allAccounts: state.accounts.length === accounts.length,
-                    accountsFilter: state.accountsFilter,
-                    allProducts: state.allProducts,
-                    products: state.products,
-                  },
-                },
-                true
-              );
-            }}
-          >
-            Save and run
-          </Button>
-          &nbsp;&nbsp;
-          {view.page !== 'EditView' && (
-            <Button
-              disabled={runDisabled}
-              onClick={() => {
+            onClick={async () => {
+              let run = true;
+              if (state.entitySearchQuery) {
+                run = await validateEntitySearchQuery();
+              }
+
+              if (run) {
                 runView(
                   {
                     name: state.name,
                     account: selectedAccountId,
-                    unsavedRun: true,
                   },
                   {
+                    id: selectedReport?.id,
                     document: {
                       owner: email,
                       name: state.name,
@@ -346,8 +323,46 @@ export default function CreateView() {
                       allProducts: state.allProducts,
                       products: state.products,
                     },
-                  }
+                  },
+                  true
                 );
+              }
+            }}
+          >
+            Save and run
+          </Button>
+          &nbsp;&nbsp;
+          {view.page !== 'EditView' && (
+            <Button
+              disabled={runDisabled}
+              onClick={async () => {
+                let run = true;
+                if (state.entitySearchQuery) {
+                  run = await validateEntitySearchQuery();
+                }
+
+                if (run) {
+                  runView(
+                    {
+                      name: state.name,
+                      account: selectedAccountId,
+                      unsavedRun: true,
+                    },
+                    {
+                      document: {
+                        owner: email,
+                        name: state.name,
+                        description: state.description,
+                        accounts: state.accounts,
+                        allAccounts: state.accounts.length === accounts.length,
+                        entitySearchQuery: state.entitySearchQuery,
+                        accountsFilter: state.accountsFilter,
+                        allProducts: state.allProducts,
+                        products: state.products,
+                      },
+                    }
+                  );
+                }
               }}
             >
               Run
