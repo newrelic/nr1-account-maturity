@@ -53,7 +53,9 @@ export default function ViewSelector() {
           </DropdownSection>
 
           <DropdownSection title="">
-            <DropdownItem>
+            <DropdownItem
+              onClick={() => setDataState({ view: { page: 'ViewList' } })}
+            >
               <div style={{ float: 'left' }}>{items.length} total views</div>
               <div style={{ float: 'right', color: 'blue' }}>See all views</div>
             </DropdownItem>

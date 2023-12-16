@@ -3,6 +3,7 @@ import { Button } from 'nr1';
 import { ProgressBar } from '@newrelic/nr-labs-components';
 import { percentageToStatus, scoreToColor } from '../../../src/utils';
 import csvDownload from 'json-to-csv-export';
+import HistorySelector from '../HistorySelector';
 
 export default function ScoreBar(props) {
   const status = percentageToStatus(props?.totalPercentage);
@@ -65,10 +66,12 @@ export default function ScoreBar(props) {
               status={status}
             />
           </td>
+
           <td style={{ textAlign: 'right' }}>
             {data && data.length > 0 && (
               <>
                 <Button
+                  style={{ float: 'right' }}
                   iconType={Button.ICON_TYPE.INTERFACE__OPERATIONS__DOWNLOAD}
                   onClick={() =>
                     csvDownload({
@@ -86,6 +89,8 @@ export default function ScoreBar(props) {
                 </Button>
               </>
             )}
+
+            <HistorySelector />
           </td>
         </tr>
       </table>

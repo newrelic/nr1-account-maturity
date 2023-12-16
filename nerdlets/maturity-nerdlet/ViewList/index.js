@@ -125,7 +125,7 @@ export default function ViewList() {
               <TableRow actions={actions}>
                 {headers.map((header) => {
                   if (header.key === 'View') {
-                    const previousResult = item?.history?.[0]?.document;
+                    const previousResult = item?.history?.[0];
                     let onClickHandler = undefined;
 
                     if (previousResult) {

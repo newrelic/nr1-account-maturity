@@ -169,16 +169,23 @@ export function useProvideData(props) {
   }, [props.accountId]);
 
   const loadHistoricalResult = (report, result) => {
+    console.log('load historical', report, result);
+    const { document } = result;
     setDataState({
-      tempAllData: result,
-      lastRunAt: result?.runAt,
-      entitiesByAccount: result?.entitiesByAccount,
-      summarizedScores: result?.summarizedScores,
-      accountSummaries: result?.accountSummaries,
-      totalPercentage: result?.totalPercentage,
-      selectedView: { ...report, id: report.id, name: report?.document?.name },
+      tempAllData: document,
+      lastRunAt: document?.runAt,
+      entitiesByAccount: document?.entitiesByAccount,
+      summarizedScores: document?.summarizedScores,
+      accountSummaries: document?.accountSummaries,
+      totalPercentage: document?.totalPercentage,
+      selectedView: {
+        ...report,
+        id: report.id,
+        name: report?.document?.name,
+        historyId: result.id,
+      },
       selectedReport: report,
-      view: { page: 'MaturityView' },
+      view: { page: 'MaturityView', historyId: result.id },
     });
   };
 
