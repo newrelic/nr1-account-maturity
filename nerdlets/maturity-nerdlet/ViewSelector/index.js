@@ -13,6 +13,7 @@ export default function ViewSelector() {
     loadHistoricalResult,
     selectedAccountId,
     selectedReport,
+    setDefaultView,
     runView,
   } = useContext(DataContext);
   const [viewSearch, setViewSearch] = useState('');
@@ -128,7 +129,13 @@ export default function ViewSelector() {
           >
             Update view
           </DropdownItem>
-          <DropdownItem>Set as default view</DropdownItem>
+          <DropdownItem
+            onClick={() => {
+              setDefaultView(selectedReport.id);
+            }}
+          >
+            Set as default view
+          </DropdownItem>
           {!unsavedRun && (
             <DropdownItem
               style={{ color: 'red' }}

@@ -18,6 +18,8 @@ export default function SaveView() {
     accounts,
     selectedView,
     defaultViewId,
+    userSettings,
+    setDefaultView,
     saveView,
     savingView,
     selectedReport,
@@ -51,7 +53,8 @@ export default function SaveView() {
         />
         <br /> <br />
         <Checkbox
-          value={defaultViewId === selectedView.id}
+          defaultChecked={userSettings?.defaultViewId === selectedView.id}
+          checked={defaultViewId === selectedView.id}
           onChange={(e) => {
             if (e.target.checked) {
               setDataState({ defaultViewId: selectedView.id });
@@ -83,7 +86,13 @@ export default function SaveView() {
         <br />
         <Button
           type={Button.TYPE.PRIMARY}
-          onClick={() => saveView()}
+          onClick={async () => {
+            if (defaultViewId === selectedView.id) {
+              await setDefaultView(selectedView.id);
+            }
+
+            saveView();
+          }}
           loading={savingView}
         >
           Save

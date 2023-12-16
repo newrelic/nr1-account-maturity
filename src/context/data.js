@@ -69,9 +69,9 @@ export function useProvideData(props) {
     defaultView: null,
     userViewHistory: null,
     view: { page: 'ReportList', title: 'Maturity Reports' },
-    // view: { page: 'ReportList', title: 'Maturity Reports' },
     sortBy: 'Lowest score',
     savingView: false,
+    userSettings: null,
   });
 
   // for testing
@@ -111,8 +111,11 @@ export function useProvideData(props) {
     const state = {};
     await getUserEmail();
 
-    const defaultView = await getUserReport(); // needs to be removed
+    // const defaultView = await getUserReport(); // needs to be removed
     const userSettings = await getUserSettings();
+    state.userSettings = userSettings;
+    console.log('userSettings =>', userSettings);
+
     const viewConfigs = await fetchViewConfigs();
     const accounts = await getAccounts();
 
@@ -121,25 +124,19 @@ export function useProvideData(props) {
       state.view = {
         page: 'ViewList',
       };
-    } else if (!defaultView || Object.keys(defaultView).length === 0) {
-      state.view = {
-        page: 'CreateDefaultView',
-        // page: 'ReportView', // revert delete
+    }
 
-        title: 'Setup default configuration',
-      };
-    } else {
-      const userViewHistory = await fetchUserViewHistory();
+    if (userSettings.defaultViewId) {
+      const viewConfig = viewConfigs.find(
+        (vc) => vc.id === userSettings.defaultViewId
+      );
 
-      state.view = {
-        page: 'DefaultView',
-        // title: 'Maturity Scores',
-        props: {
-          ...defaultView,
-          isUserDefault: true,
-          selected: userViewHistory?.[0]?.document?.runAt || 0,
-        },
-      };
+      const latestHistory = viewConfig?.history?.[0];
+
+      if (latestHistory) {
+        delete state.view;
+        loadHistoricalResult(viewConfig, latestHistory);
+      }
     }
 
     const user = await NerdGraphQuery.query({ query: userQuery });
@@ -196,6 +193,35 @@ export function useProvideData(props) {
       },
       selectedReport: report,
       view: { page: 'MaturityView', historyId: result.historyId },
+    });
+  };
+
+  const setDefaultView = (id) => {
+    return new Promise((resolve) => {
+      console.log('setting default view id =>', id);
+      const userSettings = dataState?.userSettings || {};
+      userSettings.defaultViewId = id;
+      UserStorageMutation.mutate({
+        actionType: UserStorageMutation.ACTION_TYPE.WRITE_DOCUMENT,
+        collection: 'userSettings',
+        documentId: 'main',
+        document: userSettings,
+      }).then((res) => {
+        if (res.error) {
+          Toast.showToast({
+            title: 'Failed to save',
+            type: Toast.TYPE.CRITICAL,
+          });
+        } else {
+          Toast.showToast({
+            title: 'Saved default successfully',
+            type: Toast.TYPE.NORMAL,
+          });
+        }
+
+        setDataState({ userSettings });
+        resolve(res);
+      });
     });
   };
 
@@ -1186,11 +1212,6 @@ export function useProvideData(props) {
     }
   };
 
-  // store in user settings
-  const setDefaultView = (viewId) => {
-    //
-  };
-
   return {
     ...dataState,
     setDataState,
@@ -1204,5 +1225,6 @@ export function useProvideData(props) {
     fetchUserViewHistory,
     saveView,
     loadHistoricalResult,
+    setDefaultView,
   };
 }
