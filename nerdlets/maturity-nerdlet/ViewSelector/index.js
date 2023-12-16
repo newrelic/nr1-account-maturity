@@ -1,5 +1,5 @@
 import React, { useContext, useMemo, useState } from 'react';
-import { Button, Dropdown, DropdownItem, DropdownSection } from 'nr1';
+import { Button, Dropdown, DropdownItem, DropdownSection, Icon } from 'nr1';
 
 import DataContext from '../../../src/context/data';
 
@@ -12,6 +12,7 @@ export default function ViewSelector() {
     viewConfigs,
     loadHistoricalResult,
     selectedAccountId,
+    selectedReport,
     runView,
   } = useContext(DataContext);
   const [viewSearch, setViewSearch] = useState('');
@@ -47,7 +48,6 @@ export default function ViewSelector() {
               <DropdownItem
                 onClick={() => {
                   if (item.id !== selectedView.id) {
-
                     const viewConfig = viewConfigs.find(
                       (vc) => vc.id === item.id
                     );
@@ -75,6 +75,11 @@ export default function ViewSelector() {
                   fontWeight: selectedView?.id === item.id ? 'bold' : 'none',
                 }}
               >
+                {/* <Icon
+                  color="#F0B400"
+                  style={{ marginTop: '-3px', paddingRight: '3px' }}
+                  type={Icon.TYPE.PROFILES__EVENTS__FAVORITE__WEIGHT_BOLD}
+                /> */}
                 {item.name}
               </DropdownItem>
             ))}
@@ -117,8 +122,7 @@ export default function ViewSelector() {
                   },
                 });
               } else {
-                // take to some edit screen
-                // todo!
+                setDataState({ selectedReport, view: { page: 'EditView' } });
               }
             }}
           >

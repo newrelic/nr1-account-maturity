@@ -40,6 +40,7 @@ export default function CreateView() {
       view.page === 'CreateDefaultView' || view.page === 'EditDefaultView'
         ? 'Untitled'
         : selectedReport?.document?.name || '',
+    description: selectedReport?.document?.description || '',
     entitySearchQuery: selectedReport?.document?.entitySearchQuery || '',
     allProducts:
       allProducts !== undefined && allProducts !== null ? true : allProducts,
@@ -91,105 +92,6 @@ export default function CreateView() {
     });
   };
 
-  // const createView = () => {
-  //   // eslint-disable-next-line
-  //   return new Promise(async (resolve) => {
-  //     const runAt = new Date().getTime();
-
-  //     setState({ creatingView: true });
-
-  //     let esqPassed = false;
-  //     if (state.entitySearchQuery) {
-  //       esqPassed = await validateEntitySearchQuery();
-  //     } else {
-  //       esqPassed = true;
-  //     }
-
-  //     if (esqPassed) {
-  //       const document = {
-  //         name: state.name,
-  //         owner: user,
-  //         accounts: state.accounts,
-  //       };
-  //       if (state.entitySearchQuery) {
-  //         document.entitySearchQuery = state.entitySearchQuery;
-  //       }
-
-  //       if (state.allProducts) {
-  //         document.allProducts = true;
-  //       } else {
-  //         document.products = state.products;
-  //       }
-
-  //       const documentId =
-  //         selectedReport?.id || view?.id || view?.props?.id || uuidv4();
-
-  //       if (
-  //         view.page === 'CreateDefaultView' ||
-  //         view.page === 'EditDefaultView'
-  //       ) {
-  //         UserStorageMutation.mutate({
-  //           actionType: UserStorageMutation.ACTION_TYPE.WRITE_DOCUMENT,
-  //           collection: 'userViews',
-  //           documentId: 'default',
-  //           document,
-  //         }).then(async (res) => {
-  //           if (res.error) {
-  //             Toast.showToast({
-  //               title: 'Failed to save',
-  //               description: 'Check your permissions',
-  //               type: Toast.TYPE.CRITICAL,
-  //             });
-  //           } else {
-  //             Toast.showToast({
-  //               title: selectedReport ? 'Saved' : 'Created',
-  //               type: Toast.TYPE.NORMAL,
-  //             });
-  //             setDataState({ defaultView: document });
-  //           }
-
-  //           // need new handling for default run
-  //           runUserReport({ document, id: 'default', runAt });
-  //           fetchViewConfigs().then(() => {
-  //             setState({ creatingView: false });
-  //             resolve({ res, runAt, documentId });
-  //           });
-  //         });
-  //       } else {
-  //         AccountStorageMutation.mutate({
-  //           accountId: selectedAccountId,
-  //           actionType: AccountStorageMutation.ACTION_TYPE.WRITE_DOCUMENT,
-  //           collection: ACCOUNT_USER_CONFIG_COLLECTION,
-  //           documentId,
-  //           document,
-  //         }).then((res) => {
-  //           if (res.error) {
-  //             Toast.showToast({
-  //               title: 'Failed to save',
-  //               description: 'Check your permissions',
-  //               type: Toast.TYPE.CRITICAL,
-  //             });
-  //           } else {
-  //             Toast.showToast({
-  //               title: selectedReport ? 'Saved' : 'Created',
-  //               type: Toast.TYPE.NORMAL,
-  //             });
-  //           }
-
-  //           runReport({ document, id: documentId, runAt });
-  //           fetchViewConfigs().then(() => {
-  //             setState({ creatingView: false });
-  //             resolve({ res, runAt, documentId });
-  //           });
-  //         });
-  //       }
-  //     } else {
-  //       setState({ creatingView: false });
-  //       resolve(false);
-  //     }
-  //   });
-  // };
-
   return useMemo(() => {
     if ((accounts || []).length === 0) {
       return (
@@ -210,12 +112,21 @@ export default function CreateView() {
     return (
       <>
         <br />
-        <Button
-          type={Button.TYPE.SECONDARY}
-          onClick={() => runView({ id: 'allData', name: 'All data' })}
-        >
-          Skip this step
-        </Button>
+        {view.page === 'EditView' ? (
+          <Button
+            type={Button.TYPE.SECONDARY}
+            onClick={() => setDataState({ view: { page: 'ViewList' } })}
+          >
+            Back
+          </Button>
+        ) : (
+          <Button
+            type={Button.TYPE.SECONDARY}
+            onClick={() => runView({ id: 'allData', name: 'All data' })}
+          >
+            Skip this step
+          </Button>
+        )}
         <br />
         <br />
         <HeadingText>Create View Configuration</HeadingText>
@@ -388,6 +299,7 @@ export default function CreateView() {
                   account: selectedAccountId,
                 },
                 {
+                  id: selectedReport?.id,
                   document: {
                     owner: email,
                     name: state.name,
@@ -406,32 +318,34 @@ export default function CreateView() {
             Save and run
           </Button>
           &nbsp;&nbsp;
-          <Button
-            disabled={runDisabled}
-            onClick={() => {
-              runView(
-                {
-                  name: state.name,
-                  account: selectedAccountId,
-                  unsavedRun: true,
-                },
-                {
-                  document: {
-                    owner: email,
+          {view.page !== 'EditView' && (
+            <Button
+              disabled={runDisabled}
+              onClick={() => {
+                runView(
+                  {
                     name: state.name,
-                    description: state.description,
-                    accounts: state.accounts,
-                    allAccounts: state.accounts.length === accounts.length,
-                    accountsFilter: state.accountsFilter,
-                    allProducts: state.allProducts,
-                    products: state.products,
+                    account: selectedAccountId,
+                    unsavedRun: true,
                   },
-                }
-              );
-            }}
-          >
-            Run
-          </Button>
+                  {
+                    document: {
+                      owner: email,
+                      name: state.name,
+                      description: state.description,
+                      accounts: state.accounts,
+                      allAccounts: state.accounts.length === accounts.length,
+                      accountsFilter: state.accountsFilter,
+                      allProducts: state.allProducts,
+                      products: state.products,
+                    },
+                  }
+                );
+              }}
+            >
+              Run
+            </Button>
+          )}
         </div>
       </>
     );

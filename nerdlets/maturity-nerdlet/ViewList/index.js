@@ -88,10 +88,8 @@ export default function ViewList() {
     },
     {
       label: 'Edit',
-      onClick: (evt, { item, index }) => {
-        alert(
-          `Show details:\nItem: ${index}\n${JSON.stringify(item, null, 2)}`
-        );
+      onClick: (evt, { item }) => {
+        setDataState({ selectedReport: item, view: { page: 'EditView' } });
       },
     },
     {
