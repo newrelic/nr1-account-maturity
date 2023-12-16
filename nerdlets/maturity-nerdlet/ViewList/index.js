@@ -1,6 +1,6 @@
-import React, { useState, useContext, useMemo } from 'react';
-
+import React, { useState, useContext, useMemo, useEffect } from 'react';
 import {
+  nerdlet,
   Table,
   TableHeader,
   TableHeaderCell,
@@ -24,6 +24,13 @@ export default function ViewList() {
   const [sortingType, setSortingType] = useState(
     TableHeaderCell.SORTING_TYPE.NONE
   );
+
+  useEffect(() => {
+    nerdlet.setConfig({
+      actionControls: false,
+    });
+  }, []);
+
 
   const onClickTableHeaderCell = (nextColumn, { nextSortingType }) => {
     if (nextColumn === column) {

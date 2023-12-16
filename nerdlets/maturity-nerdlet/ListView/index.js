@@ -1,6 +1,7 @@
-import React, { useContext, useMemo, useState } from 'react';
-// import DataContext from '../../../src/context/data';
+import React, { useContext, useMemo, useState, useEffect } from 'react';
 import {
+  nerdlet,
+  Icon,
   HeadingText,
   Table,
   TableHeader,
@@ -69,7 +70,7 @@ export default function ListView(props) {
 
     return (
       <div>
-        <ScoreBar {...props} data={rowData} selectedReport={selectedReport}/>
+        <ScoreBar {...props} data={rowData} selectedReport={selectedReport} />
 
         <Modal hidden={!modal} onClose={() => setModal(null)}>
           <HeadingText type={HeadingText.TYPE.HEADING_3}>

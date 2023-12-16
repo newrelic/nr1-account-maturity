@@ -1,5 +1,5 @@
-import React, { useContext, useMemo } from 'react';
-import { Spinner } from 'nr1';
+import React, { useContext, useMemo, useEffect } from 'react';
+import { Spinner, nerdlet, Icon } from 'nr1';
 import DataContext from '../../../src/context/data';
 import ListView from '../ListView';
 import rules from '../../../src/rules';
@@ -19,7 +19,30 @@ export default function MaturityView(props) {
     view,
     selectedView,
     selectedReport,
+    setDataState,
   } = useContext(DataContext);
+
+  useEffect(() => {
+    nerdlet.setConfig({
+      actionControls: true,
+      actionControlButtons: [
+        {
+          label: 'New view',
+          type: 'secondary',
+          iconType: Icon.TYPE.INTERFACE__SIGN__PLUS,
+          onClick: () =>
+            setDataState({
+              view: {
+                page: 'CreateView',
+                title: 'Create New View',
+              },
+              selectedReport: {},
+              selectedView: {}
+            }),
+        },
+      ],
+    });
+  }, []);
 
   console.log(viewSegment, selectedView, tempAllData);
 
@@ -130,7 +153,6 @@ export default function MaturityView(props) {
         </>
       );
     }
-
 
     const renderSegment = (data, scoredCollection) => {
       // eslint-disable-next-line prettier/prettier

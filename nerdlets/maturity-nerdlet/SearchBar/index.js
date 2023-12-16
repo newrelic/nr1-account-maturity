@@ -48,6 +48,8 @@ export default function SearchBar(props) {
                 page: 'CreateDefaultView',
                 title: 'Create View Configuration',
               },
+              selectedReport: {},
+              selectedView: {},
             });
           }}
         >

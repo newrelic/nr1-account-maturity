@@ -1,5 +1,6 @@
-import React, { useMemo, useContext } from 'react';
+import React, { useMemo, useContext, useEffect } from 'react';
 import {
+  nerdlet,
   EmptyState,
   TextField,
   Toast,
@@ -31,6 +32,12 @@ export default function CreateView() {
     setDataState,
     view,
   } = useContext(DataContext);
+
+  useEffect(() => {
+    nerdlet.setConfig({
+      actionControls: false,
+    });
+  }, []);
 
   const allProducts = selectedReport?.document?.allProducts;
 
