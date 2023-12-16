@@ -18,6 +18,7 @@ export default function ViewSelector() {
     runView,
   } = useContext(DataContext);
   const [viewSearch, setViewSearch] = useState('');
+  const favorites = userSettings?.favorites || [];
 
   return useMemo(() => {
     const configs = viewConfigs
@@ -46,45 +47,52 @@ export default function ViewSelector() {
           onSearch={(e) => setViewSearch(e.target.value)}
         >
           <DropdownSection title="Views">
-            {filteredItems.map((item) => (
-              <DropdownItem
-                onClick={() => {
-                  if (item.id !== selectedView.id) {
-                    const viewConfig = viewConfigs.find(
-                      (vc) => vc.id === item.id
-                    );
-
-                    const previousResult = viewConfig?.history?.[0];
-                    if (previousResult) {
-                      console.log('load previous', viewConfig);
-                      loadHistoricalResult(viewConfig, previousResult);
-                    } else if (viewConfig) {
-                      console.log('fresh run', viewConfig);
-                      runView(
-                        {
-                          name: viewConfig.document.name,
-                          account: selectedAccountId,
-                        },
-                        { ...viewConfig },
-                        false,
-                        true
+            {filteredItems
+              .sort(
+                (a, b) => favorites.includes(b.id) - favorites.includes(a.id)
+              )
+              .map((item) => (
+                <DropdownItem
+                  onClick={() => {
+                    if (item.id !== selectedView.id) {
+                      const viewConfig = viewConfigs.find(
+                        (vc) => vc.id === item.id
                       );
+
+                      const previousResult = viewConfig?.history?.[0];
+                      if (previousResult) {
+                        console.log('load previous', viewConfig);
+                        loadHistoricalResult(viewConfig, previousResult);
+                      } else if (viewConfig) {
+                        console.log('fresh run', viewConfig);
+                        runView(
+                          {
+                            name: viewConfig.document.name,
+                            account: selectedAccountId,
+                          },
+                          { ...viewConfig },
+                          false,
+                          true
+                        );
+                      }
                     }
-                  }
-                }}
-                key={item.id}
-                style={{
-                  fontWeight: selectedView?.id === item.id ? 'bold' : 'none',
-                }}
-              >
-                {/* <Icon
-                  color="#F0B400"
-                  style={{ marginTop: '-3px', paddingRight: '3px' }}
-                  type={Icon.TYPE.PROFILES__EVENTS__FAVORITE__WEIGHT_BOLD}
-                /> */}
-                {item.name}
-              </DropdownItem>
-            ))}
+                  }}
+                  key={item.id}
+                  style={{
+                    fontWeight: selectedView?.id === item.id ? 'bold' : 'none',
+                  }}
+                >
+                  {favorites.includes(item.id) && (
+                    <Icon
+                      color="#F0B400"
+                      style={{ marginTop: '-3px', paddingRight: '3px' }}
+                      type={Icon.TYPE.PROFILES__EVENTS__FAVORITE__WEIGHT_BOLD}
+                    />
+                  )}
+
+                  {item.name}
+                </DropdownItem>
+              ))}
           </DropdownSection>
 
           <DropdownSection title="">

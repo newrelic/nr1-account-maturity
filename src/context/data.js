@@ -225,6 +225,45 @@ export function useProvideData(props) {
     });
   };
 
+  const toggleFavoriteView = (id) => {
+    return new Promise((resolve) => {
+      console.log('toggle favorite view id =>', id);
+      const userSettings = dataState?.userSettings || {};
+      const favorites = userSettings?.favorites || [];
+
+      const foundIndex = favorites.indexOf(id);
+      if (foundIndex >= 0) {
+        favorites.splice(foundIndex, 1);
+      } else {
+        favorites.push(id);
+      }
+
+      userSettings.favorites = favorites;
+
+      UserStorageMutation.mutate({
+        actionType: UserStorageMutation.ACTION_TYPE.WRITE_DOCUMENT,
+        collection: 'userSettings',
+        documentId: 'main',
+        document: userSettings,
+      }).then((res) => {
+        if (res.error) {
+          Toast.showToast({
+            title: 'Failed to save',
+            type: Toast.TYPE.CRITICAL,
+          });
+        } else {
+          Toast.showToast({
+            title: 'Updated successfully',
+            type: Toast.TYPE.NORMAL,
+          });
+        }
+
+        setDataState({ userSettings });
+        resolve(res);
+      });
+    });
+  };
+
   const getUserEmail = () => {
     return new Promise((resolve) => {
       NerdGraphQuery.query({
@@ -1226,5 +1265,6 @@ export function useProvideData(props) {
     saveView,
     loadHistoricalResult,
     setDefaultView,
+    toggleFavoriteView,
   };
 }

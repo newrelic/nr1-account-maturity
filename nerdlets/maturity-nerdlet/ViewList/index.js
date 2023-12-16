@@ -6,6 +6,7 @@ import {
   TableHeaderCell,
   TableRow,
   TableRowCell,
+  FavoriteTableRowCell,
 } from 'nr1';
 
 import DataContext from '../../../src/context/data';
@@ -19,18 +20,20 @@ export default function ViewList() {
     runView,
     loadHistoricalResult,
     selectedAccountId,
+    userSettings,
+    toggleFavoriteView,
   } = useContext(DataContext);
   const [column, setColumn] = useState(0);
   const [sortingType, setSortingType] = useState(
     TableHeaderCell.SORTING_TYPE.NONE
   );
+  const favorites = userSettings?.favorites || [];
 
   useEffect(() => {
     nerdlet.setConfig({
       actionControls: false,
     });
   }, []);
-
 
   const onClickTableHeaderCell = (nextColumn, { nextSortingType }) => {
     if (nextColumn === column) {
@@ -106,15 +109,17 @@ export default function ViewList() {
     },
   ];
 
-  const filteredConfigs = viewConfigs.filter((c) =>
-    c.document.name.toLowerCase().includes(search.toLowerCase())
-  );
+  const filteredConfigs = viewConfigs
+    .filter((c) => c.document.name.toLowerCase().includes(search.toLowerCase()))
+    .sort((a, b) => favorites.includes(b.id) - favorites.includes(a.id));
 
   return useMemo(() => {
     return (
       <div>
         <Table items={filteredConfigs}>
           <TableHeader>
+            <TableHeaderCell width="56px" />
+
             {headers.map((h, i) => (
               // eslint-disable-next-line react/jsx-key
               <TableHeaderCell
@@ -133,6 +138,11 @@ export default function ViewList() {
           {({ item }) => {
             return (
               <TableRow actions={actions}>
+                <FavoriteTableRowCell
+                  onChange={() => toggleFavoriteView(item.id)}
+                  checked={favorites.includes(item.id)}
+                />
+
                 {headers.map((header) => {
                   if (header.key === 'View') {
                     const previousResult = item?.history?.[0];
@@ -173,5 +183,5 @@ export default function ViewList() {
         </Table>
       </div>
     );
-  }, [viewConfigs, search, column, sortingType]);
+  }, [viewConfigs, search, column, sortingType, JSON.stringify(favorites)]);
 }
