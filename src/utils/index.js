@@ -18,7 +18,6 @@ export const chunkString = (str, chunkSize) => {
   return chunks;
 };
 
-
 export const scoreToColor = (value) => {
   if (value === null || value === undefined) {
     return { color: '#9ea5a9' };

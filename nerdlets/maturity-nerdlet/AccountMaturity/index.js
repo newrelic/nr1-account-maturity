@@ -74,23 +74,23 @@ export default function AccountMaturity(props) {
             <LayoutItem>
               {(view.page === 'MaturityView' ||
                 view.page === 'DefaultView') && (
-                  <div
-                    style={{
-                      paddingBottom: '30px',
-                      paddingTop: '5px',
-                      paddingLeft: '5px',
-                      marginBottom: '5px',
-                      backgroundColor: 'white',
-                    }}
-                  >
-                    <div style={{ float: 'left' }}>
-                      <ViewSegmentSelector />
-                    </div>
-                    <div style={{ float: 'right' }}>
-                      <ViewSelector />
-                    </div>
+                <div
+                  style={{
+                    paddingBottom: '30px',
+                    paddingTop: '5px',
+                    paddingLeft: '5px',
+                    marginBottom: '5px',
+                    backgroundColor: 'white',
+                  }}
+                >
+                  <div style={{ float: 'left' }}>
+                    <ViewSegmentSelector />
                   </div>
-                )}
+                  <div style={{ float: 'right' }}>
+                    <ViewSelector />
+                  </div>
+                </div>
+              )}
               {view.page === 'ViewList' && <SearchBar width={props?.width} />}
 
               <div

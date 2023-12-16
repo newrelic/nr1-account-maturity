@@ -4,8 +4,16 @@ import { Button, Dropdown, DropdownItem, DropdownSection } from 'nr1';
 import DataContext from '../../../src/context/data';
 
 export default function ViewSelector() {
-  const { view, selectedView, setDataState, unsavedRun, viewConfigs } =
-    useContext(DataContext);
+  const {
+    view,
+    selectedView,
+    setDataState,
+    unsavedRun,
+    viewConfigs,
+    loadHistoricalResult,
+    selectedAccountId,
+    runView,
+  } = useContext(DataContext);
   const [viewSearch, setViewSearch] = useState('');
 
   return useMemo(() => {
@@ -39,7 +47,27 @@ export default function ViewSelector() {
               <DropdownItem
                 onClick={() => {
                   if (item.id !== selectedView.id) {
-                    setDataState({ selectedView: item });
+
+                    const viewConfig = viewConfigs.find(
+                      (vc) => vc.id === item.id
+                    );
+
+                    const previousResult = viewConfig?.history?.[0];
+                    if (previousResult) {
+                      console.log('load previous', viewConfig);
+                      loadHistoricalResult(viewConfig, previousResult);
+                    } else if (viewConfig) {
+                      console.log('fresh run', viewConfig);
+                      runView(
+                        {
+                          name: viewConfig.document.name,
+                          account: selectedAccountId,
+                        },
+                        { ...viewConfig },
+                        false,
+                        true
+                      );
+                    }
                   }
                 }}
                 key={item.id}

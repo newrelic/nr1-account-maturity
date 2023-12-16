@@ -10,7 +10,6 @@ import Summary from '../Summary';
 import SaveView from '../SaveView';
 
 export default function MaturityView(props) {
-  // const { selected, selectedAccountId, document, isUserDefault } = props;
   const {
     viewGroupBy,
     runningReport,
@@ -18,6 +17,7 @@ export default function MaturityView(props) {
     viewSegment,
     view,
     selectedView,
+    selectedReport,
   } = useContext(DataContext);
 
   console.log(viewSegment, selectedView, tempAllData);
@@ -148,6 +148,7 @@ export default function MaturityView(props) {
         }
       }
     };
+
     return (
       <div style={{ paddingTop: '10px' }}>
         <SaveView />
@@ -162,6 +163,8 @@ export default function MaturityView(props) {
     selectedView,
     viewSegment,
     selectedData,
+    scoredCollection,
     viewSegment,
+    selectedReport,
   ]);
 }

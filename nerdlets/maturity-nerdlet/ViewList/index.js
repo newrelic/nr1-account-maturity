@@ -136,6 +136,17 @@ export default function ViewList() {
                     if (previousResult) {
                       onClickHandler = () =>
                         loadHistoricalResult(item, previousResult);
+                    } else {
+                      onClickHandler = () =>
+                        runView(
+                          {
+                            name: item.document.name,
+                            account: selectedAccountId,
+                          },
+                          { ...item },
+                          false,
+                          true
+                        );
                     }
 
                     return (

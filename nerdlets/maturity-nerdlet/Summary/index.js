@@ -6,7 +6,7 @@ import SummaryCard from './card';
 
 export default function Summary(props) {
   const { scoredCollection } = props;
-  const { viewGroupBy } = useContext(DataContext);
+  const { viewGroupBy, selectedView } = useContext(DataContext);
 
   return useMemo(() => {
     if (!scoredCollection || scoredCollection.length === 0) {
@@ -72,5 +72,5 @@ export default function Summary(props) {
         </div>
       </>
     );
-  }, [scoredCollection, viewGroupBy]);
+  }, [scoredCollection, viewGroupBy, selectedView]);
 }

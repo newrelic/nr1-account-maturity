@@ -1,4 +1,4 @@
-import React, { useMemo, useState } from 'react';
+import React, { useContext, useMemo, useState } from 'react';
 // import DataContext from '../../../src/context/data';
 import {
   HeadingText,
@@ -16,6 +16,7 @@ import ScoreBar from '../ScoreBar';
 import rules from '../../../src/rules';
 import { percentageToStatus, scoreToColor } from '../../../src/utils';
 import { ProgressBar } from '@newrelic/nr-labs-components';
+import DataContext from '../../../src/context/data';
 
 export default function ListView(props) {
   const [column, setColumn] = useState(0);
@@ -23,6 +24,7 @@ export default function ListView(props) {
   const [sortingType, setSortingType] = useState(
     TableHeaderCell.SORTING_TYPE.NONE
   );
+  const { selectedView } = useContext(DataContext);
 
   const onClickTableHeaderCell = (nextColumn, { nextSortingType }) => {
     if (nextColumn === column) {
@@ -251,5 +253,5 @@ export default function ListView(props) {
         </Table>
       </div>
     );
-  }, [column, sortingType, modal]);
+  }, [column, sortingType, modal, selectedView]);
 }
