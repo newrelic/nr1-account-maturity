@@ -8,6 +8,7 @@ import { STATUSES } from '../../../src/constants';
 import Navigator from '../Navigator';
 import Summary from '../Summary';
 import SaveView from '../SaveView';
+import TrendView from '../TrendView';
 
 export default function MaturityView(props) {
   const {
@@ -142,6 +143,9 @@ export default function MaturityView(props) {
         }
         case 'summary': {
           return <Summary {...data} scoredCollection={scoredCollection} />;
+        }
+        case 'trends': {
+          return <TrendView {...data} />;
         }
         default: {
           return 'Unknown Segment View';

@@ -14,6 +14,7 @@ export default function ViewSelector() {
     selectedAccountId,
     selectedReport,
     setDefaultView,
+    userSettings,
     runView,
   } = useContext(DataContext);
   const [viewSearch, setViewSearch] = useState('');
@@ -129,13 +130,24 @@ export default function ViewSelector() {
           >
             Update view
           </DropdownItem>
-          <DropdownItem
-            onClick={() => {
-              setDefaultView(selectedReport.id);
-            }}
-          >
-            Set as default view
-          </DropdownItem>
+          {userSettings?.defaultViewId === selectedReport.id ? (
+            <DropdownItem
+              onClick={() => {
+                setDefaultView(null);
+              }}
+            >
+              Unset as default view
+            </DropdownItem>
+          ) : (
+            <DropdownItem
+              onClick={() => {
+                setDefaultView(selectedReport.id);
+              }}
+            >
+              Set as default view
+            </DropdownItem>
+          )}
+
           {!unsavedRun && (
             <DropdownItem
               style={{ color: 'red' }}

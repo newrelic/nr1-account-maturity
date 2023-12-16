@@ -214,7 +214,7 @@ export function useProvideData(props) {
           });
         } else {
           Toast.showToast({
-            title: 'Saved default successfully',
+            title: 'Saved successfully',
             type: Toast.TYPE.NORMAL,
           });
         }
