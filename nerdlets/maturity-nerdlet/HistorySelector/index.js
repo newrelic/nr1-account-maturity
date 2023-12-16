@@ -20,7 +20,7 @@ export default function HistorySelector() {
           labelInline
           onChange={(evt, value) => {
             const result = (viewConfig.history || []).find(
-              (h) => h.id === value
+              (h) => h.historyId === value
             );
 
             if (result) {
@@ -31,7 +31,7 @@ export default function HistorySelector() {
         >
           {(viewConfig?.history || []).map((h) => {
             return (
-              <SelectItem key={h.id} value={h.id}>
+              <SelectItem key={h.historyId} value={h.historyId}>
                 {new Date(h?.document?.runAt || 0).toLocaleString()}
               </SelectItem>
             );

@@ -19,7 +19,7 @@ import {
 } from '../queries/data';
 import rules from '../rules';
 import { v4 as uuidv4 } from 'uuid';
-import { chunk, generateAccountSummary } from '../utils';
+import { chunk, chunkString, generateAccountSummary } from '../utils';
 import {
   ACCOUNT_CONFIG_COLLECTION,
   ACCOUNT_HISTORY_COLLECTION,
@@ -93,11 +93,21 @@ export function useProvideData(props) {
     console.log(userView, userHistory);
   };
 
+  const wipeAccountHistory = async () => {
+    const res = await AccountStorageMutation.mutate({
+      accountId: props?.accountId || dataState?.selectedAccountId,
+      actionType: AccountStorageMutation.ACTION_TYPE.DELETE_COLLECTION,
+      collection: ACCOUNT_HISTORY_COLLECTION,
+    });
+    console.log('account history deleted resp =>', res);
+  };
+
   // handle initial load
   useEffect(async () => {
     // await wipeUserDetails();
     // eslint-disable-next-line
     console.log('DataProvider initialized');
+    // wipeAccountHistory(); // testing
     const state = {};
     await getUserEmail();
 
@@ -182,10 +192,10 @@ export function useProvideData(props) {
         ...report,
         id: report.id,
         name: report?.document?.name,
-        historyId: result.id,
+        historyId: result.historyId,
       },
       selectedReport: report,
-      view: { page: 'MaturityView', historyId: result.id },
+      view: { page: 'MaturityView', historyId: result.historyId },
     });
   };
 
@@ -356,7 +366,7 @@ export function useProvideData(props) {
     if (doSaveView) {
       saveView(report, prepareState.tempAllData);
     } else if (!doSaveView && saveHistory) {
-      saveResult(prepareState.tempAllData);
+      await saveResult(prepareState.tempAllData);
     }
 
     setDataState(prepareState);
@@ -448,95 +458,42 @@ export function useProvideData(props) {
       const accountId = dataState.selectedAccountId || props?.accountId;
 
       if (data) {
-        await AccountStorageMutation.mutate({
-          accountId,
-          actionType: AccountStorageMutation.ACTION_TYPE.WRITE_DOCUMENT,
-          collection: ACCOUNT_HISTORY_COLLECTION,
-          documentId: uuidv4(),
-          document: {
+        // this is a large chunk of data and seemingly not needed after processing
+        // this can be removed if a legitimate reason is found
+        delete data.entitiesByAccount;
+
+        data.accountId = accountId;
+        const historyId = uuidv4();
+
+        const dataString = JSON.stringify(data);
+        const chunkedData = chunkString(dataString, 824 * 1024); // browser shows between  ~930-970kB per chunked element
+        console.log('data to save', chunkedData);
+
+        const writePromises = chunkedData.map((chunk, chunkIndex) =>
+          AccountStorageMutation.mutate({
             accountId,
-            ...data,
-          },
+            actionType: AccountStorageMutation.ACTION_TYPE.WRITE_DOCUMENT,
+            collection: ACCOUNT_HISTORY_COLLECTION,
+            documentId: uuidv4(),
+            document: {
+              accountId,
+              historyId,
+              viewId: data.documentId,
+              runAt: data.runAt,
+              chunkIndex,
+              chunk,
+            },
+          })
+        );
+
+        Promise.all(writePromises).then((results) => {
+          fetchViewConfigs().then(() => {
+            resolve(results);
+          });
         });
+      } else {
+        resolve();
       }
-      resolve();
-    });
-  };
-
-  const runUserReport = async (selectedReport) => {
-    console.log('running user report', selectedReport);
-    setDataState({
-      runningReport: true,
-      [`runningReport.${selectedReport.id}`]: true,
-      entitiesByAccount: null,
-      summarizedScores: null,
-      accountSummaries: null,
-    });
-
-    const report = selectedReport || dataState.selectedReport;
-    const accounts = [...report.document.accounts].map((id) => ({
-      ...[...dataState.accounts].find((a) => a.id === id),
-    }));
-
-    const { entitiesByAccount, summarizedScores } =
-      await getEntitiesForAccounts(
-        accounts,
-        report.document?.entitySearchQuery || '',
-        dataState.agentReleases,
-        dataState.dataDictionary
-      );
-
-    const accountSummaries = generateAccountSummary(
-      entitiesByAccount,
-      dataState?.sortBy,
-      selectedReport
-    );
-
-    const totalScorePercentage =
-      accountSummaries.reduce(
-        (n, { scorePercentage }) => n + (scorePercentage || 0),
-        0
-      ) / accountSummaries.length;
-
-    const runAt = selectedReport?.runAt || new Date().getTime();
-
-    const res = await UserStorageMutation.mutate({
-      accountId: dataState.selectedAccountId,
-      actionType: UserStorageMutation.ACTION_TYPE.WRITE_DOCUMENT,
-      collection: ACCOUNT_HISTORY_COLLECTION,
-      documentId: uuidv4(),
-      document: {
-        reportId: report.id,
-        runAt,
-        totalScorePercentage,
-        accountSummaries,
-        entitySearchQuery: report.document?.entitySearchQuery,
-      },
-    });
-
-    if (res.error) {
-      Toast.showToast({
-        title: 'Failed to save',
-        description: 'Check your permissions',
-        type: Toast.TYPE.CRITICAL,
-      });
-    } else {
-      Toast.showToast({
-        title: 'Saved result successfully',
-        description: 'Refreshing history...',
-        type: Toast.TYPE.NORMAL,
-      });
-    }
-
-    await fetchUserViewHistory();
-
-    setDataState({
-      runningReport: false,
-      [`runningReport.${selectedReport.id}`]: false,
-      lastRunAt: runAt,
-      entitiesByAccount,
-      summarizedScores,
-      accountSummaries,
     });
   };
 
@@ -614,6 +571,10 @@ export function useProvideData(props) {
       (vh) => !viewConfigs.find((rc) => rc.id === vh?.document?.documentId)
     );
 
+    console.log(reportsToDelete);
+
+    reportsToDelete = [];
+
     if (reportsToDelete.length > 0) {
       const deleteDocPromises = reportsToDelete.map((r) =>
         AccountStorageMutation.mutate({
@@ -642,7 +603,7 @@ export function useProvideData(props) {
       const accountId =
         incomingAccountId || dataState.selectedAccountId || props?.accountId;
 
-      const viewHistory =
+      let unmergedViewHistory =
         (
           await AccountStorageQuery.query({
             accountId,
@@ -650,13 +611,46 @@ export function useProvideData(props) {
           })
         )?.data || [];
 
+      const groupedHistory = {};
+
+      unmergedViewHistory.forEach((h) => {
+        const historyId = h?.document?.historyId;
+        if (historyId) {
+          if (!groupedHistory[historyId]) {
+            groupedHistory[historyId] = [h];
+          } else {
+            groupedHistory[historyId].push(h);
+          }
+        }
+      });
+
+      const viewHistory = [];
+
+      Object.keys(groupedHistory).forEach((historyId) => {
+        const chunks = groupedHistory[historyId];
+        const mergedChunksString = chunks
+          .sort((a, b) => a.document.chunkIndex - b.document.chunkIndex)
+          .map((c) => c.document.chunk)
+          .join('');
+
+        try {
+          const mergedChunksJson = JSON.parse(mergedChunksString);
+          const builtDocument = {
+            historyId,
+            document: mergedChunksJson,
+          };
+          viewHistory.push(builtDocument);
+        } catch (e) {
+          console.log('failed to re-merge history chunks');
+        }
+      });
+
       setDataState({
         fetchingViewHistory: false,
         viewHistory: viewHistory.sort(
           (a, b) => b.document.runAt - a.document.runAt
         ),
       });
-      console.log('history count', viewHistory.length);
       resolve(viewHistory);
     });
   };
@@ -1188,7 +1182,6 @@ export function useProvideData(props) {
       ) {
         setDefaultView(dataState.defaultViewId);
       }
-      fetchViewConfigs();
       setDataState(prepareState);
     }
   };
@@ -1208,7 +1201,6 @@ export function useProvideData(props) {
     deleteReportConfig,
     checkUser,
     runReport,
-    runUserReport,
     fetchUserViewHistory,
     saveView,
     loadHistoricalResult,

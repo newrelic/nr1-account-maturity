@@ -130,26 +130,9 @@ export default function MaturityView(props) {
       );
     }
 
-    // const history = isUserDefault
-    //   ? userViewHistory
-    //   : viewHistory.filter(
-    //       (
-    //         h //eslint-disable-line
-    //       ) => h.document.reportId === (view?.id || view?.props?.id) //eslint-disable-line
-    //     ); //eslint-disable-line
-
-    // if (history.length === 0) {
-    //   return (
-    //     <div style={{ textAlign: 'center', paddingTop: '15px' }}>
-    //       No history for this view. Click &apos;Run&apos; to generate this view.
-    //       <br />
-    //       {/* <br />
-    //       <Button sizeType={Button.SIZE_TYPE.SMALL}>Run View</Button> */}
-    //     </div>
-    //   );
-    // }
 
     const renderSegment = (data, scoredCollection) => {
+      // eslint-disable-next-line prettier/prettier
       switch (viewSegment) {
         case 'list': {
           return <ListView {...data} scoredCollection={scoredCollection} />;

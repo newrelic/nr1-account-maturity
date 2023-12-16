@@ -1,11 +1,9 @@
 import React, { useContext } from 'react';
 import { EmptyState, Layout, LayoutItem } from 'nr1';
-
 import DataContext from '../../../src/context/data';
 import CreateView from '../CreateView';
 import MaturityView from '../MaturityView';
 import Loading from '../Loading';
-//
 import ViewSegmentSelector from '../ViewSegmentSelector';
 import ViewSelector from '../ViewSelector';
 import ViewList from '../ViewList';
@@ -17,7 +15,9 @@ export default function AccountMaturity(props) {
     useContext(DataContext);
 
   const renderView = () => {
-    switch (view.page) {
+    const page = view.page;
+    // eslint-disable-next-line prettier/prettier
+    switch (page) {
       case 'Loading': {
         return <Loading {...(view.props || {})} />;
       }
@@ -74,23 +74,23 @@ export default function AccountMaturity(props) {
             <LayoutItem>
               {(view.page === 'MaturityView' ||
                 view.page === 'DefaultView') && (
-                <div
-                  style={{
-                    paddingBottom: '30px',
-                    paddingTop: '5px',
-                    paddingLeft: '5px',
-                    marginBottom: '5px',
-                    backgroundColor: 'white',
-                  }}
-                >
-                  <div style={{ float: 'left' }}>
-                    <ViewSegmentSelector />
+                  <div
+                    style={{
+                      paddingBottom: '30px',
+                      paddingTop: '5px',
+                      paddingLeft: '5px',
+                      marginBottom: '5px',
+                      backgroundColor: 'white',
+                    }}
+                  >
+                    <div style={{ float: 'left' }}>
+                      <ViewSegmentSelector />
+                    </div>
+                    <div style={{ float: 'right' }}>
+                      <ViewSelector />
+                    </div>
                   </div>
-                  <div style={{ float: 'right' }}>
-                    <ViewSelector />
-                  </div>
-                </div>
-              )}
+                )}
               {view.page === 'ViewList' && <SearchBar width={props?.width} />}
 
               <div

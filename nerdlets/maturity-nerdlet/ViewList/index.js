@@ -12,8 +12,14 @@ import DataContext from '../../../src/context/data';
 import { calculatePercentageChange } from '../../../src/utils';
 
 export default function ViewList() {
-  const { viewConfigs, search, setDataState, runView, loadHistoricalResult } =
-    useContext(DataContext);
+  const {
+    viewConfigs,
+    search,
+    setDataState,
+    runView,
+    loadHistoricalResult,
+    selectedAccountId,
+  } = useContext(DataContext);
   const [column, setColumn] = useState(0);
   const [sortingType, setSortingType] = useState(
     TableHeaderCell.SORTING_TYPE.NONE
@@ -34,7 +40,6 @@ export default function ViewList() {
     {
       key: 'Last run',
       value: ({ item }) => {
-        console.log(item);
         const runAt = item?.history?.[0]?.document?.runAt;
         if (runAt) {
           return new Date(runAt).toLocaleString();
@@ -73,7 +78,7 @@ export default function ViewList() {
         runView(
           {
             name: item.document.name,
-            account: true,
+            account: selectedAccountId,
           },
           { ...item },
           false,

@@ -39,8 +39,6 @@ export default function ScoreBar(props) {
     return d;
   });
 
-  console.log(data);
-
   return (
     <>
       <table style={{ width: '100%' }}>
@@ -76,9 +74,8 @@ export default function ScoreBar(props) {
                   onClick={() =>
                     csvDownload({
                       data: data,
-                      filename: `${new Date().getTime()}-${
-                        props.viewGroupBy || 'account'
-                      }-summary-export.csv`,
+                      filename: `${new Date().getTime()}-${props.viewGroupBy || 'account'
+                        }-summary-export.csv`,
                       delimiter: ',',
                     })
                   }

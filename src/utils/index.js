@@ -7,6 +7,18 @@ export const chunk = (arr, size) =>
     arr.slice(i * size, i * size + size)
   );
 
+export const chunkString = (str, chunkSize) => {
+  const chunks = [];
+  const length = str.length;
+
+  for (let i = 0; i < length; i += chunkSize) {
+    chunks.push(str.slice(i, i + chunkSize));
+  }
+
+  return chunks;
+};
+
+
 export const scoreToColor = (value) => {
   if (value === null || value === undefined) {
     return { color: '#9ea5a9' };
