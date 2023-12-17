@@ -46,7 +46,31 @@ export default function ViewList() {
 
   const headers = [
     { key: 'View', value: ({ item }) => item.document?.name },
-    { key: 'Description', value: ({ item }) => item.document?.description },
+    {
+      key: 'Description',
+      value: ({ item }) => item.document?.description,
+      onClick: ({ item }) => {
+        const previousResult = item?.history?.[0];
+        let onClickHandler = undefined;
+
+        if (previousResult) {
+          onClickHandler = () => loadHistoricalResult(item, previousResult);
+        } else {
+          onClickHandler = () =>
+            runView(
+              {
+                name: item.document.name,
+                account: selectedAccountId,
+              },
+              { ...item },
+              false,
+              true
+            );
+        }
+
+        return onClickHandler;
+      },
+    },
     {
       key: 'Last run',
       value: ({ item }) => {
@@ -172,7 +196,12 @@ export default function ViewList() {
                   }
 
                   return (
-                    <TableRowCell key={header}>
+                    <TableRowCell
+                      key={header}
+                      onClick={
+                        header.onClick ? header.onClick({ item }) : undefined
+                      }
+                    >
                       {header.value({ item })}
                     </TableRowCell>
                   );

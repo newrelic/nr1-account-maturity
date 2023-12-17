@@ -295,19 +295,6 @@ export function useProvideData(props) {
     });
   };
 
-  const getUserReport = () => {
-    return new Promise((resolve) => {
-      UserStorageQuery.query({
-        collection: 'userViews',
-        documentId: 'default',
-      }).then((res) => {
-        const defaultView = res?.data || {};
-        setDataState({ defaultView });
-        resolve(defaultView);
-      });
-    });
-  };
-
   const runView = async (
     selectedView,
     selectedReport,
