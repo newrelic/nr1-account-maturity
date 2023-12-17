@@ -1,6 +1,7 @@
 import React, { createContext, useEffect } from 'react';
 import { useSetState } from '@mantine/hooks';
 import {
+  navigation,
   NerdGraphQuery,
   Toast,
   UserStorageQuery,
@@ -159,8 +160,8 @@ export function useProvideData(props) {
     const { accountId } = props;
     console.log('account id changed => ', accountId);
     if (accountId === 'cross-account') {
-      console.log('cross account should not be selected, reloading');
-      window.location.reload();
+      console.log('cross account should not be selected, reloading...');
+      navigation.openNerdlet({ id: 'maturity-nerdlet' });
     } else {
       if (!accountsInit.find(a => a.id === accountId)) {
         Toast.showToast({

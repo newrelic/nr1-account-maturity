@@ -18,7 +18,7 @@ export default function AccountMaturity(props) {
     const page = view.page;
     // eslint-disable-next-line prettier/prettier
     switch (page) {
-      case 'Loading': {
+      case 'Loading': { 
         return <Loading {...(view.props || {})} />;
       }
       case 'MaturityView': {
