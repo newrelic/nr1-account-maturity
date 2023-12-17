@@ -68,7 +68,7 @@ export function useProvideData(props) {
     defaultViewId: null,
     defaultView: null,
     userViewHistory: null,
-    view: { page: 'ReportList', title: 'Maturity Reports' },
+    view: { page: 'CreateView', title: 'Create New View' },
     sortBy: 'Lowest score',
     savingView: false,
     userSettings: null,
@@ -120,7 +120,8 @@ export function useProvideData(props) {
     const accounts = await getAccounts();
 
     // default view not configured, request configuration
-    if (viewConfigs.length > 0) {
+    // there will always be at least one view config because of allAata
+    if (viewConfigs.length > 1) {
       state.view = {
         page: 'ViewList',
       };
@@ -128,7 +129,7 @@ export function useProvideData(props) {
 
     if (userSettings.defaultViewId) {
       const viewConfig = viewConfigs.find(
-        (vc) => vc.id === userSettings.defaultViewId
+        vc => vc.id === userSettings.defaultViewId
       );
 
       const latestHistory = viewConfig?.history?.[0];
@@ -137,6 +138,12 @@ export function useProvideData(props) {
         delete state.view;
         loadHistoricalResult(viewConfig, latestHistory);
       }
+      // there will always be at least one view config because of allAata
+    } else if (viewConfigs.length === 1) {
+      state.view = {
+        page: 'CreateNewView',
+        title: 'Create New View',
+      };
     }
 
     const user = await NerdGraphQuery.query({ query: userQuery });
@@ -196,8 +203,8 @@ export function useProvideData(props) {
     });
   };
 
-  const setDefaultView = (id) => {
-    return new Promise((resolve) => {
+  const setDefaultView = id => {
+    return new Promise(resolve => {
       console.log('setting default view id =>', id);
       const userSettings = dataState?.userSettings || {};
       userSettings.defaultViewId = id;
@@ -206,7 +213,7 @@ export function useProvideData(props) {
         collection: 'userSettings',
         documentId: 'main',
         document: userSettings,
-      }).then((res) => {
+      }).then(res => {
         if (res.error) {
           Toast.showToast({
             title: 'Failed to save',
@@ -225,8 +232,8 @@ export function useProvideData(props) {
     });
   };
 
-  const toggleFavoriteView = (id) => {
-    return new Promise((resolve) => {
+  const toggleFavoriteView = id => {
+    return new Promise(resolve => {
       console.log('toggle favorite view id =>', id);
       const userSettings = dataState?.userSettings || {};
       const favorites = userSettings?.favorites || [];
@@ -245,7 +252,7 @@ export function useProvideData(props) {
         collection: 'userSettings',
         documentId: 'main',
         document: userSettings,
-      }).then((res) => {
+      }).then(res => {
         if (res.error) {
           Toast.showToast({
             title: 'Failed to save',
@@ -265,7 +272,7 @@ export function useProvideData(props) {
   };
 
   const getUserEmail = () => {
-    return new Promise((resolve) => {
+    return new Promise(resolve => {
       NerdGraphQuery.query({
         query: `{
         actor {
@@ -274,7 +281,7 @@ export function useProvideData(props) {
           }
         }
       }`,
-      }).then((res) => {
+      }).then(res => {
         const email = res?.data?.actor?.user?.email;
         setDataState({ email });
         resolve(email);
@@ -283,11 +290,11 @@ export function useProvideData(props) {
   };
 
   const getUserSettings = () => {
-    return new Promise((resolve) => {
+    return new Promise(resolve => {
       UserStorageQuery.query({
         collection: 'userSettings',
         documentId: 'main',
-      }).then((res) => {
+      }).then(res => {
         const userSettings = res?.data || {};
         setDataState({ userSettings });
         resolve(userSettings);
@@ -328,13 +335,11 @@ export function useProvideData(props) {
       report = {
         id: 'allData',
         document: {
-          accounts: dataState.accounts.map((a) => a.id),
+          accounts: dataState.accounts.map(a => a.id),
           allAccounts: true,
           allProducts: true,
         },
       };
-    } else if (selectedView.type === 'user' && selectedReport) {
-      //
     } else if (selectedView.account && selectedReport) {
       report.id = documentId;
 
@@ -349,19 +354,21 @@ export function useProvideData(props) {
     //     ? dataState.accounts
     //     : report.document.accounts;
 
-    const accounts = [...report.document.accounts].map((id) => ({
-      ...[...dataState.accounts].find((a) => a.id === id),
+    const accounts = [...report.document.accounts].map(id => ({
+      ...[...dataState.accounts].find(a => a.id === id),
     }));
 
     console.log(accounts);
 
-    const { entitiesByAccount, summarizedScores } =
-      await getEntitiesForAccounts(
-        accounts,
-        report.document?.entitySearchQuery || '',
-        dataState.agentReleases,
-        dataState.dataDictionary
-      );
+    const {
+      entitiesByAccount,
+      summarizedScores,
+    } = await getEntitiesForAccounts(
+      accounts,
+      report.document?.entitySearchQuery || '',
+      dataState.agentReleases,
+      dataState.dataDictionary
+    );
 
     console.log(summarizedScores);
 
@@ -375,7 +382,7 @@ export function useProvideData(props) {
 
     let allTotalMaxScore = 0;
     let allTotalScore = 0;
-    accountSummaries.forEach((a) => {
+    accountSummaries.forEach(a => {
       allTotalScore += a.totalScore;
       allTotalMaxScore += a.maxScore;
     });
@@ -404,7 +411,6 @@ export function useProvideData(props) {
       unsavedRun: selectedView?.unsavedRun,
     };
 
-    // if (report.id === 'allData') {
     prepareState.tempAllData = {
       documentId,
       entitiesByAccount,
@@ -413,7 +419,6 @@ export function useProvideData(props) {
       totalPercentage,
       runAt,
     };
-    // }
 
     if (doSaveView) {
       saveView(report, prepareState.tempAllData);
@@ -424,7 +429,7 @@ export function useProvideData(props) {
     setDataState(prepareState);
   };
 
-  const runReport = async (selectedReport) => {
+  const runReport = async selectedReport => {
     // console.log('selected', selectedReport);
     // setDataState({
     //   runningReport: true,
@@ -435,17 +440,19 @@ export function useProvideData(props) {
     // });
 
     const report = selectedReport || dataState.selectedReport;
-    const accounts = [...report.document.accounts].map((id) => ({
-      ...[...dataState.accounts].find((a) => a.id === id),
+    const accounts = [...report.document.accounts].map(id => ({
+      ...[...dataState.accounts].find(a => a.id === id),
     }));
 
-    const { entitiesByAccount, summarizedScores } =
-      await getEntitiesForAccounts(
-        accounts,
-        report.document?.entitySearchQuery || '',
-        dataState.agentReleases,
-        dataState.dataDictionary
-      );
+    const {
+      entitiesByAccount,
+      summarizedScores,
+    } = await getEntitiesForAccounts(
+      accounts,
+      report.document?.entitySearchQuery || '',
+      dataState.agentReleases,
+      dataState.dataDictionary
+    );
 
     const accountSummaries = generateAccountSummary(
       entitiesByAccount,
@@ -503,9 +510,9 @@ export function useProvideData(props) {
     });
   };
 
-  const saveResult = (runData) => {
+  const saveResult = runData => {
     // eslint-disable-next-line
-    return new Promise(async (resolve) => {
+    return new Promise(async resolve => {
       const data = runData || dataState?.tempAllData;
       const accountId = dataState.selectedAccountId || props?.accountId;
 
@@ -538,7 +545,7 @@ export function useProvideData(props) {
           })
         );
 
-        Promise.all(writePromises).then((results) => {
+        Promise.all(writePromises).then(results => {
           fetchViewConfigs().then(() => {
             resolve(results);
           });
@@ -550,11 +557,11 @@ export function useProvideData(props) {
   };
 
   // decorate additional account data
-  const decorateAccountData = (accounts) => {
+  const decorateAccountData = accounts => {
     // eslint-disable-next-line
-    return new Promise(async (resolve) => {
+    return new Promise(async resolve => {
       const accountData = await Promise.all(
-        accounts.map((account) =>
+        accounts.map(account =>
           NerdGraphQuery.query({ query: accountDataQuery(account.id) })
         )
       );
@@ -569,21 +576,19 @@ export function useProvideData(props) {
   };
 
   const getAgentReleases = () =>
-    NerdGraphQuery.query({ query: agentReleasesQuery }).then(
-      (res) => res?.data
-    );
+    NerdGraphQuery.query({ query: agentReleasesQuery }).then(res => res?.data);
 
   const getDataDictionary = () =>
     NerdGraphQuery.query({ query: dataDictionaryQuery }).then(
-      (res) => res?.data?.docs?.dataDictionary
+      res => res?.data?.docs?.dataDictionary
     );
 
   const getAccounts = () =>
     NerdGraphQuery.query({ query: accountsQuery }).then(
-      (res) => res?.data?.actor?.accounts || []
+      res => res?.data?.actor?.accounts || []
     );
 
-  const checkUser = (owner) => {
+  const checkUser = owner => {
     if (owner?.id !== dataState.user?.id) {
       Toast.showToast({
         title: 'Failed to deleted',
@@ -598,14 +603,14 @@ export function useProvideData(props) {
   };
 
   const deleteView = () => {
-    return new Promise((resolve) => {
+    return new Promise(resolve => {
       setDataState({ deletingView: true });
       AccountStorageMutation.mutate({
         accountId: dataState?.selectedAccountId,
         actionType: AccountStorageMutation.ACTION_TYPE.DELETE_DOCUMENT,
         collection: ACCOUNT_CONFIG_COLLECTION,
         documentId: dataState?.deleteViewModalOpen.id,
-      }).then((res) => {
+      }).then(res => {
         fetchViewConfigs().then(() => {
           setDataState({
             deletingView: false,
@@ -620,22 +625,29 @@ export function useProvideData(props) {
 
   const deleteOrphanedReports = (viewConfigs, viewHistory, accountId) => {
     let reportsToDelete = viewHistory.filter(
-      (vh) => !viewConfigs.find((rc) => rc.id === vh?.document?.documentId)
+      vh =>
+        !viewConfigs.find(rc => rc.id === vh?.document?.documentId) &&
+        vh?.document?.documentId !== 'allData'
     );
 
-    console.log(reportsToDelete);
-
-    reportsToDelete = [];
+    // use when debugging
+    // console.log("reportsToDelete", reportsToDelete);
+    // reportsToDelete = [];
+    //
 
     if (reportsToDelete.length > 0) {
-      const deleteDocPromises = reportsToDelete.map((r) =>
-        AccountStorageMutation.mutate({
-          accountId,
-          actionType: AccountStorageMutation.ACTION_TYPE.DELETE_DOCUMENT,
-          collection: ACCOUNT_HISTORY_COLLECTION,
-          documentId: r.id,
-        })
-      );
+      const deleteDocPromises = reportsToDelete
+        .map(r =>
+          r.mergedChunkIds.map(id =>
+            AccountStorageMutation.mutate({
+              accountId,
+              actionType: AccountStorageMutation.ACTION_TYPE.DELETE_DOCUMENT,
+              collection: ACCOUNT_HISTORY_COLLECTION,
+              documentId: id,
+            })
+          )
+        )
+        .flat();
 
       Promise.all(deleteDocPromises).then(() => {
         console.log(
@@ -647,9 +659,9 @@ export function useProvideData(props) {
     }
   };
 
-  const fetchViewHistory = (incomingAccountId) => {
+  const fetchViewHistory = incomingAccountId => {
     // eslint-disable-next-line
-    return new Promise(async (resolve) => {
+    return new Promise(async resolve => {
       setDataState({ fetchingViewHistory: true });
 
       const accountId =
@@ -665,7 +677,7 @@ export function useProvideData(props) {
 
       const groupedHistory = {};
 
-      unmergedViewHistory.forEach((h) => {
+      unmergedViewHistory.forEach(h => {
         const historyId = h?.document?.historyId;
         if (historyId) {
           if (!groupedHistory[historyId]) {
@@ -678,11 +690,11 @@ export function useProvideData(props) {
 
       const viewHistory = [];
 
-      Object.keys(groupedHistory).forEach((historyId) => {
+      Object.keys(groupedHistory).forEach(historyId => {
         const chunks = groupedHistory[historyId];
         const mergedChunksString = chunks
           .sort((a, b) => a.document.chunkIndex - b.document.chunkIndex)
-          .map((c) => c.document.chunk)
+          .map(c => c.document.chunk)
           .join('');
 
         try {
@@ -690,6 +702,7 @@ export function useProvideData(props) {
           const builtDocument = {
             historyId,
             document: mergedChunksJson,
+            mergedChunkIds: chunks.map(c => c.id), // needed to know all chunks to delete from history
           };
           viewHistory.push(builtDocument);
         } catch (e) {
@@ -709,7 +722,7 @@ export function useProvideData(props) {
 
   const fetchUserViewHistory = () => {
     // eslint-disable-next-line
-    return new Promise(async (resolve) => {
+    return new Promise(async resolve => {
       setDataState({ fetchingViewHistory: true });
 
       const userViewHistory = (
@@ -730,7 +743,7 @@ export function useProvideData(props) {
 
   const fetchViewConfigs = () => {
     // eslint-disable-next-line no-async-promise-executor
-    return new Promise(async (resolve) => {
+    return new Promise(async resolve => {
       setDataState({ fetchingReports: true });
 
       const viewHistory = await fetchViewHistory();
@@ -746,24 +759,34 @@ export function useProvideData(props) {
         )?.data || [];
 
       // stitch history to config
-      viewConfigs = viewConfigs.map((vc) => {
+      viewConfigs = viewConfigs.map(vc => {
         const history = viewHistory.filter(
-          (vh) => vh.document.documentId === vc.id
+          vh => vh.document.documentId === vc.id
         );
         return { ...vc, history };
       });
 
+      const allDataConfig = {
+        id: 'allData',
+        document: { name: 'All Data' },
+        history: viewHistory.filter(vh => vh.document.documentId === 'allData'),
+      };
+
+      viewConfigs.push(allDataConfig);
+
+      // simulate no configs being added, the will only include all data
+      // viewConfigs = [viewConfigs[viewConfigs.length - 1]];
+
       setDataState({
         fetchingReports: false,
         viewConfigs: [...viewConfigs],
-        // viewConfigs: [...viewConfigs, defaultView],
       });
 
       resolve(viewConfigs);
     });
   };
 
-  const deleteReportConfig = async (documentId) => {
+  const deleteReportConfig = async documentId => {
     const res = await AccountStorageMutation.mutate({
       accountId: dataState.selectedAccountId,
       actionType: AccountStorageMutation.ACTION_TYPE.DELETE_DOCUMENT,
@@ -795,7 +818,7 @@ export function useProvideData(props) {
   ) => {
     setDataState({ gettingEntities: true });
 
-    return new Promise((resolve) => {
+    return new Promise(resolve => {
       let completedAccounts = [];
       // eslint-disable-next-line
       let completedPercentageTotal = 0;
@@ -811,7 +834,7 @@ export function useProvideData(props) {
       }, 500);
 
       const q = async.queue((task, callback) => {
-        getEntitiesByAccount(task, entitySearchQuery).then((entities) => {
+        getEntitiesByAccount(task, entitySearchQuery).then(entities => {
           task.entities = entities;
           completedAccounts.push(task);
 
@@ -837,15 +860,15 @@ export function useProvideData(props) {
   };
 
   const evaluateAccounts = (accounts, agentReleases, dataDictionary) => {
-    return new Promise((resolve) => {
+    return new Promise(resolve => {
       const summarizedScores = {};
 
-      accounts.forEach((account) => {
+      accounts.forEach(account => {
         if (!account.scores) {
           account.scores = {};
         }
 
-        Object.keys(rules).forEach((key) => {
+        Object.keys(rules).forEach(key => {
           const { scores } = rules[key];
 
           if (!account.scores[key]) {
@@ -859,12 +882,12 @@ export function useProvideData(props) {
           }
 
           const foundEntities = account.entities.filter(
-            (e) =>
+            e =>
               e.entityType === rules[key].entityType &&
               (rules[key].type ? rules[key].type === e.type : true)
           );
 
-          scores.forEach((score) => {
+          scores.forEach(score => {
             const { name, entityCheck, accountCheck, valueCheck } = score;
 
             if (!valueCheck) {
@@ -919,7 +942,7 @@ export function useProvideData(props) {
             }
 
             if (rules[key].entityType) {
-              foundEntities.forEach((entity) => {
+              foundEntities.forEach(entity => {
                 if (entityCheck) {
                   if (entityCheck(entity, agentReleases)) {
                     account.scores[key][name].passed++;
@@ -932,9 +955,9 @@ export function useProvideData(props) {
                       };
 
                       if (rules[key].tagMeta) {
-                        rules[key].tagMeta.forEach((t) => {
+                        rules[key].tagMeta.forEach(t => {
                           const foundTag = entity.tags.find(
-                            (tag) => tag.key === t.key
+                            tag => tag.key === t.key
                           );
                           if (foundTag) {
                             account.scores[key].offendingEntities[entity.guid][
@@ -964,15 +987,15 @@ export function useProvideData(props) {
             }
           });
 
-          foundEntities.forEach((entity) => {
+          foundEntities.forEach(entity => {
             if (!account.scores[key].offendingEntities[entity.guid]) {
               account.scores[key].passingEntities[entity.guid] = {
                 name: entity.name,
               };
 
               if (rules[key].tagMeta) {
-                rules[key].tagMeta.forEach((t) => {
-                  const foundTag = entity.tags.find((tag) => tag.key === t.key);
+                rules[key].tagMeta.forEach(t => {
+                  const foundTag = entity.tags.find(tag => tag.key === t.key);
                   if (foundTag) {
                     account.scores[key].passingEntities[entity.guid][t.key] =
                       foundTag?.values?.[0];
@@ -989,7 +1012,7 @@ export function useProvideData(props) {
   };
 
   const getEntitiesByAccount = (account, entitySearchQuery) => {
-    return new Promise((resolve) => {
+    return new Promise(resolve => {
       let completedEntities = [];
       let totalEntityCount = 0;
       let completedPercentage = 0;
@@ -1007,7 +1030,7 @@ export function useProvideData(props) {
         NerdGraphQuery.query({
           query: entitySearchQueryByAccount(account.id, searchClause),
           variables: { cursor: task.cursor },
-        }).then((res) => {
+        }).then(res => {
           if (res.error) {
             Toast.showToast({
               title: 'Failed to fetch entities',
@@ -1045,25 +1068,25 @@ export function useProvideData(props) {
       q.drain(() => {
         clearInterval(pollJobStatus);
 
-        decorateEntities(completedEntities).then((decoratedEntities) => {
+        decorateEntities(completedEntities).then(decoratedEntities => {
           resolve(decoratedEntities);
         });
       });
     });
   };
 
-  const decorateEntities = (entities) => {
+  const decorateEntities = entities => {
     //eslint-disable-next-line
-    return new Promise(async (resolve) => {
+    return new Promise(async resolve => {
       const entityTypesToQuery = [];
       const entityNrqlQueries = [];
 
-      Object.keys(rules).forEach((key) => {
+      Object.keys(rules).forEach(key => {
         const rule = rules[key];
 
         if (rule.graphql) {
           const foundEntities = entities.filter(
-            (e) => e.entityType === rule.entityType
+            e => e.entityType === rule.entityType
           );
 
           if (foundEntities.length > 0) {
@@ -1076,10 +1099,10 @@ export function useProvideData(props) {
 
         if (rule.nrqlQueries) {
           const foundEntities = entities.filter(
-            (e) => e.entityType === rule.entityType && e.type === rule.type
+            e => e.entityType === rule.entityType && e.type === rule.type
           );
 
-          foundEntities.forEach((e) => {
+          foundEntities.forEach(e => {
             entityNrqlQueries.push({
               guid: e.guid,
               name: e.name,
@@ -1094,13 +1117,13 @@ export function useProvideData(props) {
         let entityNrqlData = [];
 
         const nrqlQueue = async.queue((task, callback) => {
-          const nrqlPromises = Object.keys(task.nrqlQueries).map((q) => {
+          const nrqlPromises = Object.keys(task.nrqlQueries).map(q => {
             return NerdGraphQuery.query({
               query: nrqlGqlQuery(task.accountId, task.nrqlQueries[q]),
             });
           });
 
-          Promise.all(nrqlPromises).then((values) => {
+          Promise.all(nrqlPromises).then(values => {
             const nrqlData = {};
 
             values.forEach((v, i) => {
@@ -1122,9 +1145,7 @@ export function useProvideData(props) {
         await nrqlQueue.drain();
 
         entities.forEach((entity, i) => {
-          const foundEntity = entityNrqlData.find(
-            (e) => e.guid === entity.guid
-          );
+          const foundEntity = entityNrqlData.find(e => e.guid === entity.guid);
           if (foundEntity) {
             entities[i] = { ...foundEntity, ...entity };
           }
@@ -1135,7 +1156,7 @@ export function useProvideData(props) {
         let entityData = [];
 
         const entityTypeQueue = async.queue((task, callback) => {
-          getEntityData(task).then((data) => {
+          getEntityData(task).then(data => {
             entityData = [...entityData, ...data];
             callback();
           });
@@ -1146,7 +1167,7 @@ export function useProvideData(props) {
         entityTypeQueue.drain(() => {
           // merge entity data
           entities.forEach((entity, i) => {
-            const foundEntity = entityData.find((e) => e.guid === entity.guid);
+            const foundEntity = entityData.find(e => e.guid === entity.guid);
             if (foundEntity) {
               entities[i] = { ...foundEntity, ...entity };
             }
@@ -1162,10 +1183,10 @@ export function useProvideData(props) {
     });
   };
 
-  const getEntityData = (entityTask) => {
-    return new Promise((resolve) => {
+  const getEntityData = entityTask => {
+    return new Promise(resolve => {
       const guidChunks = chunk(
-        entityTask.entities.map((e) => e.guid),
+        entityTask.entities.map(e => e.guid),
         25
       );
 
@@ -1175,7 +1196,7 @@ export function useProvideData(props) {
         NerdGraphQuery.query({
           query: entityTask.graphql,
           variables: { guids },
-        }).then((res) => {
+        }).then(res => {
           entityData = [...entityData, ...(res?.data?.actor?.entities || [])];
           callback();
         });

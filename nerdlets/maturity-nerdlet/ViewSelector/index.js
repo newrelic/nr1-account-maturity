@@ -22,16 +22,18 @@ export default function ViewSelector() {
 
   return useMemo(() => {
     const configs = viewConfigs
-      .filter((v) => v && Object.keys(v).length > 0)
-      .map((v) => ({
+      .filter(v => v && Object.keys(v).length > 0)
+      .map(v => ({
         id: v.id,
         name: v.document?.name,
       }));
 
-    const items = [{ id: 'allData', name: 'All data' }, ...configs];
+    const items = [...configs];
+
+    // const items = [{ id: 'allData', name: 'All data' }, ...configs];
 
     const filteredItems = items.filter(({ name }) =>
-      name.toLowerCase().includes(viewSearch.toLowerCase())
+      (name||'').toLowerCase().includes((viewSearch||'').toLowerCase())
     );
 
     console.log(selectedView, view);
@@ -44,19 +46,26 @@ export default function ViewSelector() {
           labelInline={true}
           title={unsavedRun ? 'Select' : selectedView?.name || 'Select'}
           search={viewSearch}
-          onSearch={(e) => setViewSearch(e.target.value)}
+          onSearch={e => setViewSearch(e.target.value)}
         >
           <DropdownSection title="Views">
             {filteredItems
               .sort(
                 (a, b) => favorites.includes(b.id) - favorites.includes(a.id)
               )
-              .map((item) => (
+              .map(item => (
                 <DropdownItem
                   onClick={() => {
-                    if (item.id !== selectedView.id) {
+                    if (item.id === 'allData') {
+                      runView(
+                        { id: 'allData', name: 'All data' },
+                        null,
+                        false,
+                        true
+                      );
+                    } else if (item.id !== selectedView.id && item.id !== 'allData') {
                       const viewConfig = viewConfigs.find(
-                        (vc) => vc.id === item.id
+                        vc => vc.id === item.id
                       );
 
                       const previousResult = viewConfig?.history?.[0];
@@ -75,7 +84,7 @@ export default function ViewSelector() {
                           true
                         );
                       }
-                    }
+                    } 
                   }}
                   key={item.id}
                   style={{

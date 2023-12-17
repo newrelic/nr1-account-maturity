@@ -33,7 +33,7 @@ export default class MaturityApplication extends React.Component {
         <SectionMessage
           type={SectionMessage.TYPE.WARNING}
           title="You are on the old version of account maturity"
-          description="No further support will be provided on this version."
+          description="No further support will be provided on this version"
           actions={[
             {
               label: 'Launch the new version',

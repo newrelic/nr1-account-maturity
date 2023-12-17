@@ -38,7 +38,7 @@ export default function AccountMaturity(props) {
       case 'CreateDefaultView': {
         return <CreateView {...(view.props || {})} />;
       }
-      case 'EditDefaultView': {
+      case 'CreateNewView': {
         return <CreateView {...(view.props || {})} />;
       }
       case 'EditView': {

@@ -45,7 +45,7 @@ export default function SearchBar(props) {
           onClick={() => {
             setDataState({
               view: {
-                page: 'CreateDefaultView',
+                page: 'CreateView',
                 title: 'Create View Configuration',
               },
               selectedReport: {},

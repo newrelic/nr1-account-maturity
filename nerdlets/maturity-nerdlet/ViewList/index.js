@@ -7,6 +7,7 @@ import {
   TableRow,
   TableRowCell,
   FavoriteTableRowCell,
+  Toast,
 } from 'nr1';
 
 import DataContext from '../../../src/context/data';
@@ -102,39 +103,67 @@ export default function ViewList() {
         }
       },
     },
-    { key: 'Created by', value: ({ item }) => item.document?.owner },
+    {
+      key: 'Created by',
+      value: ({ item }) =>
+        item?.id === 'allData' ? 'Account Maturity' : item.document?.owner,
+    },
   ];
 
   const actions = [
     {
       label: 'Run',
       onClick: (evt, { item }) => {
-        runView(
-          {
-            name: item.document.name,
-            account: selectedAccountId,
-          },
-          { ...item },
-          false,
-          true
-        );
+        if (item.id === 'allData') {
+          runView({ id: 'allData', name: 'All data' }, null, false, true);
+        } else {
+          runView(
+            {
+              name: item.document.name,
+              account: selectedAccountId,
+            },
+            { ...item },
+            false,
+            true
+          );
+        }
       },
     },
     {
       label: 'Edit',
       onClick: (evt, { item }) => {
-        setDataState({ selectedReport: item, view: { page: 'EditView' } });
+        if (item.id === 'allData') {
+          Toast.showToast({
+            title: 'This view cannot be edited',
+            type: Toast.TYPE.NORMAL,
+          });
+        } else {
+          setDataState({ selectedReport: item, view: { page: 'EditView' } });
+        }
       },
     },
     {
       label: 'Delete',
       type: TableRow.ACTION_TYPE.DESTRUCTIVE,
-      onClick: (evt, { item }) => setDataState({ deleteViewModalOpen: item }),
+      onClick: (evt, { item }) => {
+        if (item.id === 'allData') {
+          Toast.showToast({
+            title: 'This view cannot be deleted',
+            type: Toast.TYPE.NORMAL,
+          });
+        } else {
+          setDataState({ deleteViewModalOpen: item });
+        }
+      },
     },
   ];
 
   const filteredConfigs = viewConfigs
-    .filter((c) => c.document.name.toLowerCase().includes(search.toLowerCase()))
+    .filter(c =>
+      (c?.document?.name || '')
+        .toLowerCase()
+        .includes((search || '').toLowerCase())
+    )
     .sort((a, b) => favorites.includes(b.id) - favorites.includes(a.id));
 
   return useMemo(() => {
@@ -167,7 +196,7 @@ export default function ViewList() {
                   checked={favorites.includes(item.id)}
                 />
 
-                {headers.map((header) => {
+                {headers.map(header => {
                   if (header.key === 'View') {
                     const previousResult = item?.history?.[0];
                     let onClickHandler = undefined;

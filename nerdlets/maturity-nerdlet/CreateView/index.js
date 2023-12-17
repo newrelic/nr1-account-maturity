@@ -23,6 +23,7 @@ import rules from '../../../src/rules';
 
 export default function CreateView() {
   const {
+    viewConfigs,
     runView,
     email,
     selectedReport,
@@ -44,7 +45,7 @@ export default function CreateView() {
   const [state, setState] = useSetState({
     creatingView: false,
     name:
-      view.page === 'CreateDefaultView' || view.page === 'EditDefaultView'
+      view.page === 'CreateDefaultView' || view.page === 'CreateNewView'
         ? 'Untitled'
         : selectedReport?.document?.name || '',
     description: selectedReport?.document?.description || '',
@@ -61,7 +62,7 @@ export default function CreateView() {
     (state.accounts.length === 0 && !state.accountsFilter);
 
   const validateEntitySearchQuery = () => {
-    return new Promise((resolve) => {
+    return new Promise(resolve => {
       const accountsClause = `and tags.accountId IN ('${state.accounts.join(
         "','"
       )}')`;
@@ -73,7 +74,7 @@ export default function CreateView() {
           }
         }
       }`,
-      }).then((res) => {
+      }).then(res => {
         if (res.error) {
           Toast.showToast({
             title: 'Bad entity search query',
@@ -119,17 +120,23 @@ export default function CreateView() {
     return (
       <>
         <br />
-        {view.page === 'EditView' ? (
+        {viewConfigs.length > 1 && (
+          <>
+            <Button
+              type={Button.TYPE.SECONDARY}
+              onClick={() => setDataState({ view: { page: 'ViewList' } })}
+            >
+              Back
+            </Button>
+            &nbsp;
+          </>
+        )}
+        {view.page === 'CreateNewView' && (
           <Button
             type={Button.TYPE.SECONDARY}
-            onClick={() => setDataState({ view: { page: 'ViewList' } })}
-          >
-            Back
-          </Button>
-        ) : (
-          <Button
-            type={Button.TYPE.SECONDARY}
-            onClick={() => runView({ id: 'allData', name: 'All data' })}
+            onClick={() =>
+              runView({ id: 'allData', name: 'All data' }, null, false, true)
+            }
           >
             Skip this step
           </Button>
@@ -146,14 +153,14 @@ export default function CreateView() {
         <TextField
           label="Name"
           value={state.name}
-          onChange={(e) => setState({ name: e.target.value })}
+          onChange={e => setState({ name: e.target.value })}
           placeholder="e.g. DevOps Team"
         />
         &nbsp;&nbsp;
         <TextField
           label="Description (optional)"
           value={state.description}
-          onChange={(e) => setState({ description: e.target.value })}
+          onChange={e => setState({ description: e.target.value })}
           placeholder="Add context to the view"
         />
         &nbsp;&nbsp;
@@ -167,7 +174,7 @@ export default function CreateView() {
                 setDataState({ selectedAccountId: value })
               }
             >
-              {accounts.map((a) => (
+              {accounts.map(a => (
                 <SelectItem key={a.id} value={a.id}>
                   {a.name}
                 </SelectItem>
@@ -198,7 +205,7 @@ export default function CreateView() {
           <CardBody style={{ paddingLeft: '20px', marginTop: '5px' }}>
             <div style={{ paddingTop: '10px' }}>
               <Grid>
-                {Object.keys(rules).map((key) => (
+                {Object.keys(rules).map(key => (
                   <GridItem columnSpan={3} key={key}>
                     <Checkbox
                       key={key}
@@ -211,7 +218,7 @@ export default function CreateView() {
                       onChange={() => {
                         if (state.products.includes(key)) {
                           setState({
-                            products: state.products.filter((id) => id !== key),
+                            products: state.products.filter(id => id !== key),
                           });
                         } else {
                           setState({ products: [...state.products, key] });
@@ -241,7 +248,7 @@ export default function CreateView() {
                 if (state.accounts.length === accounts.length) {
                   setState({ accounts: [] });
                 } else {
-                  setState({ accounts: accounts.map((a) => a.id) });
+                  setState({ accounts: accounts.map(a => a.id) });
                 }
               }}
             />
@@ -249,7 +256,7 @@ export default function CreateView() {
           <CardBody style={{ paddingLeft: '20px', marginTop: '5px' }}>
             <div style={{ paddingTop: '10px' }}>
               <Grid style={{ maxHeight: '100px' }}>
-                {accounts.map((a) => (
+                {accounts.map(a => (
                   <GridItem columnSpan={3} key={a.id}>
                     <Checkbox
                       // description={`${a.id}`}
@@ -260,9 +267,7 @@ export default function CreateView() {
                       onChange={() => {
                         if (state.accounts.includes(a.id)) {
                           setState({
-                            accounts: state.accounts.filter(
-                              (id) => id !== a.id
-                            ),
+                            accounts: state.accounts.filter(id => id !== a.id),
                           });
                         } else {
                           setState({ accounts: [...state.accounts, a.id] });
@@ -289,7 +294,7 @@ export default function CreateView() {
             <TextField
               label="Entity Filter"
               value={state.entitySearchQuery}
-              onChange={(e) => setState({ entitySearchQuery: e.target.value })}
+              onChange={e => setState({ entitySearchQuery: e.target.value })}
               placeholder="e.g. tags.team = 'labs'"
             />
           </CardBody>
@@ -371,5 +376,5 @@ export default function CreateView() {
         </div>
       </>
     );
-  }, [accounts, user, state, selectedReport, email]);
+  }, [accounts, user, state, selectedReport, email, view.page, viewConfigs.length]);
 }
