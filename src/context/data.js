@@ -186,6 +186,11 @@ export function useProvideData(props) {
 
     deleteOrphanedReports(viewConfigs, viewHistory, accountId);
 
+    let view = dataState.view;
+    if (viewConfigs.length > 1) {
+      view = { page: 'ViewList' };
+    }
+
     setDataState({
       selectedAccountId: accountId,
       accounts,
@@ -193,6 +198,7 @@ export function useProvideData(props) {
       dataDictionary,
       viewConfigs,
       fetchingData: false,
+      view,
     });
   }, [props.accountId]);
 
