@@ -155,15 +155,28 @@ export function useProvideData(props) {
 
   // handle account picker changes
   useEffect(async () => {
+    const accountsInit = await getAccounts();
     const { accountId } = props;
     console.log('account id changed => ', accountId);
+    if (accountId === 'cross-account') {
+      console.log('cross account should not be selected, reloading');
+      window.location.reload();
+    } else {
+      if (!accountsInit.find(a => a.id === accountId)) {
+        Toast.showToast({
+          title: 'Account Maturity is not subscribed to the selected account',
+          description: `Change account or subscribe account: ${accountId}`,
+          type: Toast.TYPE.CRITICAL,
+        });
+      }
+    }
+
     setDataState({ fetchingData: true, selectedAccountId: accountId });
 
-    const viewConfigs = await fetchViewConfigs();
+    const viewConfigs = await fetchViewConfigs(accountId);
     const viewHistory = await fetchViewHistory(accountId);
 
-    const [accountsInit, agentReleases, dataDictionary] = await Promise.all([
-      getAccounts(),
+    const [agentReleases, dataDictionary] = await Promise.all([
       getAgentReleases(),
       getDataDictionary(),
     ]);
@@ -741,19 +754,20 @@ export function useProvideData(props) {
     });
   };
 
-  const fetchViewConfigs = () => {
+  const fetchViewConfigs = accountId => {
     // eslint-disable-next-line no-async-promise-executor
     return new Promise(async resolve => {
       setDataState({ fetchingReports: true });
 
-      const viewHistory = await fetchViewHistory();
+      const viewHistory = await fetchViewHistory(accountId);
 
       // const defaultView = await getUserReport();
 
       let viewConfigs =
         (
           await AccountStorageQuery.query({
-            accountId: dataState.selectedAccountId || props.accountId,
+            accountId:
+              accountId || dataState.selectedAccountId || props.accountId,
             collection: ACCOUNT_CONFIG_COLLECTION,
           })
         )?.data || [];
