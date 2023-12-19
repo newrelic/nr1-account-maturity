@@ -1,7 +1,6 @@
 import React, { useContext, useMemo } from 'react';
 
 import { TextField, Button } from 'nr1';
-
 import DataContext from '../../../src/context/data';
 
 export default function SearchBar(props) {
@@ -25,7 +24,7 @@ export default function SearchBar(props) {
         <TextField
           type={TextField.TYPE.SEARCH}
           value={search}
-          onChange={(e) => setDataState({ search: e.target.value })}
+          onChange={e => setDataState({ search: e.target.value })}
           style={{
             width: `${textFieldWidth}px`,
             float: 'left',
@@ -57,5 +56,5 @@ export default function SearchBar(props) {
         </Button>
       </div>
     );
-  }, [search]);
+  }, [search, width]);
 }
