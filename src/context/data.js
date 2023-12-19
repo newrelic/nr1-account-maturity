@@ -363,6 +363,17 @@ export function useProvideData(props) {
     } else if (selectedView.account && selectedReport) {
       report.id = documentId;
 
+      // if accounts filter enabled dynamical determine accounts
+      if (report.document?.accountsFilterEnabled) {
+        report.document.accounts = dataState.accounts
+          .filter(a =>
+            a.name
+              .toLowerCase()
+              .includes((report.document?.accountsFilter || '').toLowerCase())
+          )
+          .map(a => a.id);
+      }
+
       console.log('this is an account based run');
       console.log(selectedReport);
     } else {

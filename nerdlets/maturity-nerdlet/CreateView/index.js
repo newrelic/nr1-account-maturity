@@ -1,6 +1,7 @@
 import React, { useMemo, useContext, useEffect } from 'react';
 import {
   nerdlet,
+  Switch,
   EmptyState,
   TextField,
   Toast,
@@ -54,12 +55,15 @@ export default function CreateView() {
       allProducts !== undefined && allProducts !== null ? true : allProducts,
     accounts: selectedReport?.document?.accounts || [],
     accountsFilter: selectedReport?.document?.accountsFilter,
+    accountsFilterEnabled: selectedReport?.document?.accountsFilterEnabled,
     products: selectedReport?.document?.products || [],
   });
 
   const runDisabled =
     (state.products.length === 0 && !state.allProducts) ||
-    (state.accounts.length === 0 && !state.accountsFilter);
+    (state.accounts.length === 0 &&
+      !state.accountsFilter &&
+      !state.accountsFilterEnabled);
 
   const validateEntitySearchQuery = () => {
     return new Promise(resolve => {
@@ -192,14 +196,17 @@ export default function CreateView() {
               marginBottom: '5px',
             }}
           >
-            <div>
-              Capabilities &nbsp;&nbsp;&nbsp;
-              <Checkbox
-                label={'All Products'}
-                checked={state.allProducts}
-                style={{ paddingBottom: '0px' }}
-                onChange={() => setState({ allProducts: !state.allProducts })}
-              />
+            <div style={{ display: 'flex', justifyContent: 'space-between' }}>
+              <div style={{ flex: -1 }}>Capabilities&nbsp;&nbsp;&nbsp;</div>
+              <div style={{ flex: -1 }}>
+                <Checkbox
+                  label={'All Capabilities'}
+                  checked={state.allProducts}
+                  style={{ paddingBottom: '0px', paddingTop: '2px' }}
+                  onChange={() => setState({ allProducts: !state.allProducts })}
+                />
+              </div>
+              <div style={{ flex: 'auto' }}></div>
             </div>
           </CardHeader>
           <CardBody style={{ paddingLeft: '20px', marginTop: '5px' }}>
@@ -239,43 +246,84 @@ export default function CreateView() {
               marginBottom: '5px',
             }}
           >
-            Accounts&nbsp;&nbsp;&nbsp;
-            <Checkbox
-              label={'All Accounts'}
-              checked={state.accounts.length === accounts.length}
-              style={{ paddingBottom: '0px' }}
-              onChange={() => {
-                if (state.accounts.length === accounts.length) {
-                  setState({ accounts: [] });
-                } else {
-                  setState({ accounts: accounts.map(a => a.id) });
-                }
-              }}
-            />
+            <div style={{ display: 'flex', justifyContent: 'space-between' }}>
+              <div style={{ flex: -1 }}>Accounts&nbsp;&nbsp;&nbsp;</div>
+              <div style={{ flex: -1 }}>
+                <Checkbox
+                  label={'All Accounts'}
+                  disabled={state?.accountsFilterEnabled}
+                  checked={state.accounts.length === accounts.length}
+                  style={{ paddingBottom: '0px', paddingTop: '2px' }}
+                  onChange={() => {
+                    if (state.accounts.length === accounts.length) {
+                      setState({ accounts: [] });
+                    } else {
+                      setState({ accounts: accounts.map(a => a.id) });
+                    }
+                  }}
+                />
+              </div>
+              <div style={{ flex: 'auto', marginTop: '-2px' }}>
+                <TextField
+                  type={TextField.TYPE.SEARCH}
+                  style={{
+                    fontSize: '12px',
+                    fontWeight: 'normal',
+                    width: '99%',
+                  }}
+                  value={state.accountsFilter}
+                  onChange={e => setState({ accountsFilter: e.target.value })}
+                  placeholder="Filter by account names"
+                />
+              </div>
+              <div style={{ textAlign: 'right' }}>
+                <Switch
+                  onChange={() =>
+                    setState({
+                      accountsFilterEnabled: !state?.accountsFilterEnabled,
+                    })
+                  }
+                  checked={state?.accountsFilterEnabled}
+                  label="Apply dynamic filter"
+                  info="Accounts will be automatically selected for assessment depending on filter eg. 'Production'"
+                />
+              </div>
+            </div>
           </CardHeader>
           <CardBody style={{ paddingLeft: '20px', marginTop: '5px' }}>
             <div style={{ paddingTop: '10px' }}>
               <Grid style={{ maxHeight: '100px' }}>
-                {accounts.map(a => (
-                  <GridItem columnSpan={3} key={a.id}>
-                    <Checkbox
-                      // description={`${a.id}`}
-                      label={`${a.name} (${a.id})`}
-                      style={{ paddingBottom: '0px' }}
-                      checked={state.accounts.includes(a.id)}
-                      disabled={state.accounts.length === accounts.length}
-                      onChange={() => {
-                        if (state.accounts.includes(a.id)) {
-                          setState({
-                            accounts: state.accounts.filter(id => id !== a.id),
-                          });
-                        } else {
-                          setState({ accounts: [...state.accounts, a.id] });
+                {accounts
+                  .filter(a =>
+                    a.name
+                      .toLowerCase()
+                      .includes((state?.accountsFilter || '').toLowerCase())
+                  )
+                  .map(a => (
+                    <GridItem columnSpan={3} key={a.id}>
+                      <Checkbox
+                        // description={`${a.id}`}
+                        label={`${a.name} (${a.id})`}
+                        style={{ paddingBottom: '0px' }}
+                        checked={state.accounts.includes(a.id)}
+                        disabled={
+                          state.accounts.length === accounts.length ||
+                          state?.accountsFilterEnabled
                         }
-                      }}
-                    />
-                  </GridItem>
-                ))}
+                        onChange={() => {
+                          if (state.accounts.includes(a.id)) {
+                            setState({
+                              accounts: state.accounts.filter(
+                                id => id !== a.id
+                              ),
+                            });
+                          } else {
+                            setState({ accounts: [...state.accounts, a.id] });
+                          }
+                        }}
+                      />
+                    </GridItem>
+                  ))}
               </Grid>
             </div>
           </CardBody>
@@ -325,6 +373,7 @@ export default function CreateView() {
                       accounts: state.accounts,
                       allAccounts: state.accounts.length === accounts.length,
                       accountsFilter: state.accountsFilter,
+                      accountsFilterEnabled: state.accountsFilterEnabled,
                       allProducts: state.allProducts,
                       products: state.products,
                     },
@@ -362,6 +411,7 @@ export default function CreateView() {
                         allAccounts: state.accounts.length === accounts.length,
                         entitySearchQuery: state.entitySearchQuery,
                         accountsFilter: state.accountsFilter,
+                        accountsFilterEnabled: state.accountsFilterEnabled,
                         allProducts: state.allProducts,
                         products: state.products,
                       },
@@ -376,5 +426,13 @@ export default function CreateView() {
         </div>
       </>
     );
-  }, [accounts, user, state, selectedReport, email, view.page, viewConfigs.length]);
+  }, [
+    accounts,
+    user,
+    state,
+    selectedReport,
+    email,
+    view.page,
+    viewConfigs.length,
+  ]);
 }
