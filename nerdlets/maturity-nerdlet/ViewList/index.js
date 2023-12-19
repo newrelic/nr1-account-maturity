@@ -192,6 +192,9 @@ export default function ViewList() {
             return (
               <TableRow actions={actions}>
                 <FavoriteTableRowCell
+                  style={{
+                    color: favorites.includes(item.id) ? '#F0B400' : undefined,
+                  }}
                   onChange={() => toggleFavoriteView(item.id)}
                   checked={favorites.includes(item.id)}
                 />

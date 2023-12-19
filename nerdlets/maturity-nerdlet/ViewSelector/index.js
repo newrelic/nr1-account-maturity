@@ -33,10 +33,10 @@ export default function ViewSelector() {
     // const items = [{ id: 'allData', name: 'All data' }, ...configs];
 
     const filteredItems = items.filter(({ name }) =>
-      (name||'').toLowerCase().includes((viewSearch||'').toLowerCase())
+      (name || '').toLowerCase().includes((viewSearch || '').toLowerCase())
     );
 
-    console.log(selectedView, view);
+    const currentViewConfig = viewConfigs.find(vc => vc.id === selectedView.id);
 
     return (
       <div style={{ paddingRight: '5px' }}>
@@ -63,7 +63,10 @@ export default function ViewSelector() {
                         false,
                         true
                       );
-                    } else if (item.id !== selectedView.id && item.id !== 'allData') {
+                    } else if (
+                      item.id !== selectedView.id &&
+                      item.id !== 'allData'
+                    ) {
                       const viewConfig = viewConfigs.find(
                         vc => vc.id === item.id
                       );
@@ -84,7 +87,7 @@ export default function ViewSelector() {
                           true
                         );
                       }
-                    } 
+                    }
                   }}
                   key={item.id}
                   style={{
@@ -162,6 +165,23 @@ export default function ViewSelector() {
               }}
             >
               Set as default view
+            </DropdownItem>
+          )}
+
+          {currentViewConfig && (currentViewConfig.history || []).length > 1 && (
+            <DropdownItem
+              style={{ color: 'red' }}
+              onClick={() =>
+                setDataState({
+                  deleteSnapshotModalOpen: {
+                    historyId: selectedView?.historyId,
+                    id: selectedView?.id,
+                    document: { name: selectedView?.name },
+                  },
+                })
+              }
+            >
+              Delete snapshot
             </DropdownItem>
           )}
 

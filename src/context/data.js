@@ -679,6 +679,53 @@ export function useProvideData(props) {
     }
   };
 
+  const deleteSnapshot = (documentId, historyId, incomingAccountId) => {
+    return new Promise(resolve => {
+      setDataState({ deletingSnapshot: true });
+
+      const historyToDelete =
+        dataState.viewHistory.find(vh => vh.historyId === historyId)
+          ?.mergedChunkIds || [];
+
+      console.log('deleting snapshot =>', historyId, historyToDelete);
+
+      const accountId =
+        incomingAccountId || dataState.selectedAccountId || props?.accountId;
+
+      const deletePromises = historyToDelete.map(id =>
+        AccountStorageMutation.mutate({
+          accountId,
+          actionType: AccountStorageMutation.ACTION_TYPE.DELETE_DOCUMENT,
+          collection: ACCOUNT_HISTORY_COLLECTION,
+          documentId: id,
+        })
+      );
+
+      Promise.all(deletePromises).then(() => {
+        fetchViewConfigs().then(configs => {
+          const currentConfig = configs.find(c => c.id === documentId);
+          const latestHistory = currentConfig?.history?.[0];
+
+          if (latestHistory) {
+            setDataState({
+              deletingSnapshot: false,
+              deleteSnapshotModalOpen: null,
+            });
+            loadHistoricalResult(viewConfig, latestHistory);
+            resolve();
+          } else {
+            setDataState({
+              deletingSnapshot: false,
+              deleteSnapshotModalOpen: null,
+              view: { page: 'ViewList' },
+            });
+            resolve();
+          }
+        });
+      });
+    });
+  };
+
   const fetchViewHistory = incomingAccountId => {
     // eslint-disable-next-line
     return new Promise(async resolve => {
@@ -1295,5 +1342,6 @@ export function useProvideData(props) {
     loadHistoricalResult,
     setDefaultView,
     toggleFavoriteView,
+    deleteSnapshot,
   };
 }

@@ -9,16 +9,18 @@ import ViewSelector from '../ViewSelector';
 import ViewList from '../ViewList';
 import SearchBar from '../SearchBar';
 import DeleteView from '../DeleteView';
+import DeleteSnapshot from '../DeleteSnapshot';
 
 export default function AccountMaturity(props) {
-  const { fetchingData, errorMsg, view, selectedAccountId } =
-    useContext(DataContext);
+  const { fetchingData, errorMsg, view, selectedAccountId } = useContext(
+    DataContext
+  );
 
   const renderView = () => {
     const page = view.page;
     // eslint-disable-next-line prettier/prettier
     switch (page) {
-      case 'Loading': { 
+      case 'Loading': {
         return <Loading {...(view.props || {})} />;
       }
       case 'MaturityView': {
@@ -62,6 +64,8 @@ export default function AccountMaturity(props) {
   return (
     <div>
       <DeleteView />
+      <DeleteSnapshot />
+
       {fetchingData && (
         <EmptyState title="Fetching data..." type={EmptyState.TYPE.LOADING} />
       )}
