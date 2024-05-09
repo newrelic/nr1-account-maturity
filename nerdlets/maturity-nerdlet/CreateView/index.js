@@ -139,7 +139,12 @@ export default function CreateView() {
           <Button
             type={Button.TYPE.SECONDARY}
             onClick={() =>
-              runView({ id: 'allData', name: 'All data' }, null, false, true)
+              runView(
+                { id: `allData+${user.email}`, name: 'All data' },
+                null,
+                false,
+                true
+              )
             }
           >
             Skip this step

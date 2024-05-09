@@ -116,8 +116,10 @@ export function useProvideData(props) {
     const userSettings = await getUserSettings();
     state.userSettings = userSettings;
     console.log('userSettings =>', userSettings);
+    const user = await NerdGraphQuery.query({ query: userQuery });
+    state.user = user?.data?.actor?.user;
 
-    const viewConfigs = await fetchViewConfigs();
+    const viewConfigs = await fetchViewConfigs(null, state.user);
     const accounts = await getAccounts();
 
     // default view not configured, request configuration
@@ -147,8 +149,6 @@ export function useProvideData(props) {
       };
     }
 
-    const user = await NerdGraphQuery.query({ query: userQuery });
-    state.user = user?.data?.actor?.user;
     state.accounts = accounts;
     state.selectedAccountId = accounts[0].id;
     setDataState(state);
@@ -333,9 +333,16 @@ export function useProvideData(props) {
       selectedView,
       selectedReport,
       doSaveView,
-      saveHistory
+      saveHistory,
+      dataState?.email
     );
-    const documentId = selectedReport?.id || selectedView.id || uuidv4();
+    let documentId = selectedReport?.id || selectedView.id || uuidv4();
+
+    // fallback handling from testing
+    documentId =
+      documentId === 'allData+undefined'
+        ? `allData+${dataState?.email}`
+        : documentId;
 
     setDataState({
       runningReport: true,
@@ -350,16 +357,19 @@ export function useProvideData(props) {
     });
 
     let report = selectedReport || {};
-
-    if (selectedView.id === 'allData') {
+    if (
+      selectedView.id === `allData+${dataState?.email}` ||
+      documentId === `allData+${dataState?.email}`
+    ) {
       report = {
-        id: 'allData',
+        id: `allData+${dataState?.email}`,
         document: {
           accounts: dataState.accounts.map(a => a.id),
           allAccounts: true,
           allProducts: true,
         },
       };
+      console.log(dataState.accounts);
     } else if (selectedView.account && selectedReport) {
       report.id = documentId;
 
@@ -385,11 +395,14 @@ export function useProvideData(props) {
     //     ? dataState.accounts
     //     : report.document.accounts;
 
+    //
+    if (documentId.includes('allData')) {
+      report.document.accounts = (dataState?.accounts || []).map(a => a.id);
+    }
+
     const accounts = [...report.document.accounts].map(id => ({
       ...[...dataState.accounts].find(a => a.id === id),
     }));
-
-    console.log(accounts);
 
     const {
       entitiesByAccount,
@@ -470,10 +483,16 @@ export function useProvideData(props) {
     //   accountSummaries: null,
     // });
 
+    if (documentId.includes('allData')) {
+      report.document.accounts = dataState?.accounts;
+    }
+
     const report = selectedReport || dataState.selectedReport;
     const accounts = [...report.document.accounts].map(id => ({
       ...[...dataState.accounts].find(a => a.id === id),
     }));
+
+    console.log('runReport', accounts);
 
     const {
       entitiesByAccount,
@@ -819,7 +838,7 @@ export function useProvideData(props) {
     });
   };
 
-  const fetchViewConfigs = accountId => {
+  const fetchViewConfigs = (accountId, user) => {
     // eslint-disable-next-line no-async-promise-executor
     return new Promise(async resolve => {
       setDataState({ fetchingReports: true });
@@ -846,9 +865,13 @@ export function useProvideData(props) {
       });
 
       const allDataConfig = {
-        id: 'allData',
+        id: `allData+${dataState?.email || user?.email}`,
         document: { name: 'All Data' },
-        history: viewHistory.filter(vh => vh.document.documentId === 'allData'),
+        history: viewHistory.filter(
+          vh =>
+            vh.document.documentId ===
+            `allData+${dataState?.email || user?.email}`
+        ),
       };
 
       viewConfigs.push(allDataConfig);

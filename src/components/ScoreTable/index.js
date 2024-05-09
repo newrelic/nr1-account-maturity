@@ -22,15 +22,16 @@ export default function ScoreTable() {
   const [sortingType, setSortingType] = useState(
     TableHeaderCell.SORTING_TYPE.NONE
   );
-  const { view, viewHistory, userViewHistory, selectedAccountId } =
-    useContext(DataContext);
+  const { view, viewHistory, userViewHistory, selectedAccountId } = useContext(
+    DataContext
+  );
   const history =
     view?.page === 'DefaultView'
       ? userViewHistory
-      : viewHistory.filter((r) => r.document.reportId === view?.props?.id);
+      : viewHistory.filter(r => r.document.reportId === view?.props?.id);
 
   const selected = view?.props?.selected || view?.props?.document?.selected;
-  const historyDoc = history.find((h) => h.document.runAt === selected);
+  const historyDoc = history.find(h => h.document.runAt === selected);
 
   const onClickTableHeaderCell = (nextColumn, { nextSortingType }) => {
     if (nextColumn === column) {
@@ -47,28 +48,28 @@ export default function ScoreTable() {
     }
 
     const productHeaders = Object.keys(rules)
-      .filter((product) =>
-        historyDoc.document.accountSummaries.find((s) => s[product])
+      .filter(product =>
+        historyDoc.document.accountSummaries.find(s => s[product])
       )
-      .map((product) => ({ name: product, value: (a) => a[product] }));
+      .map(product => ({ name: product, value: a => a[product] }));
 
     const headers = [
       {
         name: 'Account',
         // do this to make handling sub values and csv export a touch easier
-        value: (a) => `${a.name} :: ${a.id}`,
+        value: a => `${a.name} :: ${a.id}`,
       },
       {
         name: 'Account Score',
-        value: (a) => a.scorePercentage,
+        value: a => a.scorePercentage,
       },
       ...productHeaders,
     ];
 
-    const rowData = historyDoc.document.accountSummaries.map((a) => {
+    const rowData = historyDoc.document.accountSummaries.map(a => {
       const row = {};
 
-      headers.forEach((h) => {
+      headers.forEach(h => {
         row[h.name] = h.value(a);
       });
 
@@ -89,7 +90,7 @@ export default function ScoreTable() {
           <br />
 
           <div>
-            {Object.keys(modal?.productSummary || {}).map((key) => {
+            {Object.keys(modal?.productSummary || {}).map(key => {
               const value = modal?.productSummary?.[key];
 
               return (
@@ -98,7 +99,7 @@ export default function ScoreTable() {
                     {key}
                   </HeadingText>
 
-                  {Object.keys(value || {}).map((subKey) => {
+                  {Object.keys(value || {}).map(subKey => {
                     return (
                       <div key={subKey}>
                         {subKey}: {value[subKey]}
@@ -164,7 +165,7 @@ export default function ScoreTable() {
                     cursor: 'pointer',
                     // eslint-disable-next-line
                     borderLeft: `5px solid ${
-                      scoreToColor(item['Account Score']).color
+                      scoreToColor(item['Account Score'])?.color
                       // eslint-disable-next-line
                     }`,
                   }}
@@ -191,7 +192,7 @@ export default function ScoreTable() {
                   style={{
                     fontWeight: 'bold',
                     fontSize: '15px',
-                    color: scoreToColor(item['Account Score']).color,
+                    color: scoreToColor(item['Account Score'])?.color,
                   }}
                 >
                   {/* {item['Account Score']} */}
@@ -211,23 +212,22 @@ export default function ScoreTable() {
                     </div>
                   </Tooltip>
                 </TableRowCell>
-                {productHeaders.map((h) => (
+                {productHeaders.map(h => (
                   <TableRowCell
                     key={h.name}
                     style={{
                       fontWeight: 'bold',
                       fontSize: '15px',
-                      color: scoreToColor(item[h.name]).color,
+                      color: scoreToColor(item[h.name])?.color,
                     }}
                   >
                     {item[h.name] !== undefined && item[h.name] !== null ? (
                       <div
                         style={{ cursor: 'pointer' }}
                         onClick={() => {
-                          const fullSummary =
-                            historyDoc.document.accountSummaries.find(
-                              (a) => a.id === parseInt(accountSplit[1])
-                            );
+                          const fullSummary = historyDoc.document.accountSummaries.find(
+                            a => a.id === parseInt(accountSplit[1])
+                          );
 
                           const productSummary =
                             fullSummary?.[`${h.name}.scoring`];

@@ -16,7 +16,7 @@ export default function DetailsTable(props) {
   useEffect(() => {
     let categories = [];
 
-    Object.keys(rules).forEach((key) => {
+    Object.keys(rules).forEach(key => {
       if (
         accountSummary?.[key] !== null &&
         accountSummary?.[key] !== undefined
@@ -53,7 +53,7 @@ export default function DetailsTable(props) {
       }}
     >
       <div>
-        {(dataState.categories || []).map((cat) => {
+        {(dataState.categories || []).map(cat => {
           const ruleSet = rules[cat.name];
           const tdWidth = (1 / (ruleSet.scores || []).length) * 100;
 
@@ -62,20 +62,18 @@ export default function DetailsTable(props) {
             Object.keys(accountSummary[`${cat.name}.entitiesPassing`]).length;
 
           const allEntities = [];
-          Object.keys(accountSummary[`${cat.name}.entities`]).forEach(
-            (guid) => {
-              const value = accountSummary[`${cat.name}.entities`][guid];
-              allEntities.push({
-                guid,
-                accountId: accountSummary.id,
-                accountName: accountSummary.name,
-                ...value,
-              });
-            }
-          );
+          Object.keys(accountSummary[`${cat.name}.entities`]).forEach(guid => {
+            const value = accountSummary[`${cat.name}.entities`][guid];
+            allEntities.push({
+              guid,
+              accountId: accountSummary.id,
+              accountName: accountSummary.name,
+              ...value,
+            });
+          });
 
           Object.keys(accountSummary[`${cat.name}.entitiesPassing`]).forEach(
-            (guid) => {
+            guid => {
               const value = accountSummary[`${cat.name}.entitiesPassing`][guid];
               allEntities.push({
                 guid,
@@ -86,12 +84,12 @@ export default function DetailsTable(props) {
             }
           );
 
-          ruleSet.scores.forEach((s) => {
+          ruleSet.scores.forEach(s => {
             if (
               s.name !== 'name' &&
-              !(ruleSet?.tagMeta || []).some((t) => t.key === s.name)
+              !(ruleSet?.tagMeta || []).some(t => t.key === s.name)
             ) {
-              allEntities.forEach((i) => {
+              allEntities.forEach(i => {
                 if (i[s.name] === undefined) {
                   i[s.name] = true;
                 }
@@ -179,7 +177,7 @@ export default function DetailsTable(props) {
                             style={{ width: '100%', tableLayout: 'fixed' }}
                           >
                             <tr>
-                              {rules[cat.name].scores.map((score) => {
+                              {rules[cat.name].scores.map(score => {
                                 const {
                                   entityCheck,
                                   accountCheck,

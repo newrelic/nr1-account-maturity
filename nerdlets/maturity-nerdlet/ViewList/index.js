@@ -23,6 +23,7 @@ export default function ViewList() {
     selectedAccountId,
     userSettings,
     toggleFavoriteView,
+    email,
   } = useContext(DataContext);
   const [column, setColumn] = useState(0);
   const [sortingType, setSortingType] = useState(
@@ -106,7 +107,9 @@ export default function ViewList() {
     {
       key: 'Created by',
       value: ({ item }) =>
-        item?.id === 'allData' ? 'Account Maturity' : item.document?.owner,
+        item?.id === `allData+${email}`
+          ? 'Account Maturity'
+          : item.document?.owner,
     },
   ];
 
@@ -114,8 +117,13 @@ export default function ViewList() {
     {
       label: 'Run',
       onClick: (evt, { item }) => {
-        if (item.id === 'allData') {
-          runView({ id: 'allData', name: 'All data' }, null, false, true);
+        if (item.id === `allData+${email}`) {
+          runView(
+            { id: `allData+${email}`, name: 'All data' },
+            null,
+            false,
+            true
+          );
         } else {
           runView(
             {
@@ -132,7 +140,7 @@ export default function ViewList() {
     {
       label: 'Edit',
       onClick: (evt, { item }) => {
-        if (item.id === 'allData') {
+        if (item.id === `allData+${email}`) {
           Toast.showToast({
             title: 'This view cannot be edited',
             type: Toast.TYPE.NORMAL,
@@ -146,7 +154,7 @@ export default function ViewList() {
       label: 'Delete',
       type: TableRow.ACTION_TYPE.DESTRUCTIVE,
       onClick: (evt, { item }) => {
-        if (item.id === 'allData') {
+        if (item.id === `allData+${email}`) {
           Toast.showToast({
             title: 'This view cannot be deleted',
             type: Toast.TYPE.NORMAL,

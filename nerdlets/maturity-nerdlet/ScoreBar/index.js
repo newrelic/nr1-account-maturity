@@ -7,13 +7,14 @@ import HistorySelector from '../HistorySelector';
 import DataContext from '../../../src/context/data';
 
 export default function ScoreBar(props) {
-  const { selectedReport, selectedAccountId, runView } =
-    useContext(DataContext);
+  const { selectedReport, selectedAccountId, runView } = useContext(
+    DataContext
+  );
   const status = percentageToStatus(props?.totalPercentage);
   const scoreColor = scoreToColor(props?.totalPercentage);
 
   // copy data to avoid manipulating original obj
-  const data = JSON.parse(JSON.stringify(props?.data || [])).map((d) => {
+  const data = JSON.parse(JSON.stringify(props?.data || [])).map(d => {
     if ((d?.Account || '').includes(' :: ')) {
       const accountSplit = d.Account.split(' :: ');
       d.accountName = accountSplit[0];
@@ -21,7 +22,7 @@ export default function ScoreBar(props) {
     }
 
     if (d.elementScores) {
-      d.elementScores.forEach((s) => {
+      d.elementScores.forEach(s => {
         d[s.name] = parseFloat(s.score);
       });
     }
@@ -100,9 +101,8 @@ export default function ScoreBar(props) {
                     onClick={() =>
                       csvDownload({
                         data: data,
-                        filename: `${new Date().getTime()}-${
-                          props.viewGroupBy || 'account'
-                        }-summary-export.csv`,
+                        filename: `${new Date().getTime()}-${props.viewGroupBy ||
+                          'account'}-summary-export.csv`,
                         delimiter: ',',
                       })
                     }

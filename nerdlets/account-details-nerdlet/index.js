@@ -14,9 +14,13 @@ import DetailsTable from './DetailTable';
 export default function AccountDetailsNerdlet() {
   const platformContext = useContext(PlatformStateContext);
   const nerdletContext = useContext(NerdletStateContext);
-  const { accountName, accountId, accountSummary, accountPercentage } =
-    nerdletContext;
-  const statusColor = scoreToColor(accountPercentage).color;
+  const {
+    accountName,
+    accountId,
+    accountSummary,
+    accountPercentage,
+  } = nerdletContext;
+  const statusColor = scoreToColor(accountPercentage)?.color;
   const percentageDiff = 100 - accountPercentage;
   const [dataState, setDataState] = useSetState({
     fetchingHistory: true,
@@ -25,7 +29,7 @@ export default function AccountDetailsNerdlet() {
     sortBy: 'Lowest score',
   });
 
-  const updateSortBy = (sortBy) => {
+  const updateSortBy = sortBy => {
     setDataState({ sortBy });
   };
 

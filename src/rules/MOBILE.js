@@ -44,29 +44,29 @@ export default {
   scores: [
     {
       name: 'Has Dashboards',
-      accountCheck: (account) =>
-        (account.entityInfo.types.find((t) => t.type === 'DASHBOARD')?.count ||
-          0) > 0,
+      accountCheck: account =>
+        ((account?.entityInfo?.types || []).find(t => t.type === 'DASHBOARD')
+          ?.count || 0) > 0,
     },
     {
       name: 'Launch count',
-      entityCheck: (entity) =>
+      entityCheck: entity =>
         (entity.mobileAppLaunch?.results?.[0]?.['uniqueCount.sessionId'] || 0) >
         0,
     },
     {
       name: 'Breadcrumbs',
-      entityCheck: (entity) =>
+      entityCheck: entity =>
         (entity.mobileBreadcrumbs?.results?.[0]?.count || 0) > 0,
     },
     {
       name: 'Handled Exceptions',
-      entityCheck: (entity) =>
+      entityCheck: entity =>
         (entity.mobileHandledExceptions?.results?.[0]?.count || 0) > 0,
     },
     {
       name: 'Alerts',
-      entityCheck: (entity) => entity?.alertSeverity !== 'NOT_CONFIGURED',
+      entityCheck: entity => entity?.alertSeverity !== 'NOT_CONFIGURED',
     },
   ],
 };

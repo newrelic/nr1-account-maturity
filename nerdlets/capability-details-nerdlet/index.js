@@ -16,13 +16,13 @@ export default function ProductDetailsNerdlet() {
   const nerdletContext = useContext(NerdletStateContext);
   const { rollUpScore, title } = nerdletContext;
 
-  const statusColor = scoreToColor(rollUpScore).color;
+  const statusColor = scoreToColor(rollUpScore)?.color;
   const percentageDiff = 100 - rollUpScore;
   const [dataState, setDataState] = useSetState({
     sortBy: 'Lowest score',
   });
 
-  const updateSortBy = (sortBy) => {
+  const updateSortBy = sortBy => {
     setDataState({ sortBy });
   };
 

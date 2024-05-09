@@ -42,26 +42,26 @@ export default function ListView(props) {
     }
 
     const productHeaders = Object.keys(rules)
-      .filter((product) => props.accountSummaries.find((s) => s[product]))
-      .map((product) => ({ name: product, value: (a) => a[product] }));
+      .filter(product => props.accountSummaries.find(s => s[product]))
+      .map(product => ({ name: product, value: a => a[product] }));
 
     const headers = [
       {
         name: 'Account',
         // do this to make handling sub values and csv export a touch easier
-        value: (a) => `${a.name} :: ${a.id}`,
+        value: a => `${a.name} :: ${a.id}`,
       },
       {
         name: 'Account Score',
-        value: (a) => a.scorePercentage,
+        value: a => a.scorePercentage,
       },
       ...productHeaders,
     ];
 
-    const rowData = props.accountSummaries.map((a) => {
+    const rowData = props.accountSummaries.map(a => {
       const row = {};
 
-      headers.forEach((h) => {
+      headers.forEach(h => {
         row[h.name] = h.value(a);
       });
 
@@ -84,7 +84,7 @@ export default function ListView(props) {
           <br />
 
           <div>
-            {Object.keys(modal?.productSummary || {}).map((key) => {
+            {Object.keys(modal?.productSummary || {}).map(key => {
               const value = modal?.productSummary?.[key];
 
               return (
@@ -93,7 +93,7 @@ export default function ListView(props) {
                     {key}
                   </HeadingText>
 
-                  {Object.keys(value || {}).map((subKey) => {
+                  {Object.keys(value || {}).map(subKey => {
                     return (
                       <div key={subKey}>
                         {subKey}: {value[subKey]}
@@ -159,7 +159,7 @@ export default function ListView(props) {
                     cursor: 'pointer',
                     // eslint-disable-next-line
                     borderLeft: `5px solid ${
-                      scoreToColor(item['Account Score']).color
+                      scoreToColor(item['Account Score'])?.color
                       // eslint-disable-next-line
                     }`,
                   }}
@@ -171,7 +171,7 @@ export default function ListView(props) {
                         accountId: parseInt(accountSplit[1]),
                         accountPercentage: item['Account Score'],
                         accountSummary: (props.accountSummaries || []).find(
-                          (a) => a.id === parseInt(accountSplit[1])
+                          a => a.id === parseInt(accountSplit[1])
                         ),
                       },
                     })
@@ -183,7 +183,7 @@ export default function ListView(props) {
                   style={{
                     fontWeight: 'bold',
                     fontSize: '15px',
-                    color: scoreToColor(item['Account Score']).color,
+                    color: scoreToColor(item['Account Score'])?.color,
                   }}
                 >
                   {/* {item['Account Score']} */}
@@ -212,13 +212,13 @@ export default function ListView(props) {
                     </div>
                   </Tooltip>
                 </TableRowCell>
-                {productHeaders.map((h) => (
+                {productHeaders.map(h => (
                   <TableRowCell
                     key={h.name}
                     style={{
                       fontWeight: 'bold',
                       fontSize: '15px',
-                      color: scoreToColor(item[h.name]).color,
+                      color: scoreToColor(item[h.name])?.color,
                     }}
                   >
                     {item[h.name] !== undefined && item[h.name] !== null ? (
@@ -226,7 +226,7 @@ export default function ListView(props) {
                         style={{ cursor: 'pointer' }}
                         onClick={() => {
                           const fullSummary = props.accountSummaries.find(
-                            (a) => a.id === parseInt(accountSplit[1])
+                            a => a.id === parseInt(accountSplit[1])
                           );
 
                           const productSummary =
