@@ -933,8 +933,9 @@ export function useProvideData(props) {
           completedAccountTotal,
           accountTotal: accounts.length,
         });
-      }, 500);
+      }, 1000);
 
+      console.log(`${new Date().toLocaleTimeString()} - fetch accounts start`);
       const q = async.queue((task, callback) => {
         getEntitiesByAccount(task, entitySearchQuery).then(entities => {
           task.entities = entities;
@@ -950,6 +951,7 @@ export function useProvideData(props) {
       q.push(accounts);
 
       q.drain(() => {
+        console.log(`${new Date().toLocaleTimeString()} - fetch accounts end`);
         clearInterval(pollJobStatus);
         setDataState({ gettingEntities: false, completedPercentageTotal: 100 });
         evaluateAccounts(completedAccounts, agentReleases, dataDictionary).then(
@@ -1124,50 +1126,76 @@ export function useProvideData(props) {
         setDataState({ currentLoadingAccount, completedPercentage });
       }, 1500);
 
+      console.log(
+        `${new Date().toLocaleTimeString()} - get entities by account start`
+      );
       const q = async.queue((task, callback) => {
         const entityClause = entitySearchQuery
           ? `AND ${entitySearchQuery}`
           : '';
         const searchClause = ` AND type NOT IN ('DASHBOARD') ${entityClause}`;
-        NerdGraphQuery.query({
-          query: entitySearchQueryByAccount(account.id, searchClause),
-          variables: { cursor: task.cursor },
-        }).then(res => {
-          if (res.error) {
-            Toast.showToast({
-              title: 'Failed to fetch entities',
-              description: res.error.message,
-              type: Toast.TYPE.CRITICAL,
-            });
-            callback();
-          } else {
-            const entitySearch = res?.data?.actor?.entitySearch || {};
 
-            totalEntityCount = entitySearch.count;
-            completedEntities = [
-              ...completedEntities,
-              ...(entitySearch?.results?.entities || []),
-            ];
-            completedPercentage =
-              (completedEntities.length / totalEntityCount) * 100;
+        async.retry(
+          {
+            times: 5, // Number of retries
+            interval: retryCount => 100 * Math.pow(2, retryCount), // Exponential backoff formula
+          },
+          retryCallback => {
+            NerdGraphQuery.query({
+              query: entitySearchQueryByAccount(account.id, searchClause),
+              variables: { cursor: task.cursor },
+            })
+              .then(res => {
+                if (res.error) {
+                  Toast.showToast({
+                    title: 'Failed to fetch entities, retrying',
+                    description: res.error.message,
+                    type: Toast.TYPE.CRITICAL,
+                  });
+                  retryCallback(res.error, null); // Pass error to retry, will trigger retry
+                } else {
+                  const entitySearch = res?.data?.actor?.entitySearch || {};
 
-            if (currentLoadingAccount !== account) {
-              currentLoadingAccount = account;
+                  totalEntityCount = entitySearch.count;
+                  completedEntities = [
+                    ...completedEntities,
+                    ...(entitySearch?.results?.entities || []),
+                  ];
+                  completedPercentage =
+                    (completedEntities.length / totalEntityCount) * 100;
+
+                  if (currentLoadingAccount !== account) {
+                    currentLoadingAccount = account;
+                  }
+
+                  const nextCursor = entitySearch?.results?.nextCursor;
+                  if (nextCursor) {
+                    q.push({ cursor: nextCursor });
+                  }
+
+                  retryCallback(null, res); // Success, no retry
+                }
+              })
+              .catch(error => {
+                retryCallback(error, null); // Handle promise rejection, trigger retry
+              });
+          },
+          (err, result) => {
+            // Final callback after retrying or on success
+            if (err) {
+              console.error('Final error after retries:', err);
             }
-
-            const nextCursor = entitySearch?.results?.nextCursor;
-            if (nextCursor) {
-              q.push({ cursor: nextCursor });
-            }
-
-            callback();
+            callback(); // Continue queue
           }
-        });
+        );
       }, 5);
 
       q.push({ cursor: null });
 
       q.drain(() => {
+        console.log(
+          `${new Date().toLocaleTimeString()} - get entities by account end`
+        );
         clearInterval(pollJobStatus);
 
         decorateEntities(completedEntities).then(decoratedEntities => {
@@ -1218,6 +1246,9 @@ export function useProvideData(props) {
       if (entityNrqlQueries.length > 0) {
         let entityNrqlData = [];
 
+        console.log(
+          `${new Date().toLocaleTimeString()} - fetch entity nrql data start`
+        );
         const nrqlQueue = async.queue((task, callback) => {
           const nrqlPromises = Object.keys(task.nrqlQueries).map(q => {
             return NerdGraphQuery.query({
@@ -1245,6 +1276,9 @@ export function useProvideData(props) {
         nrqlQueue.push(entityNrqlQueries);
 
         await nrqlQueue.drain();
+        console.log(
+          `${new Date().toLocaleTimeString()} - fetch entity nrql data end`
+        );
 
         entities.forEach((entity, i) => {
           const foundEntity = entityNrqlData.find(e => e.guid === entity.guid);
@@ -1257,6 +1291,9 @@ export function useProvideData(props) {
       if (entityTypesToQuery.length > 0) {
         let entityData = [];
 
+        console.log(
+          `${new Date().toLocaleTimeString()} - entity type queue start`
+        );
         const entityTypeQueue = async.queue((task, callback) => {
           getEntityData(task).then(data => {
             entityData = [...entityData, ...data];
@@ -1267,6 +1304,10 @@ export function useProvideData(props) {
         entityTypeQueue.push(entityTypesToQuery);
 
         entityTypeQueue.drain(() => {
+          console.log(
+            `${new Date().toLocaleTimeString()} - entity type queue end`
+          );
+
           // merge entity data
           entities.forEach((entity, i) => {
             const foundEntity = entityData.find(e => e.guid === entity.guid);
@@ -1294,19 +1335,51 @@ export function useProvideData(props) {
 
       let entityData = [];
 
+      console.log(`${new Date().toLocaleTimeString()} - get entity data start`);
       const taskQueue = async.queue((guids, callback) => {
-        NerdGraphQuery.query({
-          query: entityTask.graphql,
-          variables: { guids },
-        }).then(res => {
-          entityData = [...entityData, ...(res?.data?.actor?.entities || [])];
-          callback();
-        });
+        async.retry(
+          {
+            times: 5, // Retry up to 5 times
+            interval: retryCount => 100 * Math.pow(2, retryCount), // Exponential backoff, starting at 100ms
+          },
+          retryCallback => {
+            NerdGraphQuery.query({
+              query: entityTask.graphql,
+              variables: { guids },
+            })
+              .then(res => {
+                if (res.error) {
+                  console.error('Error fetching data, retrying...', res.error);
+                  retryCallback(res.error);
+                } else {
+                  entityData = [
+                    ...entityData,
+                    ...(res?.data?.actor?.entities || []),
+                  ];
+                  retryCallback(null);
+                }
+              })
+              .catch(error => {
+                console.error('Query failed', error);
+                retryCallback(error);
+              });
+          },
+          (err, result) => {
+            // Final callback for retry
+            if (err) {
+              console.error('Failed after retries:', err);
+              callback();
+            } else {
+              callback();
+            }
+          }
+        );
       }, 5);
 
       taskQueue.push(guidChunks);
 
       taskQueue.drain(() => {
+        console.log(`${new Date().toLocaleTimeString()} - get entity data end`);
         resolve(entityData);
       });
     });
