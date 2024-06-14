@@ -1,3 +1,10 @@
+# [0.15.0](https://github.com/newrelic/nr1-account-maturity/compare/v0.14.2...v0.15.0) (2024-06-11)
+
+
+### Features
+
+* version bump for new maturity products ([89408cc](https://github.com/newrelic/nr1-account-maturity/commit/89408cce3ddef050b6d8e6b1eba6681eb82dd47c))
+
 ## [0.14.2](https://github.com/newrelic/nr1-account-maturity/compare/v0.14.1...v0.14.2) (2023-07-21)
 
 
