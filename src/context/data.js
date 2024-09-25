@@ -1229,7 +1229,9 @@ export function useProvideData(props) {
 
         if (rule.nrqlQueries) {
           const foundEntities = entities.filter(
-            e => e.entityType === rule.entityType && e.type === rule.type
+            e =>
+              e.entityType === rule.entityType &&
+              (rule.type ? e.type === rule.type : true)
           );
 
           foundEntities.forEach(e => {

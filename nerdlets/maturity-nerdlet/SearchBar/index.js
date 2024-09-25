@@ -5,7 +5,7 @@ import DataContext from '../../../src/context/data';
 
 export default function SearchBar(props) {
   const { width } = props;
-  const { search, setDataState } = useContext(DataContext);
+  const { search, setDataState, view } = useContext(DataContext);
 
   const newViewWidth = 100;
   const textFieldWidth = width - newViewWidth - 30;
@@ -43,6 +43,7 @@ export default function SearchBar(props) {
           iconType={Button.ICON_TYPE.INTERFACE__SIGN__PLUS}
           onClick={() => {
             setDataState({
+              prevView: view,
               view: {
                 page: 'CreateView',
                 title: 'Create View Configuration',

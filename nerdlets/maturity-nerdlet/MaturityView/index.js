@@ -32,12 +32,13 @@ export default function MaturityView(props) {
           iconType: Icon.TYPE.INTERFACE__SIGN__PLUS,
           onClick: () =>
             setDataState({
+              prevView: view,
               view: {
                 page: 'CreateView',
                 title: 'Create New View',
               },
               selectedReport: {},
-              selectedView: {}
+              selectedView: {},
             }),
         },
       ],
@@ -57,10 +58,10 @@ export default function MaturityView(props) {
   let scoredCollection = [];
 
   if (viewGroupBy === 'account') {
-    scoredCollection = (accountSummaries || []).map((a) => {
+    scoredCollection = (accountSummaries || []).map(a => {
       const elementScores = [];
 
-      Object.keys(rules).forEach((key) => {
+      Object.keys(rules).forEach(key => {
         const value = a[key];
 
         if (value !== undefined && value !== null) {
@@ -89,16 +90,16 @@ export default function MaturityView(props) {
     });
   } else if (viewGroupBy === 'capability') {
     scoredCollection = Object.keys(rules)
-      .filter((product) =>
+      .filter(product =>
         accountSummaries.find(
-          (a) => a[product] !== null && a[product] !== undefined
+          a => a[product] !== null && a[product] !== undefined
         )
       )
-      .map((product) => {
+      .map(product => {
         const elementScores = [];
         let totalScore = 0;
 
-        accountSummaries.forEach((account) => {
+        accountSummaries.forEach(account => {
           const value = account[product];
           totalScore += value;
 

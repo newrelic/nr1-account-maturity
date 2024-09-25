@@ -4,7 +4,15 @@ import { SegmentedControl, SegmentedControlItem } from 'nr1';
 import DataContext from '../../../src/context/data';
 
 export default function ViewSegmentSelector() {
-  const { viewSegment, viewGroupBy, setDataState } = useContext(DataContext);
+  const {
+    viewSegment,
+    viewGroupBy,
+    viewConfigs,
+    setDataState,
+    selectedView,
+  } = useContext(DataContext);
+
+  const viewConfig = (viewConfigs || []).find(vc => vc.id === selectedView?.id);
 
   return useMemo(() => {
     return (
@@ -40,6 +48,7 @@ export default function ViewSegmentSelector() {
           <SegmentedControlItem
             label="Trends"
             value="trends"
+            disabled={!viewConfig}
             iconType={
               SegmentedControlItem.ICON_TYPE.DATAVIZ__DATAVIZ__LINE_CHART
             }

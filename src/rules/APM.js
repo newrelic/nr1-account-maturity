@@ -41,23 +41,27 @@ export default {
         }
       }
     }`,
+
   tagMeta: [
     { key: 'language', name: 'Language' },
     { key: 'agentVersion', name: 'Version' },
   ],
+  nrqlQueries: entity => ({
+    agentUpdate: `FROM AgentUpdate SELECT latest(currentVersion) as 'currentVersion', latest(recommendedVersion) as 'recVersion' WHERE entity.guid = '${entity.guid}' SINCE 30 hours ago`,
+  }),
   // scores and values to run and display
   scores: [
     {
       name: 'Reporting',
-      entityCheck: (entity) => entity.reporting,
+      entityCheck: entity => entity.reporting,
     },
     {
       name: 'Alerts',
-      entityCheck: (entity) => entity?.alertSeverity !== 'NOT_CONFIGURED',
+      entityCheck: entity => entity?.alertSeverity !== 'NOT_CONFIGURED',
     },
     {
       name: 'Custom Apdex',
-      entityCheck: (entity) => {
+      entityCheck: entity => {
         const { language, settings } = entity;
         return (
           (settings?.apdexTarget !== 0.5 && language !== 'nodejs') ||
@@ -67,11 +71,11 @@ export default {
     },
     {
       name: 'Tags', // this was previously the labels check, which is really just checking for non-standard tags (value of this check is questionable)
-      entityCheck: (entity) =>
+      entityCheck: entity =>
         entity.tags
-          .map((tag) => tag.key)
+          .map(tag => tag.key)
           .some(
-            (key) =>
+            key =>
               ![
                 'account',
                 'accountId',
@@ -81,31 +85,49 @@ export default {
               ].includes(key)
           ),
     },
+    // {
+    //   name: 'Latest Release',
+    //   entityCheck: (entity, releases) => {
+    //     const { runningAgentVersions, language } = entity;
+
+    //     // the logic of the original implementation assumes that the max version is okay to use and that the latest will be rolled out completely eventually
+    //     const maxVersion =
+    //       runningAgentVersions?.maxVersion ||
+    //       runningAgentVersions?.minVersion ||
+    //       '0.0.0';
+
+    //     if (releases[language]) {
+    //       const releaseCount = releases[language]?.agentReleases.length - 1;
+    //       const latestVersion =
+    //         releases[language]?.agentReleases[releaseCount || 0];
+
+    //       const lversion = semver.coerce(latestVersion?.version);
+    //       const mversion = semver.coerce(maxVersion);
+
+    //       return semver.satisfies(mversion?.raw, `>=${lversion?.raw}`);
+    //     } else {
+    //       console.log(
+    //         "Can't determine agent release for",
+    //         entity.name,
+    //         entity.guid
+    //       );
+    //       return false;
+    //     }
+    //   },
+    // },
     {
       name: 'Latest Release',
       entityCheck: (entity, releases) => {
-        const { runningAgentVersions, language } = entity;
-
-        // the logic of the original implementation assumes that the max version is okay to use and that the latest will be rolled out completely eventually
-        const maxVersion =
-          runningAgentVersions?.maxVersion ||
-          runningAgentVersions?.minVersion ||
-          '0.0.0';
-
-        if (releases[language]) {
-          const releaseCount = releases[language]?.agentReleases.length - 1;
-          const latestVersion =
-            releases[language]?.agentReleases[releaseCount || 0];
-
-          const lversion = semver.coerce(latestVersion?.version);
-          const mversion = semver.coerce(maxVersion);
-
-          return semver.satisfies(mversion?.raw, `>=${lversion?.raw}`);
+        const data = entity?.nrqlData?.agentUpdate?.[0];
+        if (data && data.currentVersion && data.recVersion) {
+          if (data.currentVersion !== data.recVersion) {
+            return false;
+          } else {
+            return true;
+          }
         } else {
           console.log(
-            "Can't determine agent release for",
-            entity.name,
-            entity.guid
+            `No AgentUpdate available to retrieve for ${entity.guid}`
           );
           return false;
         }
@@ -113,13 +135,13 @@ export default {
     },
     {
       name: 'DT Enabled',
-      entityCheck: (entity) =>
-        entity.tags.find((tag) => tag.key === 'nr.dt.enabled')?.values?.[0] ===
+      entityCheck: entity =>
+        entity.tags.find(tag => tag.key === 'nr.dt.enabled')?.values?.[0] ===
         'true',
     },
     {
       name: 'Deployments',
-      entityCheck: (entity) =>
+      entityCheck: entity =>
         (entity?.deploymentSearch?.results || []).length > 0,
     },
     {

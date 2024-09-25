@@ -107,9 +107,7 @@ export default function ViewList() {
     {
       key: 'Created by',
       value: ({ item }) =>
-        item?.id === `allData+${email}`
-          ? 'Account Maturity'
-          : item.document?.owner,
+        item?.id === `allData+${email}` ? email : item.document?.owner,
     },
   ];
 

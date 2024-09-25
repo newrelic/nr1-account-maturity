@@ -1,4 +1,4 @@
-import React, { useMemo, useContext, useEffect } from 'react';
+import React, { useMemo, useContext, useEffect, useState } from 'react';
 import {
   nerdlet,
   Switch,
@@ -17,10 +17,13 @@ import {
   Card,
   CardBody,
   CardHeader,
+  Modal,
 } from 'nr1';
 import DataContext from '../../../src/context/data';
 import { useSetState } from '@mantine/hooks';
 import rules from '../../../src/rules';
+
+const ENTITY_COUNT_WARNING = 50;
 
 export default function CreateView() {
   const {
@@ -33,7 +36,10 @@ export default function CreateView() {
     selectedAccountId,
     setDataState,
     view,
+    prevView,
   } = useContext(DataContext);
+  const [entityCount, setEntityCount] = useState(0);
+  const [runParams, setRunParams] = useState(null);
 
   useEffect(() => {
     nerdlet.setConfig({
@@ -41,7 +47,14 @@ export default function CreateView() {
     });
   }, []);
 
-  const allProducts = selectedReport?.document?.allProducts;
+  let allProducts = selectedReport?.document?.allProducts;
+
+  if (!allProducts && (selectedReport?.document?.products || []).length === 0) {
+    allProducts = true;
+  } else {
+    allProducts =
+      allProducts !== undefined && allProducts !== null ? true : allProducts;
+  }
 
   const [state, setState] = useSetState({
     creatingView: false,
@@ -51,9 +64,8 @@ export default function CreateView() {
         : selectedReport?.document?.name || '',
     description: selectedReport?.document?.description || '',
     entitySearchQuery: selectedReport?.document?.entitySearchQuery || '',
-    allProducts:
-      allProducts !== undefined && allProducts !== null ? true : allProducts,
-    accounts: selectedReport?.document?.accounts || [],
+    allProducts,
+    accounts: selectedReport?.document?.accounts || [selectedAccountId],
     accountsFilter: selectedReport?.document?.accountsFilter,
     accountsFilterEnabled: selectedReport?.document?.accountsFilterEnabled,
     products: selectedReport?.document?.products || [],
@@ -104,6 +116,83 @@ export default function CreateView() {
     });
   };
 
+  function summarizeTypesWithRules(data, products, allProducts) {
+    const summary = {};
+
+    data.forEach(item => {
+      const types = item.data.actor.entitySearch.types;
+
+      types.forEach(type => {
+        const key = `${type.domain}_${type.entityType}_${type.type}`;
+
+        if (summary[key]) {
+          summary[key].count += type.count;
+        } else {
+          summary[key] = { ...type };
+        }
+      });
+    });
+
+    let summarizedArray = Object.values(summary);
+
+    let selectedProducts = allProducts ? Object.keys(rules) : products;
+
+    summarizedArray = summarizedArray.filter(type => {
+      return selectedProducts.some(product => {
+        const rule = rules[product];
+        if (rule) {
+          if (rule.entityType && rule.type) {
+            return (
+              type.entityType === rule.entityType && type.type === rule.type
+            );
+          } else if (rule.entityType) {
+            return type.entityType === rule.entityType;
+          }
+        }
+        return false;
+      });
+    });
+
+    return summarizedArray;
+  }
+
+  const checkEntityCount = async data => {
+    const { accounts, products, allProducts } = data;
+
+    const accountEntityData = accounts.map(id => {
+      return NerdGraphQuery.query({
+        query: `{
+          actor {
+            entitySearch(query: "tags.accountId = '${id}'") {
+              types {
+                count
+                domain
+                entityType
+                type
+              }
+            }
+          }
+        }`,
+      });
+    });
+
+    const accountData = await Promise.all(accountEntityData);
+    const summarizedData = summarizeTypesWithRules(
+      accountData,
+      products,
+      allProducts
+    );
+
+    const totalEntities = summarizedData.reduce(
+      (total, type) => total + type.count,
+      0
+    );
+
+    setEntityCount(totalEntities);
+
+    return { totalEntities, summarizedData };
+  };
+
   return useMemo(() => {
     if ((accounts || []).length === 0) {
       return (
@@ -123,12 +212,57 @@ export default function CreateView() {
 
     return (
       <>
+        <Modal
+          hidden={entityCount <= ENTITY_COUNT_WARNING}
+          onClose={() => setEntityCount(0)}
+        >
+          <HeadingText type={HeadingText.TYPE.HEADING_3}>
+            Proceed with caution
+          </HeadingText>
+
+          <BlockText
+            spacingType={[
+              BlockText.SPACING_TYPE.EXTRA_LARGE,
+              BlockText.SPACING_TYPE.OMIT,
+            ]}
+          >
+            This query will target {entityCount} of entities; due to this high
+            number of entities you may experience performance delays or crashes.
+            Please consider setting up filters in the View configuration to
+            reduce to the number of entities included in the query.
+          </BlockText>
+
+          <Button
+            type={Button.TYPE.PRIMARY}
+            style={{ float: 'left' }}
+            onClick={() => {
+              setEntityCount(0);
+              runView(
+                runParams.selectedView,
+                runParams.selectedReport,
+                runParams.doSaveView
+              );
+            }}
+          >
+            Continue
+          </Button>
+
+          <Button style={{ float: 'right' }} onClick={() => setEntityCount(0)}>
+            Close
+          </Button>
+        </Modal>
         <br />
         {viewConfigs.length > 1 && (
           <>
             <Button
               type={Button.TYPE.SECONDARY}
-              onClick={() => setDataState({ view: { page: 'ViewList' } })}
+              onClick={() => {
+                if (prevView) {
+                  setDataState({ view: prevView });
+                } else {
+                  setDataState({ view: { page: 'ViewList' } });
+                }
+              }}
             >
               Back
             </Button>
@@ -310,9 +444,12 @@ export default function CreateView() {
                         // description={`${a.id}`}
                         label={`${a.name} (${a.id})`}
                         style={{ paddingBottom: '0px' }}
-                        checked={state.accounts.includes(a.id)}
+                        checked={
+                          state.accounts.includes(a.id) ||
+                          state?.accountsFilterEnabled
+                        }
                         disabled={
-                          state.accounts.length === accounts.length ||
+                          // state.accounts.length === accounts.length ||
                           state?.accountsFilterEnabled
                         }
                         onChange={() => {
@@ -356,34 +493,52 @@ export default function CreateView() {
           <br />
           <Button
             type={Button.TYPE.PRIMARY}
-            disabled={runDisabled}
+            disabled={runDisabled || !state.name}
             onClick={async () => {
               let run = true;
               if (state.entitySearchQuery) {
                 run = await validateEntitySearchQuery();
               }
 
-              if (run) {
-                runView(
-                  {
+              let { totalEntities, summarizedData } = await checkEntityCount({
+                accounts: state.accounts,
+                allAccounts: state.accounts.length === accounts.length,
+                entitySearchQuery: state.entitySearchQuery,
+                accountsFilter: state.accountsFilter,
+                accountsFilterEnabled: state.accountsFilterEnabled,
+                allProducts: state.allProducts,
+                products: state.products,
+              });
+
+              const runParams = {
+                selectedView: {
+                  name: state.name,
+                  account: selectedAccountId,
+                },
+                selectedReport: {
+                  id: selectedReport?.id,
+                  document: {
+                    owner: email,
                     name: state.name,
-                    account: selectedAccountId,
+                    description: state.description,
+                    accounts: state.accounts,
+                    allAccounts: state.accounts.length === accounts.length,
+                    accountsFilter: state.accountsFilter,
+                    accountsFilterEnabled: state.accountsFilterEnabled,
+                    allProducts: state.allProducts,
+                    products: state.products,
                   },
-                  {
-                    id: selectedReport?.id,
-                    document: {
-                      owner: email,
-                      name: state.name,
-                      description: state.description,
-                      accounts: state.accounts,
-                      allAccounts: state.accounts.length === accounts.length,
-                      accountsFilter: state.accountsFilter,
-                      accountsFilterEnabled: state.accountsFilterEnabled,
-                      allProducts: state.allProducts,
-                      products: state.products,
-                    },
-                  },
-                  true
+                },
+                doSaveView: true,
+              };
+
+              if (totalEntities > ENTITY_COUNT_WARNING) {
+                setRunParams(runParams);
+              } else if (run) {
+                runView(
+                  runParams.selectedView,
+                  runParams.selectedReport,
+                  runParams.doSaveView
                 );
               }
             }}
@@ -396,32 +551,47 @@ export default function CreateView() {
               disabled={runDisabled}
               onClick={async () => {
                 let run = true;
+
                 if (state.entitySearchQuery) {
                   run = await validateEntitySearchQuery();
                 }
 
-                if (run) {
-                  runView(
-                    {
+                let { totalEntities, summarizedData } = await checkEntityCount({
+                  accounts: state.accounts,
+                  allAccounts: state.accounts.length === accounts.length,
+                  entitySearchQuery: state.entitySearchQuery,
+                  accountsFilter: state.accountsFilter,
+                  accountsFilterEnabled: state.accountsFilterEnabled,
+                  allProducts: state.allProducts,
+                  products: state.products,
+                });
+
+                const runParams = {
+                  selectedView: {
+                    name: state.name,
+                    account: selectedAccountId,
+                    unsavedRun: true,
+                  },
+                  selectedReport: {
+                    document: {
+                      owner: email,
                       name: state.name,
-                      account: selectedAccountId,
-                      unsavedRun: true,
+                      description: state.description,
+                      accounts: state.accounts,
+                      allAccounts: state.accounts.length === accounts.length,
+                      entitySearchQuery: state.entitySearchQuery,
+                      accountsFilter: state.accountsFilter,
+                      accountsFilterEnabled: state.accountsFilterEnabled,
+                      allProducts: state.allProducts,
+                      products: state.products,
                     },
-                    {
-                      document: {
-                        owner: email,
-                        name: state.name,
-                        description: state.description,
-                        accounts: state.accounts,
-                        allAccounts: state.accounts.length === accounts.length,
-                        entitySearchQuery: state.entitySearchQuery,
-                        accountsFilter: state.accountsFilter,
-                        accountsFilterEnabled: state.accountsFilterEnabled,
-                        allProducts: state.allProducts,
-                        products: state.products,
-                      },
-                    }
-                  );
+                  },
+                };
+
+                if (totalEntities > ENTITY_COUNT_WARNING) {
+                  setRunParams(runParams);
+                } else if (run) {
+                  runView(runParams.selectedView, runParams.selectedReport);
                 }
               }}
             >
@@ -439,5 +609,7 @@ export default function CreateView() {
     email,
     view.page,
     viewConfigs.length,
+    entityCount,
+    runParams,
   ]);
 }
