@@ -16,8 +16,9 @@ export default function NavigatorCard({ elementScores = [] }) {
 
   useEffect(() => {
     if (elementScores) {
+      const sortedScores = sortByStatusAndScore(elementScores);
       setHexagons(
-        elementScores.map(({ status, name, score }, i) => (
+        sortedScores.map(({ status, name, score }, i) => (
           <Popover key={i} openOnHover>
             <PopoverTrigger>
               <StatusIcon
@@ -61,4 +62,23 @@ export default function NavigatorCard({ elementScores = [] }) {
       </div>
     </div>
   );
+}
+
+function sortByStatusAndScore(arr) {
+  const statusPriority = {
+    critical: 1,
+    warning: 2,
+    success: 3,
+  };
+
+  return arr.sort((a, b) => {
+    const statusDifference =
+      statusPriority[a.status] - statusPriority[b.status];
+    if (statusDifference !== 0) return statusDifference;
+
+    const scoreA = parseFloat(a.score);
+    const scoreB = parseFloat(b.score);
+
+    return scoreA - scoreB;
+  });
 }

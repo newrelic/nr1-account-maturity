@@ -326,7 +326,8 @@ export function useProvideData(props) {
     selectedView,
     selectedReport,
     doSaveView,
-    saveHistory
+    saveHistory,
+    setAsDefault
   ) => {
     console.log(
       'running',
@@ -337,6 +338,10 @@ export function useProvideData(props) {
       dataState?.email
     );
     let documentId = selectedReport?.id || selectedView.id || uuidv4();
+
+    if (doSaveView && setAsDefault) {
+      setDefaultView(documentId);
+    }
 
     // fallback handling from testing
     documentId =
@@ -1452,5 +1457,6 @@ export function useProvideData(props) {
     setDefaultView,
     toggleFavoriteView,
     deleteSnapshot,
+    getAccounts,
   };
 }

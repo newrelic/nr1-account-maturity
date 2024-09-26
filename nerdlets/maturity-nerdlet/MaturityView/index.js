@@ -127,7 +127,7 @@ export default function MaturityView(props) {
             (totalScore / (accountSummaries.length * 100)) * 100
           ),
           rollUpStatus: STATUSES.UNKNOWN,
-          elementListLabel: 'Capability',
+          elementListLabel: 'Accounts',
           elementScores,
         };
 

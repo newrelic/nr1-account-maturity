@@ -194,7 +194,11 @@ export default function ViewSelector() {
                   },
                 });
               } else {
-                setDataState({ selectedReport, view: { page: 'EditView' } });
+                setDataState({
+                  selectedReport,
+                  view: { page: 'EditView' },
+                  prevView: view,
+                });
               }
             }}
           >

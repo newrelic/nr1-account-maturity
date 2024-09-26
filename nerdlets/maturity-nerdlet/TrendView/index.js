@@ -1,4 +1,4 @@
-import React, { useContext, useMemo, useState } from 'react';
+import React, { useContext, useEffect, useMemo, useState } from 'react';
 import {
   Grid,
   GridItem,
@@ -13,6 +13,7 @@ import rules, { productColors } from '../../../src/rules';
 export default function TrendView(props) {
   const { documentId } = props;
   const [selectedTime, setTime] = useState('all');
+  const [accountInfo, setAccountInfo] = useState([]);
 
   const {
     view,
@@ -20,7 +21,13 @@ export default function TrendView(props) {
     viewGroupBy,
     selectedReport,
     selectedView,
+    getAccounts,
   } = useContext(DataContext);
+
+  useEffect(async () => {
+    let x = await getAccounts();
+    setAccountInfo(x);
+  });
 
   const viewConfig = (viewConfigs || []).find(vc => vc.id === documentId);
   let { history } = viewConfig || [];
@@ -73,7 +80,8 @@ export default function TrendView(props) {
           const series = {
             metadata: {
               id: accountId,
-              name: accountId,
+              name:
+                accountInfo.find(a => a.id === accountId)?.name || accountId,
               color:
                 accountColors[accountId] ||
                 `#${Math.floor(Math.random() * 16777215).toString(16)}`,

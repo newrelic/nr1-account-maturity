@@ -14,10 +14,10 @@ export default function SearchBar(props) {
     return (
       <div
         style={{
-          paddingBottom: '15px',
-          paddingTop: '5px',
-          paddingLeft: '5px',
-          marginBottom: '5px',
+          paddingBottom: '17px',
+          paddingTop: '8px',
+          paddingLeft: '8px',
+          marginBottom: '8px',
           backgroundColor: 'white',
         }}
       >

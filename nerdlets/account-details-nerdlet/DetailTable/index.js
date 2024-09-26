@@ -111,7 +111,7 @@ export default function DetailsTable(props) {
               <Card
                 collapsible
                 defaultCollapsed
-                // collapsed={!dataState[cat.name]}
+                collapsed={!dataState[cat.name]}
                 onChange={() =>
                   setDataState({ [cat.name]: !dataState[cat.name] })
                 }
@@ -121,18 +121,27 @@ export default function DetailsTable(props) {
                   style={{ overflow: 'hidden' }}
                   title={
                     <>
-                      {cat.name}{' '}
-                      <span style={{ fontWeight: 'normal', fontSize: '14px' }}>
-                        | Overall score:
-                      </span>
-                      <span
-                        style={{
-                          color: scoreToColor(cat.score)?.color,
-                          fontSize: '14px',
-                        }}
+                      <div
+                        style={{ cursor: 'pointer' }}
+                        onClick={() =>
+                          setDataState({ [cat.name]: !dataState[cat.name] })
+                        }
                       >
-                        &nbsp;{Math.round(cat.score)}%
-                      </span>
+                        {cat.name}{' '}
+                        <span
+                          style={{ fontWeight: 'normal', fontSize: '14px' }}
+                        >
+                          | Overall score:
+                        </span>
+                        <span
+                          style={{
+                            color: scoreToColor(cat.score)?.color,
+                            fontSize: '14px',
+                          }}
+                        >
+                          &nbsp;{Math.round(cat.score)}%
+                        </span>
+                      </div>
                       <div style={{ float: 'right', paddingRight: '0px' }}>
                         <Button
                           iconType={

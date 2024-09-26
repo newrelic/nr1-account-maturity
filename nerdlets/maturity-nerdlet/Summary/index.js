@@ -13,17 +13,19 @@ export default function Summary(props) {
       return 'No results';
     }
 
+    let sortedCollection = sortByRollUpStatusAndScore(scoredCollection);
+
     return (
       <>
         <ScoreBar
           {...props}
-          data={scoredCollection}
+          data={sortedCollection}
           viewGroupBy={viewGroupBy}
           selectedReport={selectedReport}
         />
 
         <div className="score-card-list" style={{ paddingTop: '10px' }}>
-          {scoredCollection.map((collection, i) => {
+          {sortedCollection.map((collection, i) => {
             const { title, subtitle, rollUpScore } = collection;
 
             return (
@@ -43,7 +45,7 @@ export default function Summary(props) {
                                 accountPercentage: rollUpScore,
                                 accountSummary: (
                                   props.accountSummaries || []
-                                ).find((a) => a.id === parseInt(subtitle)),
+                                ).find(a => a.id === parseInt(subtitle)),
                               },
                             })
                         : () =>
@@ -74,4 +76,22 @@ export default function Summary(props) {
       </>
     );
   }, [scoredCollection, viewGroupBy, selectedView]);
+}
+
+function sortByRollUpStatusAndScore(arr) {
+  const statusPriority = {
+    critical: 1,
+    warning: 2,
+    success: 3,
+  };
+
+  return arr.sort((a, b) => {
+    // Compare by rollUpStatus first
+    const statusDifference =
+      statusPriority[a.rollUpStatus] - statusPriority[b.rollUpStatus];
+    if (statusDifference !== 0) return statusDifference;
+
+    // If rollUpStatus is the same, compare by rollUpScore
+    return a.rollUpScore - b.rollUpScore; // Ascending order
+  });
 }

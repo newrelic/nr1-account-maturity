@@ -48,9 +48,11 @@ export default function CreateView() {
   }, []);
 
   let allProducts = selectedReport?.document?.allProducts;
+  let products = selectedReport?.document?.products;
 
   if (!allProducts && (selectedReport?.document?.products || []).length === 0) {
     allProducts = true;
+    products = Object.keys(rules);
   } else {
     allProducts =
       allProducts !== undefined && allProducts !== null ? true : allProducts;
@@ -65,11 +67,18 @@ export default function CreateView() {
     description: selectedReport?.document?.description || '',
     entitySearchQuery: selectedReport?.document?.entitySearchQuery || '',
     allProducts,
-    accounts: selectedReport?.document?.accounts || [selectedAccountId],
+    accounts: selectedReport?.document?.accounts || [],
     accountsFilter: selectedReport?.document?.accountsFilter,
     accountsFilterEnabled: selectedReport?.document?.accountsFilterEnabled,
-    products: selectedReport?.document?.products || [],
+    products,
+    setAsDefault: false,
   });
+
+  useEffect(() => {
+    if (selectedReport?.document?.accounts === undefined) {
+      setState({ accounts: [selectedAccountId] });
+    }
+  }, []);
 
   const runDisabled =
     (state.products.length === 0 && !state.allProducts) ||
@@ -100,7 +109,6 @@ export default function CreateView() {
           resolve(false);
         } else {
           const count = res?.data?.actor?.entitySearch?.count || 0;
-          console.log(count);
           if (!count) {
             Toast.showToast({
               title: 'Bad entity search query',
@@ -193,6 +201,55 @@ export default function CreateView() {
     return { totalEntities, summarizedData };
   };
 
+  let changes = true;
+
+  if (viewConfigs.length > 1) {
+    const nameChanged = selectedReport?.document?.name !== state?.name;
+    const descChanged =
+      selectedReport?.document?.description !== state?.description;
+    const esqChanged =
+      (selectedReport?.document?.entitySearchQuery || '') !==
+      (state?.entitySearchQuery || '');
+    const allProdChanged =
+      (selectedReport?.document?.allProducts || false) !==
+      (state?.allProducts || false);
+
+    const afeChanged =
+      (selectedReport?.document?.accountsFilterEnabled || false) !==
+      (state?.accountsFilterEnabled || false);
+
+    const prodChanged = compareStringArrays(
+      selectedReport?.document?.products || [],
+      state?.products
+    );
+    const accChanged = compareStringArrays(
+      selectedReport?.document?.accounts || [],
+      state?.accounts || []
+    );
+
+    console.log(
+      esqChanged,
+      allProdChanged,
+      afeChanged,
+      prodChanged,
+      accChanged
+    );
+
+    if (
+      nameChanged ||
+      descChanged ||
+      esqChanged ||
+      allProdChanged ||
+      accChanged ||
+      afeChanged ||
+      prodChanged
+    ) {
+      changes = true;
+    } else {
+      changes = false;
+    }
+  }
+
   return useMemo(() => {
     if ((accounts || []).length === 0) {
       return (
@@ -240,7 +297,9 @@ export default function CreateView() {
               runView(
                 runParams.selectedView,
                 runParams.selectedReport,
-                runParams.doSaveView
+                runParams.doSaveView,
+                null,
+                runParams.setAsDefault
               );
             }}
           >
@@ -277,7 +336,8 @@ export default function CreateView() {
                 { id: `allData+${user.email}`, name: 'All data' },
                 null,
                 false,
-                true
+                true,
+                runParams.setAsDefault
               )
             }
           >
@@ -296,7 +356,12 @@ export default function CreateView() {
         <TextField
           label="Name"
           value={state.name}
-          onChange={e => setState({ name: e.target.value })}
+          onChange={e => {
+            setState({
+              name: e.target.value,
+              setAsDefault: !e.target.value ? false : state.setAsDefault,
+            });
+          }}
           placeholder="e.g. DevOps Team"
         />
         &nbsp;&nbsp;
@@ -307,6 +372,7 @@ export default function CreateView() {
           placeholder="Add context to the view"
         />
         &nbsp;&nbsp;
+        {/* && !selectedReport?.document */}
         {accounts && accounts.length > 0 && (
           <>
             <Select
@@ -325,6 +391,26 @@ export default function CreateView() {
             </Select>
           </>
         )}
+        &nbsp;&nbsp;
+        {state.name && (
+          <div style={{ display: 'inline-block', verticalAlign: 'middle' }}>
+            <Checkbox
+              label={'Set as default view'}
+              checked={state.setAsDefault}
+              disabled={!state.name}
+              style={{
+                marginBottom: '-45px',
+                paddingBottom: '0px',
+                verticalAlign: 'middle',
+              }}
+              onChange={() => {
+                setState({
+                  setAsDefault: !state.setAsDefault,
+                });
+              }}
+            />
+          </div>
+        )}
         <br />
         <br />
         <Card collapsible>
@@ -340,9 +426,18 @@ export default function CreateView() {
               <div style={{ flex: -1 }}>
                 <Checkbox
                   label={'All Capabilities'}
-                  checked={state.allProducts}
+                  checked={state.products.length === Object.keys(rules).length}
                   style={{ paddingBottom: '0px', paddingTop: '2px' }}
-                  onChange={() => setState({ allProducts: !state.allProducts })}
+                  onChange={() => {
+                    if (state.products.length === Object.keys(rules).length) {
+                      setState({ products: [], allProducts: false });
+                    } else {
+                      setState({
+                        products: Object.keys(rules),
+                        allProducts: true,
+                      });
+                    }
+                  }}
                 />
               </div>
               <div style={{ flex: 'auto' }}></div>
@@ -357,10 +452,8 @@ export default function CreateView() {
                       key={key}
                       label={key}
                       style={{ paddingBottom: '0px' }}
-                      disabled={state.allProducts}
-                      checked={
-                        state.allProducts || state.products.includes(key)
-                      }
+                      // disabled={state.allProducts}
+                      checked={state.products.includes(key)}
                       onChange={() => {
                         if (state.products.includes(key)) {
                           setState({
@@ -446,7 +539,7 @@ export default function CreateView() {
                         style={{ paddingBottom: '0px' }}
                         checked={
                           state.accounts.includes(a.id) ||
-                          state?.accountsFilterEnabled
+                          state?.accountsFilterEnabled === true
                         }
                         disabled={
                           // state.accounts.length === accounts.length ||
@@ -493,7 +586,7 @@ export default function CreateView() {
           <br />
           <Button
             type={Button.TYPE.PRIMARY}
-            disabled={runDisabled || !state.name}
+            disabled={runDisabled || !state.name || !changes}
             onClick={async () => {
               let run = true;
               if (state.entitySearchQuery) {
@@ -530,6 +623,7 @@ export default function CreateView() {
                   },
                 },
                 doSaveView: true,
+                setAsDefault: state.setAsDefault,
               };
 
               if (totalEntities > ENTITY_COUNT_WARNING) {
@@ -538,7 +632,9 @@ export default function CreateView() {
                 runView(
                   runParams.selectedView,
                   runParams.selectedReport,
-                  runParams.doSaveView
+                  runParams.doSaveView,
+                  null,
+                  runParams.setAsDefault
                 );
               }
             }}
@@ -586,12 +682,19 @@ export default function CreateView() {
                       products: state.products,
                     },
                   },
+                  setAsDefault: state.setAsDefault,
                 };
 
                 if (totalEntities > ENTITY_COUNT_WARNING) {
                   setRunParams(runParams);
                 } else if (run) {
-                  runView(runParams.selectedView, runParams.selectedReport);
+                  runView(
+                    runParams.selectedView,
+                    runParams.selectedReport,
+                    null,
+                    null,
+                    runParams.setAsDefault
+                  );
                 }
               }}
             >
@@ -611,5 +714,16 @@ export default function CreateView() {
     viewConfigs.length,
     entityCount,
     runParams,
+    products,
+    allProducts,
   ]);
+}
+
+function compareStringArrays(arr1, arr2) {
+  if (arr1.length !== arr2.length) return true;
+
+  const sortedArr1 = arr1.slice().sort();
+  const sortedArr2 = arr2.slice().sort();
+
+  return sortedArr1.join() !== sortedArr2.join();
 }
