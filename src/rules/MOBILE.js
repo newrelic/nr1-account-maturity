@@ -43,12 +43,6 @@ export default {
       }`,
   scores: [
     {
-      name: 'Has Dashboards',
-      accountCheck: account =>
-        ((account?.entityInfo?.types || []).find(t => t.type === 'DASHBOARD')
-          ?.count || 0) > 0,
-    },
-    {
       name: 'Launch count',
       entityCheck: entity =>
         (entity.mobileAppLaunch?.results?.[0]?.['uniqueCount.sessionId'] || 0) >
