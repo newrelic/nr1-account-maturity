@@ -47,7 +47,17 @@ export default function ViewList() {
   };
 
   const headers = [
-    { key: 'View', value: ({ item }) => item.document?.name },
+    {
+      key: 'View',
+      value: ({ item }) => {
+        let name = item.document?.name;
+        if (userSettings?.defaultViewId === item?.id) {
+          name = `${name} (default)`;
+        }
+
+        return name;
+      },
+    },
     {
       key: 'Description',
       value: ({ item }) => item.document?.description,
@@ -138,7 +148,10 @@ export default function ViewList() {
     {
       label: 'Edit',
       onClick: (evt, { item }) => {
-        if (item.id === `allData+${email}`) {
+        const documentId =
+          item.id === 'allData+undefined' ? `allData+${email}` : documentId;
+
+        if (documentId === `allData+${email}`) {
           Toast.showToast({
             title: 'This view cannot be edited',
             type: Toast.TYPE.NORMAL,
@@ -152,7 +165,10 @@ export default function ViewList() {
       label: 'Delete',
       type: TableRow.ACTION_TYPE.DESTRUCTIVE,
       onClick: (evt, { item }) => {
-        if (item.id === `allData+${email}`) {
+        const documentId =
+          item.id === 'allData+undefined' ? `allData+${email}` : documentId;
+
+        if (documentId === `allData+${email}`) {
           Toast.showToast({
             title: 'This view cannot be deleted',
             type: Toast.TYPE.NORMAL,

@@ -27,7 +27,8 @@ export default function AccountMaturityRoot() {
         actions={[
           {
             label: 'Raise issue or feature request',
-            to: 'https://github.com/newrelic/nr1-account-maturity/issues/new/choose',
+            to:
+              'https://github.com/newrelic/nr1-account-maturity/issues/new/choose',
           },
           {
             label: 'Launch the old version',

@@ -80,7 +80,7 @@ export default function MaturityView(props) {
         subtitle: a.id,
         rollUpScore: Math.round((a.totalScore / a.maxScore) * 100),
         rollUpStatus: STATUSES.UNKNOWN,
-        elementListLabel: 'Products',
+        elementListLabel: 'Capabilities',
         elementScores,
       };
 

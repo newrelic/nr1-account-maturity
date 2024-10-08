@@ -1,5 +1,12 @@
 import React, { useContext, useMemo, useState } from 'react';
-import { Button, Dropdown, DropdownItem, DropdownSection, Icon } from 'nr1';
+import {
+  Button,
+  Dropdown,
+  DropdownItem,
+  DropdownSection,
+  Icon,
+  Toast,
+} from 'nr1';
 
 import DataContext from '../../../src/context/data';
 
@@ -194,16 +201,24 @@ export default function ViewSelector() {
                   },
                 });
               } else {
-                setDataState({
-                  selectedReport,
-                  view: { page: 'EditView' },
-                  prevView: view,
-                });
+                if (selectedView.name === 'All Data') {
+                  Toast.showToast({
+                    title: 'This view cannot be edited',
+                    type: Toast.TYPE.NORMAL,
+                  });
+                } else {
+                  setDataState({
+                    selectedReport,
+                    view: { page: 'EditView' },
+                    prevView: view,
+                  });
+                }
               }
             }}
           >
             Update view
           </DropdownItem>
+
           {userSettings?.defaultViewId === selectedReport.id ? (
             <DropdownItem
               onClick={() => {
@@ -242,14 +257,21 @@ export default function ViewSelector() {
           {!unsavedRun && (
             <DropdownItem
               style={{ color: 'red' }}
-              onClick={() =>
-                setDataState({
-                  deleteViewModalOpen: {
-                    id: selectedView?.id,
-                    document: { name: selectedView?.name },
-                  },
-                })
-              }
+              onClick={() => {
+                if (selectedView.name === 'All Data') {
+                  Toast.showToast({
+                    title: 'This view cannot be deleted',
+                    type: Toast.TYPE.NORMAL,
+                  });
+                } else {
+                  setDataState({
+                    deleteViewModalOpen: {
+                      id: selectedView?.id,
+                      document: { name: selectedView?.name },
+                    },
+                  });
+                }
+              }}
             >
               Delete view
             </DropdownItem>

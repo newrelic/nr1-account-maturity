@@ -172,9 +172,22 @@ export function useProvideData(props) {
       }
     }
 
-    setDataState({ fetchingData: true, selectedAccountId: accountId });
+    await getUserEmail();
 
-    const viewConfigs = await fetchViewConfigs(accountId);
+    const state = {};
+    const userSettings = await getUserSettings();
+    state.userSettings = userSettings;
+    console.log('userSettings =>', userSettings);
+    const user = await NerdGraphQuery.query({ query: userQuery });
+    state.user = user?.data?.actor?.user;
+
+    setDataState({
+      fetchingData: true,
+      selectedAccountId: accountId,
+      ...state,
+    });
+
+    const viewConfigs = await fetchViewConfigs(accountId, state.user);
     const viewHistory = await fetchViewHistory(accountId);
 
     const [agentReleases, dataDictionary] = await Promise.all([
@@ -408,6 +421,17 @@ export function useProvideData(props) {
     const accounts = [...report.document.accounts].map(id => ({
       ...[...dataState.accounts].find(a => a.id === id),
     }));
+
+    // inject hideNotReporting to entitySearchQuery
+    let entitySearchQuery = report.document?.entitySearchQuery || '';
+
+    if (report.document?.hideNotReporting) {
+      entitySearchQuery = entitySearchQuery
+        ? `${entitySearchQuery} AND reporting = 'true'`
+        : `reporting = 'true'`;
+    }
+
+    //----------------------------------------------------
 
     const {
       entitiesByAccount,
@@ -844,6 +868,7 @@ export function useProvideData(props) {
   };
 
   const fetchViewConfigs = (accountId, user) => {
+    console.log('!!!', user, dataState?.user, dataState?.email);
     // eslint-disable-next-line no-async-promise-executor
     return new Promise(async resolve => {
       setDataState({ fetchingReports: true });
@@ -869,17 +894,19 @@ export function useProvideData(props) {
         return { ...vc, history };
       });
 
-      const allDataConfig = {
-        id: `allData+${dataState?.email || user?.email}`,
-        document: { name: 'All Data' },
-        history: viewHistory.filter(
-          vh =>
-            vh.document.documentId ===
-            `allData+${dataState?.email || user?.email}`
-        ),
-      };
+      const eml = dataState?.user?.email || dataState?.email || user?.email;
 
-      viewConfigs.push(allDataConfig);
+      if (eml) {
+        const allDataConfig = {
+          id: `allData+${eml}`,
+          document: { name: 'All Data' },
+          history: viewHistory.filter(
+            vh => vh.document.documentId === `allData+${eml}`
+          ),
+        };
+
+        viewConfigs.push(allDataConfig);
+      }
 
       // simulate no configs being added, the will only include all data
       // viewConfigs = [viewConfigs[viewConfigs.length - 1]];

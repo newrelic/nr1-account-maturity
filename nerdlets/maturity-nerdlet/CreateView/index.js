@@ -23,7 +23,7 @@ import DataContext from '../../../src/context/data';
 import { useSetState } from '@mantine/hooks';
 import rules from '../../../src/rules';
 
-const ENTITY_COUNT_WARNING = 50;
+const ENTITY_COUNT_WARNING = 10;
 
 export default function CreateView() {
   const {
@@ -49,13 +49,25 @@ export default function CreateView() {
 
   let allProducts = selectedReport?.document?.allProducts;
   let products = selectedReport?.document?.products;
+  let hideNotReporting = selectedReport?.document?.hideNotReporting;
 
-  if (!allProducts && (selectedReport?.document?.products || []).length === 0) {
-    allProducts = true;
-    products = Object.keys(rules);
-  } else {
-    allProducts =
-      allProducts !== undefined && allProducts !== null ? true : allProducts;
+  if ((selectedReport?.document?.products || []).length === 0) {
+    if (view.page !== 'EditView') {
+      hideNotReporting = true;
+    }
+
+    if (!allProducts) {
+      allProducts = true;
+      products = Object.keys(rules);
+    } else {
+      allProducts =
+        allProducts !== undefined && allProducts !== null ? true : allProducts;
+
+      // hideNotReporting =
+      //   hideNotReporting !== undefined && hideNotReporting !== null
+      //     ? true
+      //     : hideNotReporting;
+    }
   }
 
   const [state, setState] = useSetState({
@@ -72,6 +84,7 @@ export default function CreateView() {
     accountsFilterEnabled: selectedReport?.document?.accountsFilterEnabled,
     products,
     setAsDefault: false,
+    hideNotReporting,
   });
 
   useEffect(() => {
@@ -84,17 +97,20 @@ export default function CreateView() {
     (state.products.length === 0 && !state.allProducts) ||
     (state.accounts.length === 0 &&
       !state.accountsFilter &&
-      !state.accountsFilterEnabled);
+      !state.accountsFilterEnabled) ||
+    state.name.toLowerCase() === 'all data';
 
   const validateEntitySearchQuery = () => {
     return new Promise(resolve => {
       const accountsClause = `and tags.accountId IN ('${state.accounts.join(
         "','"
       )}')`;
+      const hnr = hideNotReporting ? `and reporting = 'true'` : '';
+
       NerdGraphQuery.query({
         query: `{
         actor {
-          entitySearch(query: "${state.entitySearchQuery} ${accountsClause}") {
+          entitySearch(query: "${state.entitySearchQuery} ${accountsClause} ${hnr}") {
             count
           }
         }
@@ -128,7 +144,7 @@ export default function CreateView() {
     const summary = {};
 
     data.forEach(item => {
-      const types = item.data.actor.entitySearch.types;
+      const types = item?.data?.actor?.entitySearch?.types || [];
 
       types.forEach(type => {
         const key = `${type.domain}_${type.entityType}_${type.type}`;
@@ -165,13 +181,16 @@ export default function CreateView() {
   }
 
   const checkEntityCount = async data => {
-    const { accounts, products, allProducts } = data;
+    const { accounts, products, allProducts, hideNotReporting } = data;
+    setRunParams(null);
+
+    const reporting = hideNotReporting ? `reporting = 'true' and ` : '';
 
     const accountEntityData = accounts.map(id => {
       return NerdGraphQuery.query({
         query: `{
           actor {
-            entitySearch(query: "tags.accountId = '${id}'") {
+            entitySearch(query: "${reporting} tags.accountId = '${id}'") {
               types {
                 count
                 domain
@@ -213,6 +232,9 @@ export default function CreateView() {
     const allProdChanged =
       (selectedReport?.document?.allProducts || false) !==
       (state?.allProducts || false);
+    const hnrChanged =
+      (selectedReport?.document?.hideNotReporting || false) !==
+      (state?.hideNotReporting || false);
 
     const afeChanged =
       (selectedReport?.document?.accountsFilterEnabled || false) !==
@@ -228,11 +250,9 @@ export default function CreateView() {
     );
 
     console.log(
-      esqChanged,
-      allProdChanged,
-      afeChanged,
-      prodChanged,
-      accChanged
+      hnrChanged,
+      selectedReport?.document?.hideNotReporting,
+      state?.hideNotReporting
     );
 
     if (
@@ -242,7 +262,8 @@ export default function CreateView() {
       allProdChanged ||
       accChanged ||
       afeChanged ||
-      prodChanged
+      prodChanged ||
+      hnrChanged
     ) {
       changes = true;
     } else {
@@ -346,7 +367,7 @@ export default function CreateView() {
         )}
         <br />
         <br />
-        <HeadingText>Create View Configuration</HeadingText>
+        <HeadingText>View Configuration</HeadingText>
         <BlockText style={{ paddingTop: '5px' }}>
           Use views to create saved filter sets that you can return to at
           anytime; letting you create shortcuts to product, account, environment
@@ -357,6 +378,14 @@ export default function CreateView() {
           label="Name"
           value={state.name}
           onChange={e => {
+            if (e.target.value.toLowerCase() === 'all data') {
+              Toast.showToast({
+                description: `'All Data' is a reserved name`,
+                title: 'Cannot use this name',
+                type: Toast.TYPE.CRITICAL,
+              });
+            }
+
             setState({
               name: e.target.value,
               setAsDefault: !e.target.value ? false : state.setAsDefault,
@@ -580,6 +609,24 @@ export default function CreateView() {
               onChange={e => setState({ entitySearchQuery: e.target.value })}
               placeholder="e.g. tags.team = 'labs'"
             />
+
+            <div style={{ display: 'inline-block', verticalAlign: 'middle' }}>
+              <Checkbox
+                label={'Hide not reporting entities'}
+                checked={state.hideNotReporting}
+                style={{
+                  paddingLeft: '8px',
+                  marginBottom: '-45px',
+                  paddingBottom: '0px',
+                  verticalAlign: 'middle',
+                }}
+                onChange={() => {
+                  setState({
+                    hideNotReporting: !state.hideNotReporting,
+                  });
+                }}
+              />
+            </div>
           </CardBody>
         </Card>
         <div style={{ paddingTop: '10px' }}>
@@ -601,6 +648,7 @@ export default function CreateView() {
                 accountsFilterEnabled: state.accountsFilterEnabled,
                 allProducts: state.allProducts,
                 products: state.products,
+                hideNotReporting: state.hideNotReporting,
               });
 
               const runParams = {
@@ -620,6 +668,7 @@ export default function CreateView() {
                     accountsFilterEnabled: state.accountsFilterEnabled,
                     allProducts: state.allProducts,
                     products: state.products,
+                    hideNotReporting: state.hideNotReporting,
                   },
                 },
                 doSaveView: true,
@@ -642,65 +691,69 @@ export default function CreateView() {
             Save and run
           </Button>
           &nbsp;&nbsp;
-          {view.page !== 'EditView' && (
-            <Button
-              disabled={runDisabled}
-              onClick={async () => {
-                let run = true;
+          {/* {view.page !== 'EditView' && ( */}
+          <Button
+            disabled={runDisabled || !changes}
+            onClick={async () => {
+              let run = true;
 
-                if (state.entitySearchQuery) {
-                  run = await validateEntitySearchQuery();
-                }
+              if (state.entitySearchQuery) {
+                run = await validateEntitySearchQuery();
+              }
 
-                let { totalEntities, summarizedData } = await checkEntityCount({
-                  accounts: state.accounts,
-                  allAccounts: state.accounts.length === accounts.length,
-                  entitySearchQuery: state.entitySearchQuery,
-                  accountsFilter: state.accountsFilter,
-                  accountsFilterEnabled: state.accountsFilterEnabled,
-                  allProducts: state.allProducts,
-                  products: state.products,
-                });
+              let { totalEntities, summarizedData } = await checkEntityCount({
+                accounts: state.accounts,
+                allAccounts: state.accounts.length === accounts.length,
+                entitySearchQuery: state.entitySearchQuery,
+                accountsFilter: state.accountsFilter,
+                accountsFilterEnabled: state.accountsFilterEnabled,
+                allProducts: state.allProducts,
+                products: state.products,
+                hideNotReporting: state.hideNotReporting,
+              });
 
-                const runParams = {
-                  selectedView: {
+              const runParams = {
+                selectedView: {
+                  name: state.name,
+                  account: selectedAccountId,
+                  unsavedRun: true,
+                },
+                selectedReport: {
+                  document: {
+                    owner: email,
                     name: state.name,
-                    account: selectedAccountId,
-                    unsavedRun: true,
+                    description: state.description,
+                    accounts: state.accounts,
+                    allAccounts: state.accounts.length === accounts.length,
+                    entitySearchQuery: state.entitySearchQuery,
+                    accountsFilter: state.accountsFilter,
+                    accountsFilterEnabled: state.accountsFilterEnabled,
+                    allProducts: state.allProducts,
+                    products: state.products,
+                    hideNotReporting: state.hideNotReporting,
                   },
-                  selectedReport: {
-                    document: {
-                      owner: email,
-                      name: state.name,
-                      description: state.description,
-                      accounts: state.accounts,
-                      allAccounts: state.accounts.length === accounts.length,
-                      entitySearchQuery: state.entitySearchQuery,
-                      accountsFilter: state.accountsFilter,
-                      accountsFilterEnabled: state.accountsFilterEnabled,
-                      allProducts: state.allProducts,
-                      products: state.products,
-                    },
-                  },
-                  setAsDefault: state.setAsDefault,
-                };
+                },
+                setAsDefault: state.setAsDefault,
+              };
 
-                if (totalEntities > ENTITY_COUNT_WARNING) {
-                  setRunParams(runParams);
-                } else if (run) {
-                  runView(
-                    runParams.selectedView,
-                    runParams.selectedReport,
-                    null,
-                    null,
-                    runParams.setAsDefault
-                  );
-                }
-              }}
-            >
-              Run
-            </Button>
-          )}
+              console.log(totalEntities, ENTITY_COUNT_WARNING);
+
+              if (totalEntities > ENTITY_COUNT_WARNING) {
+                setRunParams(runParams);
+              } else if (run) {
+                runView(
+                  runParams.selectedView,
+                  runParams.selectedReport,
+                  null,
+                  null,
+                  runParams.setAsDefault
+                );
+              }
+            }}
+          >
+            Run
+          </Button>
+          {/* )} */}
         </div>
       </>
     );
@@ -716,6 +769,7 @@ export default function CreateView() {
     runParams,
     products,
     allProducts,
+    hideNotReporting,
   ]);
 }
 
