@@ -23,7 +23,7 @@ export default function ViewSegmentSelector() {
         >
           <SegmentedControlItem
             label="List"
-            disabled={viewGroupBy === 'capability'}
+            // disabled={viewGroupBy === 'capability'}
             value="list"
             iconType={SegmentedControlItem.ICON_TYPE.INTERFACE__VIEW__LIST_VIEW}
           />

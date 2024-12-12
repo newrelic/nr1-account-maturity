@@ -9,6 +9,7 @@ import Navigator from '../Navigator';
 import Summary from '../Summary';
 import SaveView from '../SaveView';
 import TrendView from '../TrendView';
+import { defaultActions } from '../AccountMaturity';
 
 export default function MaturityView(props) {
   const {
@@ -41,6 +42,7 @@ export default function MaturityView(props) {
               selectedView: {},
             }),
         },
+        ...defaultActions(setDataState),
       ],
     });
   }, []);
@@ -159,6 +161,9 @@ export default function MaturityView(props) {
       // eslint-disable-next-line prettier/prettier
       switch (viewSegment) {
         case 'list': {
+          if (viewGroupBy === 'capability') {
+            return 'Not available for Capability View';
+          }
           return <ListView {...data} scoredCollection={scoredCollection} />;
         }
         case 'navigator': {
@@ -169,6 +174,13 @@ export default function MaturityView(props) {
         }
         case 'trends': {
           return <TrendView {...data} />;
+        }
+        case 'unavailable-account': {
+          return (
+            <div>
+              Account Maturity is not subscribed to the selected account
+            </div>
+          );
         }
         default: {
           return 'Unknown Segment View';

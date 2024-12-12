@@ -1,5 +1,12 @@
 import React, { useContext } from 'react';
-import { EmptyState, Layout, LayoutItem } from 'nr1';
+import {
+  EmptyState,
+  Layout,
+  LayoutItem,
+  HeadingText,
+  BlockText,
+  Icon,
+} from 'nr1';
 import DataContext from '../../../src/context/data';
 import CreateView from '../CreateView';
 import MaturityView from '../MaturityView';
@@ -10,11 +17,35 @@ import ViewList from '../ViewList';
 import SearchBar from '../SearchBar';
 import DeleteView from '../DeleteView';
 import DeleteSnapshot from '../DeleteSnapshot';
+import Help from '../HelpModal';
+
+export const defaultActions = setDataState => {
+  return [
+    {
+      label: 'Launch old version',
+      type: 'secondary',
+      hint: 'Launch the old version',
+      iconType: Icon.TYPE.INTERFACE__OPERATIONS__EXTERNAL_LINK,
+      onClick: () => navigation.openNerdlet({ id: 'old-maturity-nerdlet' }),
+    },
+    {
+      label: 'Help',
+      type: 'secondary',
+      hint: '',
+      iconType: Icon.TYPE.INTERFACE__INFO__HELP,
+      onClick: () => setDataState({ helpModalOpen: true }),
+    },
+  ];
+};
 
 export default function AccountMaturity(props) {
-  const { fetchingData, errorMsg, view, selectedAccountId } = useContext(
-    DataContext
-  );
+  const {
+    fetchingData,
+    errorMsg,
+    view,
+    selectedAccountId,
+    helpModalOpen,
+  } = useContext(DataContext);
 
   const renderView = () => {
     const page = view.page;
@@ -22,6 +53,25 @@ export default function AccountMaturity(props) {
     switch (page) {
       case 'Loading': {
         return <Loading {...(view.props || {})} />;
+      }
+      case 'unavailable-account': {
+        return (
+          <div style={{ paddingRight: '20px', paddingTop: '15px' }}>
+            <div className="empty-state">
+              <HeadingText className="empty-state-header">
+                Account Maturity is not enabled
+              </HeadingText>
+              <BlockText className="empty-state-desc">
+                Account Maturity has not been enabled for this account.
+              </BlockText>
+              <BlockText className="empty-state-desc">
+                To enable, please contact your NR Admin, or confirm that the
+                Account Maturity was subscribed or published to the correct
+                accounts.
+              </BlockText>
+            </div>
+          </div>
+        );
       }
       case 'MaturityView': {
         return (
@@ -63,6 +113,7 @@ export default function AccountMaturity(props) {
 
   return (
     <div>
+      <Help />
       <DeleteView />
       <DeleteSnapshot />
 

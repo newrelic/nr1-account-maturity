@@ -18,10 +18,12 @@ import {
   CardBody,
   CardHeader,
   Modal,
+  Icon,
 } from 'nr1';
 import DataContext from '../../../src/context/data';
 import { useSetState } from '@mantine/hooks';
 import rules from '../../../src/rules';
+import { defaultActions } from '../AccountMaturity';
 
 const ENTITY_COUNT_WARNING = 10;
 
@@ -43,7 +45,8 @@ export default function CreateView() {
 
   useEffect(() => {
     nerdlet.setConfig({
-      actionControls: false,
+      actionControls: true,
+      actionControlButtons: [...defaultActions(setDataState)],
     });
   }, []);
 
@@ -377,6 +380,11 @@ export default function CreateView() {
         <TextField
           label="Name"
           value={state.name}
+          invalid={
+            (state?.name || '').toLowerCase() === 'all data'
+              ? `'All Data' is a reserved name`
+              : false
+          }
           onChange={e => {
             if (e.target.value.toLowerCase() === 'all data') {
               Toast.showToast({
@@ -603,21 +611,11 @@ export default function CreateView() {
             Advanced Filtering
           </CardHeader>
           <CardBody style={{ paddingLeft: '20px', marginTop: '5px' }}>
-            <TextField
-              label="Entity Filter"
-              value={state.entitySearchQuery}
-              onChange={e => setState({ entitySearchQuery: e.target.value })}
-              placeholder="e.g. tags.team = 'labs'"
-            />
-
             <div style={{ display: 'inline-block', verticalAlign: 'middle' }}>
               <Checkbox
                 label={'Hide not reporting entities'}
                 checked={state.hideNotReporting}
                 style={{
-                  paddingLeft: '8px',
-                  marginBottom: '-45px',
-                  paddingBottom: '0px',
                   verticalAlign: 'middle',
                 }}
                 onChange={() => {
@@ -627,6 +625,13 @@ export default function CreateView() {
                 }}
               />
             </div>
+            <br /> <br />
+            <TextField
+              label="Entity Filter"
+              value={state.entitySearchQuery}
+              onChange={e => setState({ entitySearchQuery: e.target.value })}
+              placeholder="e.g. tags.team = 'labs'"
+            />
           </CardBody>
         </Card>
         <div style={{ paddingTop: '10px' }}>

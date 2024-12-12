@@ -5,6 +5,7 @@ import {
   navigation,
   AutoSizer,
   SectionMessage,
+  Icon,
 } from 'nr1';
 import { ProvideData } from '../../src/context/data';
 import AccountMaturity from './AccountMaturity';
@@ -16,6 +17,7 @@ export default function AccountMaturityRoot() {
     nerdlet.setConfig({
       accountPicker: true,
       timePicker: false,
+      actionControls: true,
     });
   }, []);
 

@@ -39,6 +39,7 @@ export default DataContext;
 export function useProvideData(props) {
   const [dataState, setDataState] = useSetState({
     email: null,
+    helpModalOpen: false,
     deleteViewModalOpen: null,
     search: '',
     saveViewModalOpen: false,
@@ -158,6 +159,8 @@ export function useProvideData(props) {
   useEffect(async () => {
     const accountsInit = await getAccounts();
     const { accountId } = props;
+    const state = {};
+
     console.log('account id changed => ', accountId);
     if (accountId === 'cross-account') {
       console.log('cross account should not be selected, reloading...');
@@ -169,12 +172,13 @@ export function useProvideData(props) {
           description: `Change account or subscribe account: ${accountId}`,
           type: Toast.TYPE.CRITICAL,
         });
+        state.view = { page: 'unavailable-account' };
+        state.viewSegment = 'unavailable-account';
       }
     }
 
     await getUserEmail();
 
-    const state = {};
     const userSettings = await getUserSettings();
     state.userSettings = userSettings;
     console.log('userSettings =>', userSettings);
@@ -187,32 +191,41 @@ export function useProvideData(props) {
       ...state,
     });
 
-    const viewConfigs = await fetchViewConfigs(accountId, state.user);
-    const viewHistory = await fetchViewHistory(accountId);
+    if (state.viewSegment == 'unavailable-account') {
+      setDataState({
+        selectedAccountId: accountId,
+        fetchingData: false,
+        view: state.view,
+        viewSegment: 'unavailable-account',
+      });
+    } else {
+      const viewConfigs = await fetchViewConfigs(accountId, state.user);
+      const viewHistory = await fetchViewHistory(accountId);
 
-    const [agentReleases, dataDictionary] = await Promise.all([
-      getAgentReleases(),
-      getDataDictionary(),
-    ]);
+      const [agentReleases, dataDictionary] = await Promise.all([
+        getAgentReleases(),
+        getDataDictionary(),
+      ]);
 
-    const accounts = await decorateAccountData(accountsInit);
+      const accounts = await decorateAccountData(accountsInit);
 
-    deleteOrphanedReports(viewConfigs, viewHistory, accountId);
+      deleteOrphanedReports(viewConfigs, viewHistory, accountId);
 
-    let view = dataState.view;
-    if (viewConfigs.length > 1) {
-      view = { page: 'ViewList' };
+      let view = dataState.view;
+      if (viewConfigs.length > 1) {
+        view = { page: 'ViewList' };
+      }
+
+      setDataState({
+        selectedAccountId: accountId,
+        accounts,
+        agentReleases,
+        dataDictionary,
+        viewConfigs,
+        fetchingData: false,
+        view,
+      });
     }
-
-    setDataState({
-      selectedAccountId: accountId,
-      accounts,
-      agentReleases,
-      dataDictionary,
-      viewConfigs,
-      fetchingData: false,
-      view,
-    });
   }, [props.accountId]);
 
   const loadHistoricalResult = (report, result) => {
@@ -438,7 +451,7 @@ export function useProvideData(props) {
       summarizedScores,
     } = await getEntitiesForAccounts(
       accounts,
-      report.document?.entitySearchQuery || '',
+      entitySearchQuery || '',
       dataState.agentReleases,
       dataState.dataDictionary
     );

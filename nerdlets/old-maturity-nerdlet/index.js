@@ -1,5 +1,5 @@
 import React from 'react';
-import { navigation, NerdGraphQuery, SectionMessage } from 'nr1';
+import { navigation, NerdGraphQuery, SectionMessage, nerdlet, Icon } from 'nr1';
 
 import { Tab, Tabs, TabList, TabPanel } from 'react-tabs';
 import {
@@ -25,6 +25,21 @@ import {
 export default class MaturityApplication extends React.Component {
   constructor(props) {
     super(props);
+  }
+
+  componentDidMount() {
+    nerdlet.setConfig({
+      actionControls: true,
+      actionControlButtons: [
+        {
+          label: 'Launch new version',
+          type: 'secondary',
+          hint: 'Launch the new version',
+          iconType: Icon.TYPE.INTERFACE__OPERATIONS__EXTERNAL_LINK,
+          onClick: () => navigation.openNerdlet({ id: 'maturity-nerdlet' }),
+        },
+      ],
+    });
   }
 
   render() {

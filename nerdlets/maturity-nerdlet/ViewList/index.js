@@ -8,10 +8,12 @@ import {
   TableRowCell,
   FavoriteTableRowCell,
   Toast,
+  Icon,
 } from 'nr1';
 
 import DataContext from '../../../src/context/data';
 import { calculatePercentageChange } from '../../../src/utils';
+import { defaultActions } from '../AccountMaturity';
 
 export default function ViewList() {
   const {
@@ -33,7 +35,8 @@ export default function ViewList() {
 
   useEffect(() => {
     nerdlet.setConfig({
-      actionControls: false,
+      actionControls: true,
+      actionControlButtons: [...defaultActions(setDataState)],
     });
   }, []);
 

@@ -2,7 +2,7 @@
   "private": true,
   "name": "nr1-maturity",
   "description": "New Relic Account Maturity App",
-  "version": "0.14.0-beta-17",
+  "version": "0.14.0-beta-19",
   "scripts": {
     "start": "nr1 nerdpack:serve",
     "eslint-check": "eslint nerdlets/ src/",
@@ -20,20 +20,23 @@
   "nr1": {
     "idOld": "b54addf7-3663-47e0-8862-3ec058588b58",
     "id": "ec734258-b5ca-41b2-84ef-d97352e0ea19",
-    "dv2": "ec734258-b5ca-41b2-84ef-d97352e0ea19"
+    "dv2": "ec734258-b5ca-41b2-84ef-d97352e0ea19",
+    "esb": "0307f9fe-8a83-4752-b2b4-215a08adfbd8",
+    "ditcert": "49417ec5-182c-4141-b52f-4de83724e42a",
+    "ditp": "d392bf86-98fd-4759-9120-097587f0e018"
   },
   "dependencies": {
     "@mantine/hooks": "^6.0.10",
-    "@newrelic/nr-labs-components": "^1.16.0",
+    "@newrelic/nr-labs-components": "^1.23.5",
     "async": "^3.2.4",
     "json-to-csv-export": "^2.1.1",
+    "maturity-products": "github:newrelic-experimental/nr1-account-maturity-products",
     "react": "17.0.2",
     "react-dom": "17.0.2",
     "react-json-to-csv": "^1.2.0",
+    "react-tabs": "^3.2.1",
     "semver": "^7.5.1",
-    "uuid": "^9.0.0",
-    "maturity-products": "github:newrelic-experimental/nr1-account-maturity-products",
-    "react-tabs": "^3.2.1"
+    "uuid": "^9.0.0"
   },
   "devDependencies": {
     "@newrelic/eslint-plugin-newrelic": "^0.3.1",

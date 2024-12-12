@@ -86,3 +86,44 @@
   grid-template-columns: repeat(auto-fit, minmax(340px, 340px));
   grid-gap: 20px 17px;
 }
+
+
+.section-header {
+  padding: 0.5rem 0.25rem;
+}
+
+
+.empty-state {
+  height: 100%;
+  box-sizing: border-box;
+  padding: 1rem;
+  border: 3px dashed #e3e4e4;
+  text-align: center;
+  border-radius: 8px;
+  display: flex;
+  flex-direction: column;
+  justify-content: center;
+  align-items: center;
+  background-color: none;
+}
+
+.empty-state-header {
+  margin-bottom: 1rem;
+  color: #464e4e;
+  font-size: 1.5rem;
+  font-weight: 600;
+}
+
+.empty-state-desc {
+  margin: 0 auto;
+  color: #8e9494;
+  line-height: 1.25rem;
+}
+
+.button-row {
+  padding: 0.5rem;
+
+  button + button {
+    margin-left: 0.5rem;
+  }
+}

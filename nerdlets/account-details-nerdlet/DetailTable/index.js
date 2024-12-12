@@ -30,7 +30,8 @@ export default function DetailsTable(props) {
 
     const state = { categories };
 
-    if (categories.length > 0) state[categories[0].name] = true;
+    // this opens the first category if entities exist
+    // if (categories.length > 0) state[categories[0].name] = true;
 
     if (sortBy === 'Lowest score') {
       categories = categories.sort((a, b) => a.score - b.score);
