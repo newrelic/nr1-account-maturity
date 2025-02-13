@@ -17,6 +17,7 @@ import { defaultActions } from '../AccountMaturity';
 
 export default function ViewList() {
   const {
+    view,
     viewConfigs,
     search,
     setDataState,
@@ -160,7 +161,11 @@ export default function ViewList() {
             type: Toast.TYPE.NORMAL,
           });
         } else {
-          setDataState({ selectedReport: item, view: { page: 'EditView' } });
+          setDataState({
+            selectedReport: item,
+            view: { page: 'EditView' },
+            prevView: view,
+          });
         }
       },
     },
@@ -227,9 +232,18 @@ export default function ViewList() {
                 {headers.map(header => {
                   if (header.key === 'View') {
                     const previousResult = item?.history?.[0];
+                    const SEVEN_DAYS_MS = 7 * 24 * 60 * 60 * 1000;
+                    const runAtTimestamp = previousResult?.document?.runAt
+                      ? new Date(previousResult.document.runAt).getTime()
+                      : null;
+                    const isOlderThanSevenDays =
+                      (runAtTimestamp !== null &&
+                        Date.now() - runAtTimestamp > SEVEN_DAYS_MS) ||
+                      item.document.owner === 'etantry+demotron@newrelic.com';
+
                     let onClickHandler = undefined;
 
-                    if (previousResult) {
+                    if (previousResult && !isOlderThanSevenDays) {
                       onClickHandler = () =>
                         loadHistoricalResult(item, previousResult);
                     } else {

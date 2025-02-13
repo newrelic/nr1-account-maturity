@@ -85,7 +85,6 @@ export default function ProductDetailsNerdlet() {
                       labelInline
                       onChange={(evt, value) => updateSortBy(value)}
                     >
-                      <SelectItem value="Default">Default</SelectItem>
                       <SelectItem value="Lowest score">Lowest score</SelectItem>
                       <SelectItem value="Highest score">
                         Highest score

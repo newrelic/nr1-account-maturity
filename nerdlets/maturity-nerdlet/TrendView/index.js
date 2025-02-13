@@ -3,7 +3,9 @@ import {
   Grid,
   GridItem,
   LineChart,
-  HeadingText,
+  Card,
+  CardBody,
+  CardHeader,
   Select,
   SelectItem,
 } from 'nr1';
@@ -222,7 +224,7 @@ export default function TrendView(props) {
   return useMemo(() => {
     return (
       <div>
-        <div style={{ float: 'right', paddingRight: '5px' }}>
+        <div style={{ float: 'right', paddingRight: '13px' }}>
           <Select
             value={selectedTime}
             onChange={(evt, value) => setTime(value)}
@@ -239,10 +241,23 @@ export default function TrendView(props) {
               <GridItem
                 key={a.accountId || a.productName}
                 columnSpan={4}
-                style={{ padding: '5px' }}
+                style={{
+                  padding: '5px',
+                  boxShadow: '1px 1px 2px rgb(243,244,255)',
+                  margin: '6px',
+                }}
               >
-                <HeadingText>{a.accountName || a.productName}</HeadingText>
-                <LineChart data={a.lineData} fullWidth />
+                <div className="golden-metrics">
+                  <Card className="golden-metric-card">
+                    <CardHeader
+                      className="golden-metric-card-header"
+                      title={a.accountName || a.productName}
+                    />
+                    <CardBody className="golden-metric-card-body">
+                      <LineChart data={a.lineData} fullWidth />
+                    </CardBody>
+                  </Card>
+                </div>
               </GridItem>
             );
           })}

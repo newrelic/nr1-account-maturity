@@ -9,6 +9,7 @@ import Navigator from '../Navigator';
 import Summary from '../Summary';
 import SaveView from '../SaveView';
 import TrendView from '../TrendView';
+import Welcome from '../Welcome';
 import { defaultActions } from '../AccountMaturity';
 
 export default function MaturityView(props) {

@@ -123,35 +123,42 @@ export function useProvideData(props) {
     const viewConfigs = await fetchViewConfigs(null, state.user);
     const accounts = await getAccounts();
 
-    // default view not configured, request configuration
-    // there will always be at least one view config because of allAata
-    if (viewConfigs.length > 1) {
-      state.view = {
-        page: 'ViewList',
-      };
-    }
-
-    if (userSettings.defaultViewId) {
-      const viewConfig = viewConfigs.find(
-        vc => vc.id === userSettings.defaultViewId
-      );
-
-      const latestHistory = viewConfig?.history?.[0];
-
-      if (latestHistory) {
-        delete state.view;
-        loadHistoricalResult(viewConfig, latestHistory);
-      }
+    if (!state.userSettings.doneWelcome) {
+      // console.log('Welcome not complete');
+      // state.view = {
+      //   page: 'Welcome',
+      // };
+    } else {
+      // default view not configured, request configuration
       // there will always be at least one view config because of allAata
-    } else if (viewConfigs.length === 1) {
-      state.view = {
-        page: 'CreateNewView',
-        title: 'Create New View',
-      };
-    }
+      if (viewConfigs.length > 1) {
+        state.view = {
+          page: 'ViewList',
+        };
+      }
 
-    state.accounts = accounts;
-    state.selectedAccountId = accounts[0].id;
+      if (userSettings.defaultViewId) {
+        const viewConfig = viewConfigs.find(
+          vc => vc.id === userSettings.defaultViewId
+        );
+
+        const latestHistory = viewConfig?.history?.[0];
+
+        if (latestHistory) {
+          delete state.view;
+          loadHistoricalResult(viewConfig, latestHistory);
+        }
+        // there will always be at least one view config because of allData
+      } else if (viewConfigs.length === 1) {
+        state.view = {
+          page: 'CreateNewView',
+          title: 'Create New View',
+        };
+      }
+
+      state.accounts = accounts;
+      state.selectedAccountId = accounts[0].id;
+    }
     setDataState(state);
   }, []);
 
@@ -174,6 +181,9 @@ export function useProvideData(props) {
         });
         state.view = { page: 'unavailable-account' };
         state.viewSegment = 'unavailable-account';
+      } else {
+        state.view = { page: 'ViewList' };
+        state.viewSegment = 'list';
       }
     }
 
@@ -191,6 +201,17 @@ export function useProvideData(props) {
       ...state,
     });
 
+    // if (!state.userSettings.doneWelcome) {
+    //   console.log('Welcome not complete');
+    //   state.view = {
+    //     page: 'Welcome',
+    //   };
+
+    //   setDataState({
+    //     fetchingData: false,
+    //     view: state.view,
+    //   });
+    // } else
     if (state.viewSegment == 'unavailable-account') {
       setDataState({
         selectedAccountId: accountId,
@@ -509,7 +530,10 @@ export function useProvideData(props) {
     if (doSaveView) {
       saveView(report, prepareState.tempAllData);
     } else if (!doSaveView && saveHistory) {
-      await saveResult(prepareState.tempAllData);
+      await saveResult(prepareState.tempAllData, {
+        ...selectedView,
+        id: documentId,
+      });
     }
 
     setDataState(prepareState);
@@ -602,7 +626,7 @@ export function useProvideData(props) {
     });
   };
 
-  const saveResult = runData => {
+  const saveResult = (runData, selectedView) => {
     // eslint-disable-next-line
     return new Promise(async resolve => {
       const data = runData || dataState?.tempAllData;
@@ -638,6 +662,12 @@ export function useProvideData(props) {
         );
 
         Promise.all(writePromises).then(results => {
+          setDataState({
+            selectedView: {
+              ...selectedView,
+              historyId,
+            },
+          });
           fetchViewConfigs().then(() => {
             resolve(results);
           });
@@ -779,11 +809,15 @@ export function useProvideData(props) {
           const latestHistory = currentConfig?.history?.[0];
 
           if (latestHistory) {
+            // const viewConfig = viewConfigs.find(vc => vc.id === documentId);
+
+            // console.log('!!FOUND', viewConfig);
+
             setDataState({
               deletingSnapshot: false,
               deleteSnapshotModalOpen: null,
             });
-            loadHistoricalResult(viewConfig, latestHistory);
+            loadHistoricalResult(currentConfig, latestHistory);
             resolve();
           } else {
             setDataState({
@@ -1498,5 +1532,6 @@ export function useProvideData(props) {
     toggleFavoriteView,
     deleteSnapshot,
     getAccounts,
+    getUserSettings,
   };
 }

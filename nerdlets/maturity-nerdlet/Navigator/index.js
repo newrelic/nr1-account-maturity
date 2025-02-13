@@ -28,34 +28,35 @@ export default function Navigator(props) {
 
             return (
               <React.Fragment key={i}>
-                <div className={`score-card`}>
-                  <div
-                    style={{ cursor: 'pointer' }}
-                    onClick={
-                      viewGroupBy === 'account'
-                        ? () =>
-                            /* eslint-disable */
-                            navigation.openStackedNerdlet({
-                              id: 'account-details-nerdlet',
-                              urlState: {
-                                accountName: title,
-                                accountId: subtitle,
-                                accountPercentage: rollUpScore,
-                                accountSummary: (
-                                  props.accountSummaries || []
-                                ).find((a) => a.id === parseInt(subtitle)),
-                              },
-                            })
-                        : () =>
-                            navigation.openStackedNerdlet({
-                              id: 'capability-details-nerdlet',
-                              urlState: {
-                                ...collection,
-                              },
-                            })
-                      /* eslint-enable */
-                    }
-                  >
+                <div
+                  className={`score-card`}
+                  style={{ cursor: 'pointer' }}
+                  onClick={
+                    viewGroupBy === 'account'
+                      ? () =>
+                          /* eslint-disable */
+                          navigation.openStackedNerdlet({
+                            id: 'account-details-nerdlet',
+                            urlState: {
+                              accountName: title,
+                              accountId: subtitle,
+                              accountPercentage: rollUpScore,
+                              accountSummary: (
+                                props.accountSummaries || []
+                              ).find(a => a.id === parseInt(subtitle)),
+                            },
+                          })
+                      : () =>
+                          navigation.openStackedNerdlet({
+                            id: 'capability-details-nerdlet',
+                            urlState: {
+                              ...collection,
+                            },
+                          })
+                    /* eslint-enable */
+                  }
+                >
+                  <div>
                     <HeadingText
                       className="title"
                       type={HeadingText.TYPE.HEADING_3}

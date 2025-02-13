@@ -6,6 +6,7 @@ import {
   HeadingText,
   BlockText,
   Icon,
+  navigation,
 } from 'nr1';
 import DataContext from '../../../src/context/data';
 import CreateView from '../CreateView';
@@ -18,6 +19,7 @@ import SearchBar from '../SearchBar';
 import DeleteView from '../DeleteView';
 import DeleteSnapshot from '../DeleteSnapshot';
 import Help from '../HelpModal';
+import Welcome from '../Welcome';
 
 export const defaultActions = setDataState => {
   return [
@@ -81,6 +83,9 @@ export default function AccountMaturity(props) {
           />
         );
       }
+      case 'Welcome': {
+        return <Welcome />;
+      }
       case 'CreateView': {
         return <CreateView {...(view.props || {})} />;
       }
@@ -113,6 +118,7 @@ export default function AccountMaturity(props) {
 
   return (
     <div>
+      <Welcome />
       <Help />
       <DeleteView />
       <DeleteSnapshot />

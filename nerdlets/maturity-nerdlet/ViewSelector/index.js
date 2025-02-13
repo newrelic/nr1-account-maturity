@@ -45,6 +45,8 @@ export default function ViewSelector() {
 
     const currentViewConfig = viewConfigs.find(vc => vc.id === selectedView.id);
 
+    console.log('view sel', selectedView, currentViewConfig);
+
     return (
       <div style={{ paddingRight: '5px' }}>
         <Dropdown

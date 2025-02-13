@@ -110,7 +110,7 @@ export default function DetailsTable(props) {
                 status={percentageToStatus(cat.score)}
               />
               <Card
-                collapsible
+                collapsible={allEntities.length > 0}
                 defaultCollapsed
                 collapsed={!dataState[cat.name]}
                 onChange={() =>
