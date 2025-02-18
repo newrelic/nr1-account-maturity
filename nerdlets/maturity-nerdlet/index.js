@@ -13,6 +13,7 @@ import {
   LogPanel,
   ProgramPanel,
   MobilePanel,
+  ErrorsInboxPanel,
   WorkloadPanel,
   SLMPanel,
   NPMPanel
@@ -41,6 +42,7 @@ export default class MaturityApplication extends React.Component {
           <Tab>Log</Tab>
           <Tab>Programmability</Tab>
           <Tab>Mobile</Tab>
+          <Tab>Errors Inbox</Tab>
           <Tab>Workloads</Tab>
           <Tab>SLM</Tab>
           <Tab>NPM</Tab>
@@ -76,6 +78,9 @@ export default class MaturityApplication extends React.Component {
             </TabPanel>
             <TabPanel>
               <MobilePanel />
+            </TabPanel>
+            <TabPanel>
+              <ErrorsInboxPanel />
             </TabPanel>
             <TabPanel>
               <WorkloadPanel />
