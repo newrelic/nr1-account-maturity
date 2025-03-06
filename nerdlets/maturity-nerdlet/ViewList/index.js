@@ -27,6 +27,7 @@ export default function ViewList() {
     userSettings,
     toggleFavoriteView,
     email,
+    loadedDefaultView,
   } = useContext(DataContext);
   const [column, setColumn] = useState(0);
   const [sortingType, setSortingType] = useState(
@@ -39,6 +40,32 @@ export default function ViewList() {
       actionControls: true,
       actionControlButtons: [...defaultActions(setDataState)],
     });
+
+    if (loadedDefaultView === false && userSettings.defaultViewId) {
+      setDataState({ loadedDefaultView: true });
+      const viewConfig = viewConfigs.find(
+        vc => vc.id === userSettings.defaultViewId
+      );
+
+      if (viewConfig.id === `allData+${email}`) {
+        runView(
+          { id: `allData+${email}`, name: 'All data' },
+          null,
+          false,
+          true
+        );
+      } else {
+        runView(
+          {
+            name: viewConfig.document.name,
+            account: selectedAccountId,
+          },
+          { ...viewConfig },
+          false,
+          true
+        );
+      }
+    }
   }, []);
 
   const onClickTableHeaderCell = (nextColumn, { nextSortingType }) => {

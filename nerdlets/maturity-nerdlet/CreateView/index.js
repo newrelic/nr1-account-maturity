@@ -361,7 +361,7 @@ export default function CreateView() {
                 null,
                 false,
                 true,
-                runParams.setAsDefault
+                runParams?.setAsDefault
               )
             }
           >

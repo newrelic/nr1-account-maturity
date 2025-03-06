@@ -38,6 +38,7 @@ export default DataContext;
 
 export function useProvideData(props) {
   const [dataState, setDataState] = useSetState({
+    loadedDefaultView: false,
     email: null,
     helpModalOpen: false,
     deleteViewModalOpen: null,
@@ -123,42 +124,24 @@ export function useProvideData(props) {
     const viewConfigs = await fetchViewConfigs(null, state.user);
     const accounts = await getAccounts();
 
-    if (!state.userSettings.doneWelcome) {
-      // console.log('Welcome not complete');
-      // state.view = {
-      //   page: 'Welcome',
-      // };
-    } else {
-      // default view not configured, request configuration
-      // there will always be at least one view config because of allAata
-      if (viewConfigs.length > 1) {
-        state.view = {
-          page: 'ViewList',
-        };
-      }
-
-      if (userSettings.defaultViewId) {
-        const viewConfig = viewConfigs.find(
-          vc => vc.id === userSettings.defaultViewId
-        );
-
-        const latestHistory = viewConfig?.history?.[0];
-
-        if (latestHistory) {
-          delete state.view;
-          loadHistoricalResult(viewConfig, latestHistory);
-        }
-        // there will always be at least one view config because of allData
-      } else if (viewConfigs.length === 1) {
-        state.view = {
-          page: 'CreateNewView',
-          title: 'Create New View',
-        };
-      }
-
-      state.accounts = accounts;
-      state.selectedAccountId = accounts[0].id;
+    // default view not configured, request configuration
+    // there will always be at least one view config because of allAata
+    if (viewConfigs.length > 1) {
+      state.view = {
+        page: 'ViewList',
+      };
     }
+
+    if (viewConfigs.length === 1) {
+      state.view = {
+        page: 'CreateNewView',
+        title: 'Create New View',
+      };
+    }
+
+    state.accounts = accounts;
+    state.selectedAccountId = accounts[0].id;
+
     setDataState(state);
   }, []);
 
@@ -749,7 +732,7 @@ export function useProvideData(props) {
     let reportsToDelete = viewHistory.filter(
       vh =>
         !viewConfigs.find(rc => rc.id === vh?.document?.documentId) &&
-        vh?.document?.documentId !== 'allData'
+        !vh?.document?.documentId.includes('allData')
     );
 
     // use when debugging
