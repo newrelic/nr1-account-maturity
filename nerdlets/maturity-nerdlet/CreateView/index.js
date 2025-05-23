@@ -39,6 +39,8 @@ export default function CreateView() {
     setDataState,
     view,
     prevView,
+    showSkipThisStep,
+    userSettings,
   } = useContext(DataContext);
   const [entityCount, setEntityCount] = useState(0);
   const [runParams, setRunParams] = useState(null);
@@ -352,7 +354,7 @@ export default function CreateView() {
             &nbsp;
           </>
         )}
-        {view.page === 'CreateNewView' && (
+        {showSkipThisStep && (
           <Button
             type={Button.TYPE.SECONDARY}
             onClick={() =>
@@ -763,6 +765,7 @@ export default function CreateView() {
       </>
     );
   }, [
+    userSettings,
     accounts,
     user,
     state,

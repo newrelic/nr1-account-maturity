@@ -39,6 +39,7 @@ export default DataContext;
 export function useProvideData(props) {
   const [dataState, setDataState] = useSetState({
     loadedDefaultView: false,
+    showSkipThisStep: true,
     email: null,
     helpModalOpen: false,
     deleteViewModalOpen: null,
@@ -120,6 +121,10 @@ export function useProvideData(props) {
     console.log('userSettings =>', userSettings);
     const user = await NerdGraphQuery.query({ query: userQuery });
     state.user = user?.data?.actor?.user;
+
+    // if (userSettings.doneWelcomeTest16) {
+    //   state.showSkipThisStep = false;
+    // }
 
     const viewConfigs = await fetchViewConfigs(null, state.user);
     const accounts = await getAccounts();
