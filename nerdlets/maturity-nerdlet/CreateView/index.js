@@ -25,7 +25,7 @@ import { useSetState } from '@mantine/hooks';
 import rules from '../../../src/rules';
 import { defaultActions } from '../AccountMaturity';
 
-const ENTITY_COUNT_WARNING = 10;
+const ENTITY_COUNT_WARNING = 1000;
 
 export default function CreateView() {
   const {
@@ -354,7 +354,17 @@ export default function CreateView() {
             &nbsp;
           </>
         )}
-        {showSkipThisStep && (
+        {/* Show all views if views exist */}
+        {viewConfigs && viewConfigs.length > 1 && (
+          <>
+            <Button
+              onClick={() => setDataState({ view: { page: 'ViewList' } })}
+            >
+              List views
+            </Button>
+          </>
+        )}
+        {/* {showSkipThisStep && (
           <Button
             type={Button.TYPE.SECONDARY}
             onClick={() =>
@@ -369,7 +379,7 @@ export default function CreateView() {
           >
             Skip this step
           </Button>
-        )}
+        )} */}
         <br />
         <br />
         <HeadingText>View Configuration</HeadingText>
