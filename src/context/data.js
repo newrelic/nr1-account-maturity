@@ -153,12 +153,12 @@ export function useProvideData(props) {
       };
     }
 
-    if (viewConfigs.length === 1) {
-      state.view = {
-        page: 'CreateNewView',
-        title: 'Create New View',
-      };
-    }
+    // if (viewConfigs.length === 1) {
+    //   state.view = {
+    //     page: 'CreateNewView',
+    //     title: 'Create New View',
+    //   };
+    // }
 
     state.accounts = accounts;
     state.selectedAccountId = accounts[0].id;
