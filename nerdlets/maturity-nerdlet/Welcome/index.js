@@ -6,7 +6,7 @@ export default function Welcome() {
   const { userSettings } = useContext(DataContext);
 
   return useMemo(() => {
-    if (!userSettings || userSettings?.doneWelcomeTest20) return <></>;
+    if (!userSettings || userSettings?.doneWelcomeTest21) return <></>;
 
     return (
       <>
@@ -76,5 +76,5 @@ export default function Welcome() {
         </div>
       </>
     );
-  }, [userSettings, userSettings?.doneWelcomeTest20]);
+  }, [userSettings, userSettings?.doneWelcomeTest21]);
 }

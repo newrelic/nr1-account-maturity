@@ -108,7 +108,7 @@ export function useProvideData(props) {
 
   const clearWelcome = async () => {
     const userSettings = dataState.userSettings;
-    userSettings.doneWelcomeTest20 = new Date().getTime();
+    userSettings.doneWelcomeTest21 = new Date().getTime();
     console.log('clearing welcome', userSettings);
     const res = await UserStorageMutation.mutate({
       actionType: UserStorageMutation.ACTION_TYPE.WRITE_DOCUMENT,
@@ -138,7 +138,7 @@ export function useProvideData(props) {
     const user = await NerdGraphQuery.query({ query: userQuery });
     state.user = user?.data?.actor?.user;
 
-    // if (userSettings.doneWelcomeTest20) {
+    // if (userSettings.doneWelcomeTest21) {
     //   state.showSkipThisStep = false;
     // }
 
