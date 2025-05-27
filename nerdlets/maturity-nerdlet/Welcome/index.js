@@ -1,31 +1,12 @@
-import React, { useMemo, useEffect, useContext } from 'react';
-import { Spacing, BlockText, Link, UserStorageMutation } from 'nr1';
+import React, { useMemo, useContext } from 'react';
+import { Spacing, BlockText, Link } from 'nr1';
 import DataContext from '../../../src/context/data';
 
 export default function Welcome() {
-  const { userSettings, setDataState } = useContext(DataContext);
-  // clear user welcome
-  useEffect(async () => {
-    if (userSettings && !userSettings?.doneWelcomeTest16) {
-      // set timeout needed if an account switch or set occurs and it reloads and clears this immediately
-      setTimeout(() => {
-        userSettings.doneWelcomeTest16 = new Date().getTime();
-        console.log('clearing welcome here', userSettings);
-
-        UserStorageMutation.mutate({
-          actionType: UserStorageMutation.ACTION_TYPE.WRITE_DOCUMENT,
-          collection: 'userSettings',
-          documentId: 'main',
-          document: userSettings,
-        }).then(res => {
-          //
-        });
-      }, 7500);
-    }
-  }, [userSettings]);
+  const { userSettings } = useContext(DataContext);
 
   return useMemo(() => {
-    if (!userSettings || userSettings?.doneWelcomeTest16) return <></>;
+    if (!userSettings || userSettings?.doneWelcomeTest20) return <></>;
 
     return (
       <>
@@ -95,5 +76,5 @@ export default function Welcome() {
         </div>
       </>
     );
-  }, [userSettings]);
+  }, [userSettings, userSettings?.doneWelcomeTest20]);
 }

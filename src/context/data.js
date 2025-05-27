@@ -106,6 +106,22 @@ export function useProvideData(props) {
     console.log('account history deleted resp =>', res);
   };
 
+  const clearWelcome = async () => {
+    const userSettings = dataState.userSettings;
+    userSettings.doneWelcomeTest20 = new Date().getTime();
+    console.log('clearing welcome', userSettings);
+    const res = await UserStorageMutation.mutate({
+      actionType: UserStorageMutation.ACTION_TYPE.WRITE_DOCUMENT,
+      collection: 'userSettings',
+      documentId: 'main',
+      document: userSettings,
+    });
+
+    setDataState({ userSettings });
+
+    console.log('user welcome clear resp =>', res);
+  };
+
   // handle initial load
   useEffect(async () => {
     // await wipeUserDetails();
@@ -122,7 +138,7 @@ export function useProvideData(props) {
     const user = await NerdGraphQuery.query({ query: userQuery });
     state.user = user?.data?.actor?.user;
 
-    // if (userSettings.doneWelcomeTest16) {
+    // if (userSettings.doneWelcomeTest20) {
     //   state.showSkipThisStep = false;
     // }
 
@@ -1521,5 +1537,6 @@ export function useProvideData(props) {
     deleteSnapshot,
     getAccounts,
     getUserSettings,
+    clearWelcome,
   };
 }

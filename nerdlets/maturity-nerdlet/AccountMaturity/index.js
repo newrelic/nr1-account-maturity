@@ -83,9 +83,6 @@ export default function AccountMaturity(props) {
           />
         );
       }
-      case 'Welcome': {
-        return <Welcome />;
-      }
       case 'CreateView': {
         return <CreateView {...(view.props || {})} />;
       }

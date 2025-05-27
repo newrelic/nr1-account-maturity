@@ -40,6 +40,7 @@ export default function CreateView() {
     view,
     prevView,
     showSkipThisStep,
+    clearWelcome,
     userSettings,
   } = useContext(DataContext);
   const [entityCount, setEntityCount] = useState(0);
@@ -358,7 +359,10 @@ export default function CreateView() {
         {viewConfigs && viewConfigs.length > 1 && (
           <>
             <Button
-              onClick={() => setDataState({ view: { page: 'ViewList' } })}
+              onClick={() => {
+                clearWelcome();
+                setDataState({ view: { page: 'ViewList' } });
+              }}
             >
               List views
             </Button>
@@ -652,6 +656,8 @@ export default function CreateView() {
             type={Button.TYPE.PRIMARY}
             disabled={runDisabled || !state.name || !changes}
             onClick={async () => {
+              clearWelcome();
+
               let run = true;
               if (state.entitySearchQuery) {
                 run = await validateEntitySearchQuery();
@@ -712,6 +718,8 @@ export default function CreateView() {
           <Button
             disabled={runDisabled || !changes}
             onClick={async () => {
+              clearWelcome();
+
               let run = true;
 
               if (state.entitySearchQuery) {
