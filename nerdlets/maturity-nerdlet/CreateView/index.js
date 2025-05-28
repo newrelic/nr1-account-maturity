@@ -426,25 +426,6 @@ export default function CreateView() {
         />
         &nbsp;&nbsp;
         {/* && !selectedReport?.document */}
-        {accounts && accounts.length > 0 && (
-          <>
-            <Select
-              value={selectedAccountId}
-              label="Select an account"
-              info="Your view will be stored into this account, but can access other accounts if selected below"
-              onChange={(evt, value) =>
-                setDataState({ selectedAccountId: value })
-              }
-            >
-              {accounts.map(a => (
-                <SelectItem key={a.id} value={a.id}>
-                  {a.name}
-                </SelectItem>
-              ))}
-            </Select>
-          </>
-        )}
-        &nbsp;&nbsp;
         {state.name && (
           <div style={{ display: 'inline-block', verticalAlign: 'middle' }}>
             <Checkbox
