@@ -108,7 +108,7 @@ export function useProvideData(props) {
 
   const clearWelcome = async () => {
     const userSettings = dataState.userSettings;
-    userSettings.doneWelcomeTest21 = new Date().getTime();
+    userSettings.doneWelcomeTest22 = new Date().getTime();
     console.log('clearing welcome', userSettings);
     const res = await UserStorageMutation.mutate({
       actionType: UserStorageMutation.ACTION_TYPE.WRITE_DOCUMENT,
@@ -135,30 +135,20 @@ export function useProvideData(props) {
     const userSettings = await getUserSettings();
     state.userSettings = userSettings;
     console.log('userSettings =>', userSettings);
-    const user = await NerdGraphQuery.query({ query: userQuery });
-    state.user = user?.data?.actor?.user;
 
-    // if (userSettings.doneWelcomeTest21) {
-    //   state.showSkipThisStep = false;
-    // }
-
-    const viewConfigs = await fetchViewConfigs(null, state.user);
-    const accounts = await getAccounts();
-
-    // default view not configured, request configuration
-    // there will always be at least one view config because of allAata
-    if (viewConfigs.length > 1) {
+    // there will always be at least one view config because of allData
+    // load list view if welcome has been done
+    if (userSettings?.doneWelcomeTest22) {
       state.view = {
         page: 'ViewList',
       };
     }
 
-    // if (viewConfigs.length === 1) {
-    //   state.view = {
-    //     page: 'CreateNewView',
-    //     title: 'Create New View',
-    //   };
-    // }
+    const user = await NerdGraphQuery.query({ query: userQuery });
+    state.user = user?.data?.actor?.user;
+
+    const viewConfigs = await fetchViewConfigs(null, state.user);
+    const accounts = await getAccounts();
 
     state.accounts = accounts;
     state.selectedAccountId = accounts[0].id;
@@ -168,7 +158,6 @@ export function useProvideData(props) {
 
   // handle account picker changes
   useEffect(async () => {
-    const accountsInit = await getAccounts();
     const { accountId } = props;
     const state = {};
 
@@ -176,19 +165,22 @@ export function useProvideData(props) {
     if (accountId === 'cross-account') {
       console.log('cross account should not be selected, reloading...');
       navigation.openNerdlet({ id: 'maturity-nerdlet' });
+      return;
+    }
+
+    const accountsInit = await getAccounts();
+
+    if (!accountsInit.find(a => a.id === accountId)) {
+      Toast.showToast({
+        title: 'Account Maturity is not subscribed to the selected account',
+        description: `Change account or subscribe account: ${accountId}`,
+        type: Toast.TYPE.CRITICAL,
+      });
+      state.view = { page: 'unavailable-account' };
+      state.viewSegment = 'unavailable-account';
     } else {
-      if (!accountsInit.find(a => a.id === accountId)) {
-        Toast.showToast({
-          title: 'Account Maturity is not subscribed to the selected account',
-          description: `Change account or subscribe account: ${accountId}`,
-          type: Toast.TYPE.CRITICAL,
-        });
-        state.view = { page: 'unavailable-account' };
-        state.viewSegment = 'unavailable-account';
-      } else {
-        state.view = { page: 'ViewList' };
-        state.viewSegment = 'list';
-      }
+      state.view = { page: 'ViewList' };
+      state.viewSegment = 'list';
     }
 
     await getUserEmail();
@@ -196,6 +188,11 @@ export function useProvideData(props) {
     const userSettings = await getUserSettings();
     state.userSettings = userSettings;
     console.log('userSettings =>', userSettings);
+    if (userSettings?.doneWelcomeTest22) {
+      state.view = { page: 'ViewList' };
+      state.viewSegment = 'list';
+    }
+
     const user = await NerdGraphQuery.query({ query: userQuery });
     state.user = user?.data?.actor?.user;
 
@@ -237,7 +234,7 @@ export function useProvideData(props) {
       deleteOrphanedReports(viewConfigs, viewHistory, accountId);
 
       let view = dataState.view;
-      if (viewConfigs.length > 1) {
+      if (userSettings?.doneWelcomeTest22) {
         view = { page: 'ViewList' };
       }
 

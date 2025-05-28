@@ -49,8 +49,7 @@ export default function AccountMaturity(props) {
     helpModalOpen,
   } = useContext(DataContext);
 
-  const renderView = () => {
-    const page = view.page;
+  const renderView = page => {
     // eslint-disable-next-line prettier/prettier
     switch (page) {
       case 'Loading': {
@@ -158,7 +157,7 @@ export default function AccountMaturity(props) {
                   backgroundColor: 'white',
                 }}
               >
-                <div>{renderView()}</div>
+                <div>{renderView(view.page)}</div>
               </div>
             </LayoutItem>
           </Layout>
