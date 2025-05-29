@@ -364,7 +364,7 @@ export default function CreateView() {
                 setDataState({ view: { page: 'ViewList' } });
               }}
             >
-              List views
+              See all views
             </Button>
           </>
         )}

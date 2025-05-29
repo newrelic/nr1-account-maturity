@@ -108,7 +108,7 @@ export function useProvideData(props) {
 
   const clearWelcome = async () => {
     const userSettings = dataState.userSettings;
-    userSettings.doneWelcomeTest22 = new Date().getTime();
+    userSettings.doneWelcomeTest23 = new Date().getTime();
     console.log('clearing welcome', userSettings);
     const res = await UserStorageMutation.mutate({
       actionType: UserStorageMutation.ACTION_TYPE.WRITE_DOCUMENT,
@@ -138,7 +138,7 @@ export function useProvideData(props) {
 
     // there will always be at least one view config because of allData
     // load list view if welcome has been done
-    if (userSettings?.doneWelcomeTest22) {
+    if (userSettings?.doneWelcomeTest23) {
       state.view = {
         page: 'ViewList',
       };
@@ -188,7 +188,7 @@ export function useProvideData(props) {
     const userSettings = await getUserSettings();
     state.userSettings = userSettings;
     console.log('userSettings =>', userSettings);
-    if (userSettings?.doneWelcomeTest22) {
+    if (userSettings?.doneWelcomeTest23) {
       state.view = { page: 'ViewList' };
       state.viewSegment = 'list';
     }
@@ -234,7 +234,7 @@ export function useProvideData(props) {
       deleteOrphanedReports(viewConfigs, viewHistory, accountId);
 
       let view = dataState.view;
-      if (userSettings?.doneWelcomeTest22) {
+      if (userSettings?.doneWelcomeTest23) {
         view = { page: 'ViewList' };
       }
 
