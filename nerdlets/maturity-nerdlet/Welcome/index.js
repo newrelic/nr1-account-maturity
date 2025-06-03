@@ -48,16 +48,16 @@ export default function Welcome() {
 
               <Spacing type={[Spacing.TYPE.MEDIUM, Spacing.TYPE.OMIT]}>
                 <BlockText>
-                  You can click the <strong>Skip this Step</strong> button above
-                  to immediately evaluate all the data you have access to.
+                  If you have access to a lot of accounts or entites, we
+                  strongly recommend you use the form below to create a targeted
+                  view; this will help avoid performance issues and timeouts.
                 </BlockText>
               </Spacing>
               <Spacing type={[Spacing.TYPE.MEDIUM, Spacing.TYPE.OMIT]}>
                 <BlockText>
-                  However, if you have access to a lot of accounts or entites,
-                  we strongly recommend you use the form below to create a more
-                  targeted view; this will help avoid performance issues and
-                  timeouts.
+                  Click <strong>Save & Run</strong> to create a reusable
+                  configuration, or click the <strong>Run</strong> below to
+                  create a temporary report.
                 </BlockText>
               </Spacing>
               <Spacing type={[Spacing.TYPE.MEDIUM, Spacing.TYPE.OMIT]}>

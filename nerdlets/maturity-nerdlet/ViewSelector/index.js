@@ -205,7 +205,7 @@ export default function ViewSelector() {
               } else {
                 if (selectedView.name === 'All Data') {
                   Toast.showToast({
-                    title: 'This view cannot be edited',
+                    title: 'All Data is a reserved view and cannot be edited',
                     type: Toast.TYPE.NORMAL,
                   });
                 } else {
@@ -262,7 +262,7 @@ export default function ViewSelector() {
               onClick={() => {
                 if (selectedView.name === 'All Data') {
                   Toast.showToast({
-                    title: 'This view cannot be deleted',
+                    title: 'All Data is a reserved view and cannot be deleted',
                     type: Toast.TYPE.NORMAL,
                   });
                 } else {
