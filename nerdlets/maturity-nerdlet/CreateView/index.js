@@ -490,11 +490,22 @@ export default function CreateView() {
                       checked={state.products.includes(key)}
                       onChange={() => {
                         if (state.products.includes(key)) {
+                          const products = state.products.filter(
+                            id => id !== key
+                          );
+                          const allProducts =
+                            products.length === Object.keys(rules).length;
+
                           setState({
-                            products: state.products.filter(id => id !== key),
+                            products,
+                            allProducts,
                           });
                         } else {
-                          setState({ products: [...state.products, key] });
+                          const products = [...state.products, key];
+                          const allProducts =
+                            products.length === Object.keys(rules).length;
+
+                          setState({ products, allProducts });
                         }
                       }}
                     />
