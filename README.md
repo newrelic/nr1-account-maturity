@@ -27,6 +27,7 @@ However, it measures data from specific product capabilities - without data from
 **Note** that only a subset of product capabilities are measured in Account Maturity.
 
 The list of measured capabilities is:
+
 - APM
 - Infrastructure
 - Kubernetes
@@ -36,12 +37,11 @@ The list of measured capabilities is:
 - Synthetics
 - Workloads
 - SLM
-- NPM
 - Extensibility
 
 ## <a id="enable"></a>Enabling this App
 
-This App is available via the New Relic Catalog. 
+This App is available via the New Relic Catalog.
 
 To enable it in your account:
 

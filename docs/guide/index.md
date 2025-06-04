@@ -61,7 +61,7 @@ The **Accounts** section lets you target specific accounts to include in the rep
 
 Use the **Advanced Filtering** options to include non-reporting entities in your reports (they are excluded by default), or to apply a tag filter to further refine the scope of entities included. A tag filter is simply a NRQL-compliant query string specifying the tag and target value, for instance: `tag.env = 'uat'`.
 
-The example configuration above targets all product capabilities for accounts that include the term "Demo", and which are owned by the labs team.
+The example configuration above targets all product capabilities for accounts that include the term "Demo", and which are owned by the docs team.
 
 Once the filters are configured, click either `Save and Run` or `Run` to generate a score.
 
@@ -248,4 +248,4 @@ If we flip that scenario, and the user has access to 2 accounts but Account Matu
 
 Given that different users may have access to different data scopes, it is possible that an Account Maturity View configuration may contain data from accounts you don't have access to - in these cases, an icon will be shown at the top of the View on the View Summary Page to indicate that you are only seeing partial data within that View.
 
-![Screenshot No Access to Data Icon]()
+![Screenshot No Access to Data Icon](screenshots/am-unauth-accounts.png)
