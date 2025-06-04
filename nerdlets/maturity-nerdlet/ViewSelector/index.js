@@ -53,7 +53,7 @@ export default function ViewSelector() {
           sectioned
           label={'Views'}
           labelInline={true}
-          title={unsavedRun ? 'Select' : selectedView?.name || 'Select'}
+          title={selectedView?.name || 'Select'}
           search={viewSearch}
           onSearch={e => setViewSearch(e.target.value)}
         >
