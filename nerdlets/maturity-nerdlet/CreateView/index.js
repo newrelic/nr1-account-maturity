@@ -708,7 +708,7 @@ export default function CreateView() {
           &nbsp;&nbsp;
           {/* {view.page !== 'EditView' && ( */}
           <Button
-            disabled={runDisabled || !changes}
+            disabled={runDisabled}
             onClick={async () => {
               clearWelcome();
 

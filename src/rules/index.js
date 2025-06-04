@@ -8,7 +8,7 @@ import EXTENSIBILITY from './EXTENSIBILITY';
 import MOBILE from './MOBILE';
 import WORKLOADS from './WORKLOADS';
 import SLM from './SLM';
-import NPM from './NPM';
+// import NPM from './NPM';
 
 export default {
   // category name : category rules
@@ -22,7 +22,7 @@ export default {
   Mobile: MOBILE,
   Workloads: WORKLOADS,
   SLM: SLM,
-  NPM: NPM,
+  // NPM: NPM,
 };
 
 // colors provided by @etantry
@@ -37,5 +37,5 @@ export const productColors = {
   Mobile: '#F82241',
   Workloads: '#4831EC',
   SLM: '#D25028',
-  NPM: '#F38A8A',
+  // NPM: '#F38A8A',
 };
