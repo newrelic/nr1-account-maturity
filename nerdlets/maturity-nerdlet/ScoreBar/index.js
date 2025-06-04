@@ -110,8 +110,7 @@ export default function ScoreBar(props) {
               <Icon type={Icon.TYPE.INTERFACE__OPERATIONS__REFRESH} />
             </td>
 
-            {/* Anna check wording/style, and invert the check */}
-            {allAccountsAvailable && (
+            {!allAccountsAvailable && (
               <Tooltip text="This View definition contains accounts you don't have access to; you are seeing only the subset you are authorized to.">
                 <td style={{ color: 'orange' }}>
                   <Icon type={Icon.TYPE.INTERFACE__STATE__WARNING} />
