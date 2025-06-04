@@ -1,5 +1,5 @@
 import React, { useContext, useMemo } from 'react';
-import { Button, Icon } from 'nr1';
+import { Button, Icon, Tooltip } from 'nr1';
 import { ProgressBar } from '@newrelic/nr-labs-components';
 import { percentageToStatus, scoreToColor } from '../../../src/utils';
 import csvDownload from 'json-to-csv-export';
@@ -94,7 +94,7 @@ export default function ScoreBar(props) {
               />
             </td>
             <td
-              style={{ paddingLeft: '0px', cursor: 'pointer' }}
+              style={{ paddingLeft: '0px', cursor: 'pointer', width: '8px' }}
               onClick={() =>
                 runView(
                   {
@@ -112,10 +112,12 @@ export default function ScoreBar(props) {
 
             {/* Anna check wording/style, and invert the check */}
             {allAccountsAvailable && (
-              <td style={{ color: 'orange' }}>
-                <Icon type={Icon.TYPE.INTERFACE__STATE__WARNING} />
-                &nbsp;&nbsp; Unavailable accounts
-              </td>
+              <Tooltip text="This View definition contains accounts you don't have access to; you are seeing only the subset you are authorized to.">
+                <td style={{ color: 'orange' }}>
+                  <Icon type={Icon.TYPE.INTERFACE__STATE__WARNING} />
+                  &nbsp;&nbsp; Unauthorized accounts
+                </td>
+              </Tooltip>
             )}
 
             <td style={{ textAlign: 'right' }}>
