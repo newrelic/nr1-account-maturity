@@ -190,7 +190,9 @@ export default function ListView(props) {
 
                   <Tooltip
                     text={
-                      item['Account Score'] ? item['Account Score'] : undefined
+                      item['Account Score']
+                        ? parseFloat(item['Account Score'] || 0).toFixed(2)
+                        : undefined
                     }
                   >
                     <div style={{ width: '100px' }}>

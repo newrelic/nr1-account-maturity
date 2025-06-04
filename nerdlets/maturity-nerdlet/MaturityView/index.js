@@ -30,7 +30,7 @@ export default function MaturityView(props) {
       actionControlButtons: [
         {
           label: 'New view',
-          type: 'secondary',
+          type: 'primary',
           iconType: Icon.TYPE.INTERFACE__SIGN__PLUS,
           onClick: () =>
             setDataState({
