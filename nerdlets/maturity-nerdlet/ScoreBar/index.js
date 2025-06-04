@@ -7,7 +7,7 @@ import HistorySelector from '../HistorySelector';
 import DataContext from '../../../src/context/data';
 
 export default function ScoreBar(props) {
-  const { selectedReport, selectedAccountId, runView } = useContext(
+  const { selectedReport, selectedAccountId, runView, accounts } = useContext(
     DataContext
   );
   const status = percentageToStatus(props?.totalPercentage);
@@ -43,7 +43,25 @@ export default function ScoreBar(props) {
     return d;
   });
 
+  const areAllAccountsAvailable = (requiredAccounts, availableAccounts) => {
+    const found = new Set();
+
+    for (const { id } of availableAccounts) {
+      if (requiredAccounts.includes(id)) {
+        found.add(id);
+        if (found.size === requiredAccounts.length) return true;
+      }
+    }
+
+    return false;
+  };
+
   return useMemo(() => {
+    const allAccountsAvailable = areAllAccountsAvailable(
+      selectedReport.document.accounts,
+      accounts
+    );
+
     return (
       <>
         <table style={{ width: '100%' }}>
@@ -91,6 +109,14 @@ export default function ScoreBar(props) {
             >
               <Icon type={Icon.TYPE.INTERFACE__OPERATIONS__REFRESH} />
             </td>
+
+            {/* Anna check wording/style, and invert the check */}
+            {allAccountsAvailable && (
+              <td style={{ color: 'orange' }}>
+                <Icon type={Icon.TYPE.INTERFACE__STATE__WARNING} />
+                &nbsp;&nbsp; Unavailable accounts
+              </td>
+            )}
 
             <td style={{ textAlign: 'right' }}>
               {data && data.length > 0 && (

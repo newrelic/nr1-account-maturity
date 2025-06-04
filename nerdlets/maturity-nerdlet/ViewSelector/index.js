@@ -168,7 +168,12 @@ export default function ViewSelector() {
 
           <DropdownSection title="">
             <DropdownItem
-              onClick={() => setDataState({ view: { page: 'ViewList' }, loadedDefaultView: true })}
+              onClick={() =>
+                setDataState({
+                  view: { page: 'ViewList' },
+                  loadedDefaultView: true,
+                })
+              }
             >
               <div style={{ float: 'left' }}>{items.length} total views</div>
               <div style={{ float: 'right', color: 'blue' }}>See all views</div>
@@ -177,7 +182,8 @@ export default function ViewSelector() {
         </Dropdown>
         {unsavedRun === true && (
           <>
-            &nbsp; &nbsp;
+            {/* disabling "save as" */}
+            {/* &nbsp; &nbsp;
             <Button
               sizeType={Button.SIZE_TYPE.SMALL}
               type={Button.TYPE.OUTLINE}
@@ -185,7 +191,7 @@ export default function ViewSelector() {
               onClick={() => setDataState({ saveViewModalOpen: true })}
             >
               Save
-            </Button>
+            </Button> */}
           </>
         )}
         <Dropdown
