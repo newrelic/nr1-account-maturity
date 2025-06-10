@@ -1,3 +1,15 @@
+# [2.0.0](https://github.com/newrelic/nr1-account-maturity/compare/v1.0.0...v2.0.0) (2025-06-10)
+
+
+### Features
+
+* V2 version bump ([a5bf954](https://github.com/newrelic/nr1-account-maturity/commit/a5bf954e4b16818fa4436498dc04a8dd7ff77123))
+
+
+### BREAKING CHANGES
+
+* V2 upgrade.
+
 # [1.0.0](https://github.com/newrelic/nr1-account-maturity/compare/v0.16.0...v1.0.0) (2025-06-10)
 
 
