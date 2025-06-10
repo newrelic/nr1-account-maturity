@@ -5,8 +5,8 @@
   "version": "0.16.0",
   "scripts": {
     "start": "nr1 nerdpack:serve",
-    "eslint-check": "eslint nerdlets/ src/",
-    "eslint-fix": "eslint nerdlets/ src/ --fix",
+    "eslint-check": "eslint nerdlets/",
+    "eslint-fix": "eslint nerdlets/ --fix",
     "test": "exit 0"
   },
   "bugs": {
@@ -43,6 +43,9 @@
     "@semantic-release/changelog": "^5.0.1",
     "@semantic-release/git": "^9.0.0",
     "eslint": "^6.8.0",
+    "eslint-config-prettier": "^6.4.0",
+    "eslint-plugin-prettier": "^3.4.1",
+    "eslint-plugin-promise": "^4.2.1",
     "prettier": "^1.19.1"
   }
 }

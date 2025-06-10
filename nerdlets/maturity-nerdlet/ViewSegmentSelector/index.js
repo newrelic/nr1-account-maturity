@@ -9,7 +9,7 @@ export default function ViewSegmentSelector() {
     viewGroupBy,
     viewConfigs,
     setDataState,
-    selectedView,
+    selectedView
   } = useContext(DataContext);
 
   const viewConfig = (viewConfigs || []).find(vc => vc.id === selectedView?.id);

@@ -7,7 +7,7 @@ export default function HistorySelector() {
     viewConfigs,
     selectedView,
     loadHistoricalResult,
-    selectedReport,
+    selectedReport
   } = useContext(DataContext);
 
   return useMemo(() => {

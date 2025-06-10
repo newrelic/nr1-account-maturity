@@ -7,8 +7,7 @@ import {
   TableRow,
   TableRowCell,
   FavoriteTableRowCell,
-  Toast,
-  Icon,
+  Toast
 } from 'nr1';
 
 import DataContext from '../../../src/context/data';
@@ -27,7 +26,7 @@ export default function ViewList() {
     userSettings,
     toggleFavoriteView,
     email,
-    loadedDefaultView,
+    loadedDefaultView
   } = useContext(DataContext);
   const [column, setColumn] = useState(0);
   const [sortingType, setSortingType] = useState(
@@ -38,7 +37,7 @@ export default function ViewList() {
   useEffect(() => {
     nerdlet.setConfig({
       actionControls: true,
-      actionControlButtons: [...defaultActions(setDataState)],
+      actionControlButtons: [...defaultActions(setDataState)]
     });
 
     if (loadedDefaultView === false && userSettings.defaultViewId) {
@@ -58,7 +57,7 @@ export default function ViewList() {
         runView(
           {
             name: viewConfig.document.name,
-            account: selectedAccountId,
+            account: selectedAccountId
           },
           { ...viewConfig },
           false,
@@ -87,14 +86,14 @@ export default function ViewList() {
         }
 
         return name;
-      },
+      }
     },
     {
       key: 'Description',
       value: ({ item }) => item.document?.description,
       onClick: ({ item }) => {
         const previousResult = item?.history?.[0];
-        let onClickHandler = undefined;
+        let onClickHandler;
 
         if (previousResult) {
           onClickHandler = () => loadHistoricalResult(item, previousResult);
@@ -103,7 +102,7 @@ export default function ViewList() {
             runView(
               {
                 name: item.document.name,
-                account: selectedAccountId,
+                account: selectedAccountId
               },
               { ...item },
               false,
@@ -112,7 +111,7 @@ export default function ViewList() {
         }
 
         return onClickHandler;
-      },
+      }
     },
     {
       key: 'Last run',
@@ -123,12 +122,12 @@ export default function ViewList() {
         } else {
           return '';
         }
-      },
+      }
     },
     {
       key: 'Last score',
       value: ({ item }) =>
-        Math.round(item?.history?.[0]?.document?.totalPercentage || 0),
+        Math.round(item?.history?.[0]?.document?.totalPercentage || 0)
     },
     {
       key: 'Last % score change',
@@ -143,13 +142,13 @@ export default function ViewList() {
         } else {
           return '';
         }
-      },
+      }
     },
     {
       key: 'Created by',
       value: ({ item }) =>
-        item?.id === `allData+${email}` ? email : item.document?.owner,
-    },
+        item?.id === `allData+${email}` ? email : item.document?.owner
+    }
   ];
 
   const actions = [
@@ -167,14 +166,14 @@ export default function ViewList() {
           runView(
             {
               name: item.document.name,
-              account: selectedAccountId,
+              account: selectedAccountId
             },
             { ...item },
             false,
             true
           );
         }
-      },
+      }
     },
     {
       label: 'Edit',
@@ -185,16 +184,16 @@ export default function ViewList() {
         if (documentId === `allData+${email}`) {
           Toast.showToast({
             title: 'All Data is a reserved view and cannot be edited',
-            type: Toast.TYPE.NORMAL,
+            type: Toast.TYPE.NORMAL
           });
         } else {
           setDataState({
             selectedReport: item,
             view: { page: 'EditView' },
-            prevView: view,
+            prevView: view
           });
         }
-      },
+      }
     },
     {
       label: 'Delete',
@@ -206,13 +205,13 @@ export default function ViewList() {
         if (documentId === `allData+${email}`) {
           Toast.showToast({
             title: 'All Data is a reserved view and cannot be deleted',
-            type: Toast.TYPE.NORMAL,
+            type: Toast.TYPE.NORMAL
           });
         } else {
           setDataState({ deleteViewModalOpen: item });
         }
-      },
-    },
+      }
+    }
   ];
 
   const filteredConfigs = viewConfigs
@@ -250,7 +249,7 @@ export default function ViewList() {
               <TableRow actions={actions}>
                 <FavoriteTableRowCell
                   style={{
-                    color: favorites.includes(item.id) ? '#F0B400' : undefined,
+                    color: favorites.includes(item.id) ? '#F0B400' : undefined
                   }}
                   onChange={() => toggleFavoriteView(item.id)}
                   checked={favorites.includes(item.id)}
@@ -268,7 +267,7 @@ export default function ViewList() {
                         Date.now() - runAtTimestamp > SEVEN_DAYS_MS) ||
                       item.document.owner === 'etantry+demotron@newrelic.com';
 
-                    let onClickHandler = undefined;
+                    let onClickHandler;
 
                     if (previousResult && !isOlderThanSevenDays) {
                       onClickHandler = () =>
@@ -278,7 +277,7 @@ export default function ViewList() {
                         runView(
                           {
                             name: item.document.name,
-                            account: selectedAccountId,
+                            account: selectedAccountId
                           },
                           { ...item },
                           false,

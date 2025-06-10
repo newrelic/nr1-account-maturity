@@ -200,7 +200,7 @@ export default function DetailsTable(props) {
                                   ] || {};
                                 const maxValue = passed + failed;
 
-                                let label = undefined;
+                                let label;
                                 if (entityCheck) {
                                   const value = Math.round(
                                     (passed / maxValue) * 100

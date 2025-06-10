@@ -6,7 +6,7 @@ const Score = ({ name, status, score, onClick }) => {
     <div
       className="score"
       style={{
-        ...(onClick ? { cursor: 'pointer' } : {}),
+        ...(onClick ? { cursor: 'pointer' } : {})
       }}
       onClick={onClick}
     >

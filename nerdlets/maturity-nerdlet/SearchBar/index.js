@@ -18,7 +18,7 @@ export default function SearchBar(props) {
           paddingTop: '8px',
           paddingLeft: '8px',
           marginBottom: '8px',
-          backgroundColor: 'white',
+          backgroundColor: 'white'
         }}
       >
         <TextField
@@ -27,7 +27,7 @@ export default function SearchBar(props) {
           onChange={e => setDataState({ search: e.target.value })}
           style={{
             width: `${textFieldWidth}px`,
-            float: 'left',
+            float: 'left'
           }}
           placeholder="Search for view"
         />
@@ -36,7 +36,7 @@ export default function SearchBar(props) {
           style={{
             width: `${newViewWidth}px`,
             marginRight: '10px',
-            float: 'right',
+            float: 'right'
           }}
           type={Button.TYPE.PRIMARY}
           sizeType={Button.SIZE_TYPE.SMALL}
@@ -46,10 +46,10 @@ export default function SearchBar(props) {
               prevView: view,
               view: {
                 page: 'CreateView',
-                title: 'Create View Configuration',
+                title: 'Create View Configuration'
               },
               selectedReport: {},
-              selectedView: {},
+              selectedView: {}
             });
           }}
         >

@@ -9,8 +9,8 @@ export default function EntityTable(props) {
     <div style={{ paddingTop: '15px' }}>
       <ExtendedDetailsTable
         limit={5}
-        noMeta={true}
-        hideDownload={true}
+        noMeta
+        hideDownload
         categoryName={categoryName}
         accountId={accountId}
         accountName={accountName}
@@ -28,8 +28,8 @@ export default function EntityTable(props) {
                     categoryName,
                     accountId,
                     accountName,
-                    allEntities,
-                  },
+                    allEntities
+                  }
                 })
               }
             >

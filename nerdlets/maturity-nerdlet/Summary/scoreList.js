@@ -10,6 +10,7 @@ export default function ScoreList({ idxBase, scores = [] }) {
           <Score
             id={i + idxBase}
             {...score}
+            // eslint-disable-next-line
             onClick={() => console.info(`ScoreListclicked ${i + idxBase}`)}
           />
         </Tooltip>

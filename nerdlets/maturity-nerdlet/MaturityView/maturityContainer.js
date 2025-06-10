@@ -12,13 +12,13 @@ export default function MaturityContainer(props) {
     selected,
     selectedAccountId,
     entitySearchQuery,
-    isUserDefault,
+    isUserDefault
   } = props;
   const [view, setView] = useState('summary');
   const [groupBy, setGroupBy] = useState('account');
 
   const selectedHistory = history.find(h => h.document.runAt === selected) || [
-    selected,
+    selected
   ];
 
   const { accountSummaries } = selectedHistory?.document || {};
@@ -36,7 +36,7 @@ export default function MaturityContainer(props) {
           const payload = {
             name: key,
             status: percentageToStatus(value),
-            score: `${Math.round(value)}%`,
+            score: `${Math.round(value)}%`
           };
 
           elementScores.push(payload);
@@ -49,7 +49,7 @@ export default function MaturityContainer(props) {
         rollUpScore: Math.round((a.totalScore / a.maxScore) * 100),
         rollUpStatus: STATUSES.UNKNOWN,
         elementListLabel: 'Capabilities',
-        elementScores,
+        elementScores
       };
 
       payload.rollUpStatus = percentageToStatus(payload.rollUpScore);
@@ -76,7 +76,7 @@ export default function MaturityContainer(props) {
               name: account.name,
               id: account.id,
               status: percentageToStatus(value),
-              score: `${Math.round(value)}%`,
+              score: `${Math.round(value)}%`
             };
 
             elementScores.push(payload);
@@ -91,7 +91,7 @@ export default function MaturityContainer(props) {
           ),
           rollUpStatus: STATUSES.UNKNOWN,
           elementListLabel: 'Capabilities',
-          elementScores,
+          elementScores
         };
 
         payload.rollUpStatus = percentageToStatus(payload.rollUpScore);
@@ -105,7 +105,7 @@ export default function MaturityContainer(props) {
       a => {
         let accountData = {
           id: a.id,
-          name: a.name,
+          name: a.name
         };
 
         Object.keys(rules).forEach(product => {

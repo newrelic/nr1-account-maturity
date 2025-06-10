@@ -7,7 +7,7 @@ import {
   CardBody,
   CardHeader,
   Select,
-  SelectItem,
+  SelectItem
 } from 'nr1';
 import DataContext from '../../../src/context/data';
 import rules, { productColors } from '../../../src/rules';
@@ -23,29 +23,29 @@ export default function TrendView(props) {
     viewGroupBy,
     selectedReport,
     selectedView,
-    getAccounts,
+    getAccounts
   } = useContext(DataContext);
 
   useEffect(async () => {
-    let x = await getAccounts();
+    const x = await getAccounts();
     setAccountInfo(x);
   });
 
   const viewConfig = (viewConfigs || []).find(vc => vc.id === documentId);
   let { history } = viewConfig || [];
 
-  if (selectedTime == 'month') {
+  if (selectedTime === 'month') {
     const timeAgoMs = new Date().getTime() - 2.628e9;
     history = history.filter(h => h.document.runAt >= timeAgoMs);
-  } else if (selectedTime == 'week') {
+  } else if (selectedTime === 'week') {
     const timeAgoMs = new Date().getTime() - 6.048e8;
     history = history.filter(h => h.document.runAt >= timeAgoMs);
-  } else if (selectedTime == 'day') {
+  } else if (selectedTime === 'day') {
     const timeAgoMs = new Date().getTime() - 8.64e7;
     history = history.filter(h => h.document.runAt >= timeAgoMs);
   }
 
-  let selectedHistory = history.find(
+  const selectedHistory = history.find(
     h => h.historyId === selectedView.historyId
   );
 
@@ -90,10 +90,10 @@ export default function TrendView(props) {
               viz: 'main',
               units_data: {
                 x: 'TIMESTAMP',
-                y: 'COUNT',
-              },
+                y: 'COUNT'
+              }
             },
-            data: [],
+            data: []
           };
 
           history.forEach(h => {
@@ -163,10 +163,10 @@ export default function TrendView(props) {
             viz: 'main',
             units_data: {
               x: 'TIMESTAMP',
-              y: 'COUNT',
-            },
+              y: 'COUNT'
+            }
           },
-          data: [],
+          data: []
         };
 
         history.forEach(h => {
@@ -244,7 +244,7 @@ export default function TrendView(props) {
                 style={{
                   padding: '5px',
                   boxShadow: '1px 1px 2px rgb(243,244,255)',
-                  margin: '6px',
+                  margin: '6px'
                 }}
               >
                 <div className="golden-metrics">

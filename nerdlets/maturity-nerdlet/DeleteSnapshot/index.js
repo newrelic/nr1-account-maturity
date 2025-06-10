@@ -9,7 +9,7 @@ export default function DeleteSnapshot() {
     deleteSnapshotModalOpen,
     deletingSnapshot,
     deleteSnapshot,
-    setDataState,
+    setDataState
   } = useContext(DataContext);
 
   return useMemo(() => {

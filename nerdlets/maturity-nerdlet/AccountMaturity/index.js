@@ -6,7 +6,7 @@ import {
   HeadingText,
   BlockText,
   Icon,
-  navigation,
+  navigation
 } from 'nr1';
 import DataContext from '../../../src/context/data';
 import CreateView from '../CreateView';
@@ -28,26 +28,22 @@ export const defaultActions = setDataState => {
       type: 'secondary',
       hint: 'Launch the old version',
       iconType: Icon.TYPE.INTERFACE__OPERATIONS__EXTERNAL_LINK,
-      onClick: () => navigation.openNerdlet({ id: 'old-maturity-nerdlet' }),
+      onClick: () => navigation.openNerdlet({ id: 'old-maturity-nerdlet' })
     },
     {
       label: 'Help',
       type: 'secondary',
       hint: '',
       iconType: Icon.TYPE.INTERFACE__INFO__HELP,
-      onClick: () => setDataState({ helpModalOpen: true }),
-    },
+      onClick: () => setDataState({ helpModalOpen: true })
+    }
   ];
 };
 
 export default function AccountMaturity(props) {
-  const {
-    fetchingData,
-    errorMsg,
-    view,
-    selectedAccountId,
-    helpModalOpen,
-  } = useContext(DataContext);
+  const { fetchingData, errorMsg, view, selectedAccountId } = useContext(
+    DataContext
+  );
 
   const renderView = page => {
     // eslint-disable-next-line prettier/prettier
@@ -137,7 +133,7 @@ export default function AccountMaturity(props) {
                     paddingTop: '5px',
                     paddingLeft: '5px',
                     marginBottom: '5px',
-                    backgroundColor: 'white',
+                    backgroundColor: 'white'
                   }}
                 >
                   <div style={{ float: 'left' }}>
@@ -154,7 +150,7 @@ export default function AccountMaturity(props) {
                 style={{
                   paddingBottom: '15px',
                   paddingLeft: '20px',
-                  backgroundColor: 'white',
+                  backgroundColor: 'white'
                 }}
               >
                 <div>{renderView(view.page)}</div>

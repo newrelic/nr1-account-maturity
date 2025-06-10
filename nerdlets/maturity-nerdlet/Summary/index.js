@@ -13,7 +13,7 @@ export default function Summary(props) {
       return 'No results';
     }
 
-    let sortedCollection = sortByRollUpStatusAndScore(scoredCollection);
+    const sortedCollection = sortByRollUpStatusAndScore(scoredCollection);
 
     return (
       <>
@@ -31,7 +31,7 @@ export default function Summary(props) {
             return (
               <React.Fragment key={i}>
                 <div
-                  className={`score-card`}
+                  className="score-card"
                   style={{ cursor: 'pointer' }}
                   onClick={
                     viewGroupBy === 'account'
@@ -83,7 +83,7 @@ function sortByRollUpStatusAndScore(arr) {
   const statusPriority = {
     critical: 1,
     warning: 2,
-    success: 3,
+    success: 3
   };
 
   return arr.sort((a, b) => {

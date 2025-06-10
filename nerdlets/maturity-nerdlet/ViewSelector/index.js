@@ -1,12 +1,5 @@
 import React, { useContext, useMemo, useState } from 'react';
-import {
-  Button,
-  Dropdown,
-  DropdownItem,
-  DropdownSection,
-  Icon,
-  Toast,
-} from 'nr1';
+import { Dropdown, DropdownItem, DropdownSection, Icon, Toast } from 'nr1';
 
 import DataContext from '../../../src/context/data';
 
@@ -17,14 +10,14 @@ export default function ViewSelector() {
     setDataState,
     unsavedRun,
     viewConfigs,
-    viewHistory,
+    // viewHistory,
     loadHistoricalResult,
     selectedAccountId,
     selectedReport,
     setDefaultView,
     userSettings,
     runView,
-    toggleFavoriteView,
+    toggleFavoriteView
   } = useContext(DataContext);
   const [viewSearch, setViewSearch] = useState('');
   const favorites = userSettings?.favorites || [];
@@ -34,7 +27,7 @@ export default function ViewSelector() {
       .filter(v => v && Object.keys(v).length > 0)
       .map(v => ({
         id: v.id,
-        name: v.document?.name,
+        name: v.document?.name
       }));
 
     const items = [...configs];
@@ -45,14 +38,15 @@ export default function ViewSelector() {
 
     const currentViewConfig = viewConfigs.find(vc => vc.id === selectedView.id);
 
+    // eslint-disable-next-line
     console.log('view sel', selectedView, currentViewConfig);
 
     return (
       <div style={{ paddingRight: '5px' }}>
         <Dropdown
           sectioned
-          label={'Views'}
-          labelInline={true}
+          label="Views"
+          labelInline
           title={selectedView?.name || 'Select'}
           search={viewSearch}
           onSearch={e => setViewSearch(e.target.value)}
@@ -81,14 +75,16 @@ export default function ViewSelector() {
                     //  && item.id !== 'allData'
                   ) {
                     if (latestHistory) {
+                      // eslint-disable-next-line
                       console.log('load previous', viewConfig);
                       loadHistoricalResult(viewConfig, latestHistory);
                     } else if (viewConfig) {
+                      // eslint-disable-next-line
                       console.log('fresh run', viewConfig);
                       runView(
                         {
                           name: viewConfig.document.name,
-                          account: selectedAccountId,
+                          account: selectedAccountId
                         },
                         { ...viewConfig },
                         false,
@@ -102,14 +98,13 @@ export default function ViewSelector() {
                   <DropdownItem
                     key={item.id}
                     style={{
-                      fontWeight:
-                        selectedView?.id === item.id ? 'bold' : 'none',
+                      fontWeight: selectedView?.id === item.id ? 'bold' : 'none'
                     }}
                   >
                     <div
                       style={{
                         display: 'flex',
-                        justifyContent: 'space-between',
+                        justifyContent: 'space-between'
                       }}
                     >
                       <div
@@ -150,7 +145,7 @@ export default function ViewSelector() {
                         style={{
                           textAlign: 'right',
                           fontWeight: 'lighter',
-                          cursor: 'text',
+                          cursor: 'text'
                         }}
                       >
                         &nbsp;&nbsp;&nbsp;
@@ -171,7 +166,7 @@ export default function ViewSelector() {
               onClick={() =>
                 setDataState({
                   view: { page: 'ViewList' },
-                  loadedDefaultView: true,
+                  loadedDefaultView: true
                 })
               }
             >
@@ -197,7 +192,7 @@ export default function ViewSelector() {
         <Dropdown
           iconType={Dropdown.ICON_TYPE.INTERFACE__OPERATIONS__MORE}
           label={<>&nbsp;</>}
-          labelInline={true}
+          labelInline
         >
           <DropdownItem
             onClick={() => {
@@ -205,22 +200,20 @@ export default function ViewSelector() {
                 setDataState({
                   view: {
                     page: 'CreateView',
-                    title: 'Create New View',
-                  },
+                    title: 'Create New View'
+                  }
+                });
+              } else if (selectedView.name === 'All Data') {
+                Toast.showToast({
+                  title: 'All Data is a reserved view and cannot be edited',
+                  type: Toast.TYPE.NORMAL
                 });
               } else {
-                if (selectedView.name === 'All Data') {
-                  Toast.showToast({
-                    title: 'All Data is a reserved view and cannot be edited',
-                    type: Toast.TYPE.NORMAL,
-                  });
-                } else {
-                  setDataState({
-                    selectedReport,
-                    view: { page: 'EditView' },
-                    prevView: view,
-                  });
-                }
+                setDataState({
+                  selectedReport,
+                  view: { page: 'EditView' },
+                  prevView: view
+                });
               }
             }}
           >
@@ -253,8 +246,8 @@ export default function ViewSelector() {
                   deleteSnapshotModalOpen: {
                     historyId: selectedView?.historyId,
                     id: selectedView?.id,
-                    document: { name: selectedView?.name },
-                  },
+                    document: { name: selectedView?.name }
+                  }
                 })
               }
             >
@@ -269,14 +262,14 @@ export default function ViewSelector() {
                 if (selectedView.name === 'All Data') {
                   Toast.showToast({
                     title: 'All Data is a reserved view and cannot be deleted',
-                    type: Toast.TYPE.NORMAL,
+                    type: Toast.TYPE.NORMAL
                   });
                 } else {
                   setDataState({
                     deleteViewModalOpen: {
                       id: selectedView?.id,
-                      document: { name: selectedView?.name },
-                    },
+                      document: { name: selectedView?.name }
+                    }
                   });
                 }
               }}
@@ -293,6 +286,6 @@ export default function ViewSelector() {
     selectedView,
     unsavedRun,
     viewConfigs,
-    toggleFavoriteView,
+    toggleFavoriteView
   ]);
 }

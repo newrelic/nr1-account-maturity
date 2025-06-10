@@ -1,7 +1,5 @@
-import React, { useContext, useMemo, useState, useEffect } from 'react';
+import React, { useContext, useMemo, useState } from 'react';
 import {
-  nerdlet,
-  Icon,
   HeadingText,
   Table,
   TableHeader,
@@ -11,7 +9,7 @@ import {
   Button,
   Modal,
   navigation,
-  Tooltip,
+  Tooltip
 } from 'nr1';
 import ScoreBar from '../ScoreBar';
 import rules from '../../../src/rules';
@@ -49,13 +47,13 @@ export default function ListView(props) {
       {
         name: 'Account',
         // do this to make handling sub values and csv export a touch easier
-        value: a => `${a.name} :: ${a.id}`,
+        value: a => `${a.name} :: ${a.id}`
       },
       {
         name: 'Account Score',
-        value: a => a.scorePercentage,
+        value: a => a.scorePercentage
       },
-      ...productHeaders,
+      ...productHeaders
     ];
 
     const rowData = props.accountSummaries.map(a => {
@@ -111,7 +109,7 @@ export default function ListView(props) {
         <Table items={rowData} multivalue>
           <TableHeader>
             <TableHeaderCell
-              value={({ item }) => item['Account']}
+              value={({ item }) => item.Account}
               sortable
               sortingType={
                 column === 0 ? sortingType : TableHeaderCell.SORTING_TYPE.NONE
@@ -161,7 +159,7 @@ export default function ListView(props) {
                     borderLeft: `5px solid ${
                       scoreToColor(item['Account Score'])?.color
                       // eslint-disable-next-line
-                    }`,
+                    }`
                   }}
                   onClick={() =>
                     navigation.openStackedNerdlet({
@@ -172,8 +170,8 @@ export default function ListView(props) {
                         accountPercentage: item['Account Score'],
                         accountSummary: (props.accountSummaries || []).find(
                           a => a.id === parseInt(accountSplit[1])
-                        ),
-                      },
+                        )
+                      }
                     })
                   }
                 >
@@ -183,7 +181,7 @@ export default function ListView(props) {
                   style={{
                     fontWeight: 'bold',
                     fontSize: '15px',
-                    color: scoreToColor(item['Account Score'])?.color,
+                    color: scoreToColor(item['Account Score'])?.color
                   }}
                 >
                   {/* {item['Account Score']} */}
@@ -220,7 +218,7 @@ export default function ListView(props) {
                     style={{
                       fontWeight: 'bold',
                       fontSize: '15px',
-                      color: scoreToColor(item[h.name])?.color,
+                      color: scoreToColor(item[h.name])?.color
                     }}
                   >
                     {item[h.name] !== undefined && item[h.name] !== null ? (
@@ -237,7 +235,7 @@ export default function ListView(props) {
                           setModal({
                             name: h.name,
                             ...item,
-                            productSummary,
+                            productSummary
                           });
                         }}
                       >

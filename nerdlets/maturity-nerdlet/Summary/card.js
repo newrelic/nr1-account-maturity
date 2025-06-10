@@ -9,7 +9,7 @@ export default function SummaryCard({
   rollUpStatus,
   rollUpScore,
   maxScore = 100,
-  elementListLabel,
+  elementListLabel
 }) {
   return useMemo(() => {
     const elementSliceIndex =

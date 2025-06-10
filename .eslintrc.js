@@ -1,42 +1,26 @@
 module.exports = {
-  extends: [
-    'eslint:recommended',
-    'plugin:import/recommended',
-    'plugin:promise/recommended',
-    'plugin:eslint-comments/recommended',
-    'plugin:react/recommended',
-    'plugin:prettier/recommended',
-  ],
-  overrides: [
-    {
-      files: ['.eslintrc.js'],
-      env: {
-        node: true,
-        browser: false,
-      },
-    },
-  ],
   env: {
     browser: true,
     es6: true,
-    jest: true,
   },
+  extends: [
+    'plugin:@newrelic/eslint-plugin-newrelic/react',
+    'plugin:@newrelic/eslint-plugin-newrelic/jest',
+    'plugin:@newrelic/eslint-plugin-newrelic/prettier',
+  ],
   globals: {
-    __nr: true,
+    Atomics: 'readonly',
+    SharedArrayBuffer: 'readonly',
   },
+  parser: 'babel-eslint',
   parserOptions: {
     ecmaFeatures: {
       jsx: true,
     },
-    ecmaVersion: 2020,
+    ecmaVersion: 2018,
     sourceType: 'module',
   },
-  plugins: ['import', 'promise', 'eslint-comments', 'react', 'prettier'],
-  settings: {
-    react: {
-      version: 'detect',
-    },
-  },
+  plugins: ['react', 'prettier'],
   rules: {
     'import/no-unresolved': 'off',
     'react/prop-types': 0,

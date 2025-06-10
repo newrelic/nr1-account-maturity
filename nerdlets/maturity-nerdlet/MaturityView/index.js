@@ -9,7 +9,6 @@ import Navigator from '../Navigator';
 import Summary from '../Summary';
 import SaveView from '../SaveView';
 import TrendView from '../TrendView';
-import Welcome from '../Welcome';
 import { defaultActions } from '../AccountMaturity';
 
 export default function MaturityView(props) {
@@ -21,7 +20,7 @@ export default function MaturityView(props) {
     view,
     selectedView,
     selectedReport,
-    setDataState,
+    setDataState
   } = useContext(DataContext);
 
   useEffect(() => {
@@ -37,17 +36,18 @@ export default function MaturityView(props) {
               prevView: view,
               view: {
                 page: 'CreateView',
-                title: 'Create New View',
+                title: 'Create New View'
               },
               selectedReport: {},
-              selectedView: {},
-            }),
+              selectedView: {}
+            })
         },
-        ...defaultActions(setDataState),
-      ],
+        ...defaultActions(setDataState)
+      ]
     });
   }, []);
 
+  // eslint-disable-next-line
   console.log(viewSegment, selectedView, tempAllData);
 
   let selectedData = null;
@@ -71,7 +71,7 @@ export default function MaturityView(props) {
           const payload = {
             name: key,
             status: percentageToStatus(value),
-            score: `${Math.round(value)}%`,
+            score: `${Math.round(value)}%`
           };
 
           elementScores.push(payload);
@@ -84,7 +84,7 @@ export default function MaturityView(props) {
         rollUpScore: Math.round((a.totalScore / a.maxScore) * 100),
         rollUpStatus: STATUSES.UNKNOWN,
         elementListLabel: 'Capabilities',
-        elementScores,
+        elementScores
       };
 
       payload.rollUpStatus = percentageToStatus(payload.rollUpScore);
@@ -106,8 +106,6 @@ export default function MaturityView(props) {
           const value = account[product];
           totalScore += value;
 
-          console.log(account);
-
           if (value !== undefined && value !== null) {
             const payload = {
               name: account.name,
@@ -116,7 +114,7 @@ export default function MaturityView(props) {
               score: `${Math.round(value)}%`,
               entities: account[`${product}.entities`],
               entitiesPassing: account[`${product}.entitiesPassing`],
-              scoring: account[`${product}.scoring`],
+              scoring: account[`${product}.scoring`]
             };
 
             elementScores.push(payload);
@@ -131,7 +129,7 @@ export default function MaturityView(props) {
           ),
           rollUpStatus: STATUSES.UNKNOWN,
           elementListLabel: 'Accounts',
-          elementScores,
+          elementScores
         };
 
         payload.rollUpStatus = percentageToStatus(payload.rollUpScore);
@@ -148,7 +146,7 @@ export default function MaturityView(props) {
             style={{
               textAlign: 'center',
               paddingBottom: '10px',
-              paddingTop: '10px',
+              paddingTop: '10px'
             }}
           >
             Generating View
@@ -205,6 +203,6 @@ export default function MaturityView(props) {
     selectedData,
     scoredCollection,
     viewSegment,
-    selectedReport,
+    selectedReport
   ]);
 }

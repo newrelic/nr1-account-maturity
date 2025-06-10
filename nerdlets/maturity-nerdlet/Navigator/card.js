@@ -5,7 +5,7 @@ import {
   PopoverBody,
   Card,
   CardBody,
-  HeadingText,
+  HeadingText
 } from 'nr1';
 import { StatusIcon } from '@newrelic/nr-labs-components';
 
@@ -27,8 +27,9 @@ export default function NavigatorCard({ elementScores = [] }) {
                   width: '30px',
                   height: '36px',
                   margin: 1,
-                  marginBottom: -7,
+                  marginBottom: -7
                 }}
+                // eslint-disable-next-line
                 onClick={() => console.info(`Navigator clicked ${i}`)}
               />
             </PopoverTrigger>
@@ -68,7 +69,7 @@ function sortByStatusAndScore(arr) {
   const statusPriority = {
     critical: 1,
     warning: 2,
-    success: 3,
+    success: 3
   };
 
   return arr.sort((a, b) => {

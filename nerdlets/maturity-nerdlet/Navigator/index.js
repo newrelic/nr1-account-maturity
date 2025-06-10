@@ -29,7 +29,7 @@ export default function Navigator(props) {
             return (
               <React.Fragment key={i}>
                 <div
-                  className={`score-card`}
+                  className="score-card"
                   style={{ cursor: 'pointer' }}
                   onClick={
                     viewGroupBy === 'account'

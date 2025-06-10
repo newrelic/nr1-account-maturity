@@ -72,7 +72,7 @@ export default function ExtendedDetailsTable(props) {
   tempHeaders.forEach((header) => {
     headers.push({
       key: header,
-      value: ({ item }) => (item[header] === false ? false : true),
+      value: ({ item }) => (item[header] !== false),
     });
   });
 

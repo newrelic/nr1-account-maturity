@@ -33,8 +33,6 @@ export default function DetailsTable(props) {
     setDataState(state);
   }, [elementScores, sortBy]);
 
-  console.log(dataState?.categories);
-
   return (
     <div
       style={{
@@ -183,7 +181,7 @@ export default function DetailsTable(props) {
                                   cat.scoring?.[score.name] || {};
                                 const maxValue = passed + failed;
 
-                                let label = undefined;
+                                let label;
                                 if (entityCheck) {
                                   const value = Math.round(
                                     (passed / maxValue) * 100
@@ -229,7 +227,7 @@ export default function DetailsTable(props) {
                   <div>
                     {Object.keys(cat.entities).length > 0 && (
                       <EntityTable
-                        isCapability={true}
+                        isCapability
                         categoryName={title}
                         accountId={cat.id}
                         accountName={cat.name}

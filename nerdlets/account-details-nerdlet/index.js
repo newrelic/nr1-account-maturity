@@ -4,7 +4,7 @@ import {
   NerdletStateContext,
   AutoSizer,
   Select,
-  SelectItem,
+  SelectItem
 } from 'nr1';
 import { ProvideData } from '../../src/context/data';
 import { scoreToColor } from '../../src/utils';
@@ -18,7 +18,7 @@ export default function AccountDetailsNerdlet() {
     accountName,
     accountId,
     accountSummary,
-    accountPercentage,
+    accountPercentage
   } = nerdletContext;
   const statusColor = scoreToColor(accountPercentage)?.color;
   const percentageDiff = 100 - accountPercentage;
@@ -26,7 +26,7 @@ export default function AccountDetailsNerdlet() {
     fetchingHistory: true,
     historyDocument: null,
     selectedDocument: null,
-    sortBy: 'Lowest score',
+    sortBy: 'Lowest score'
   });
 
   const updateSortBy = sortBy => {
@@ -47,23 +47,23 @@ export default function AccountDetailsNerdlet() {
                 width: width - 20,
                 marginTop: 10,
                 marginLeft: 10,
-                marginRight: 10,
+                marginRight: 10
               }}
             >
               <div
                 style={{
                   display: 'inline-block',
                   borderTop: `10px solid ${statusColor}`,
-                  width: width * (accountPercentage / 100) - 10,
+                  width: width * (accountPercentage / 100) - 10
                 }}
-              ></div>
+              />
               <div
                 style={{
                   display: 'inline-block',
                   borderTop: '10px solid #cccccc',
-                  width: width * (percentageDiff / 100) - 10,
+                  width: width * (percentageDiff / 100) - 10
                 }}
-              ></div>
+              />
               <table style={{ width: '100%' }}>
                 <tr>
                   <td>
@@ -76,7 +76,7 @@ export default function AccountDetailsNerdlet() {
                         style={{
                           fontWeight: 'bold',
                           fontSize: '16px',
-                          color: statusColor,
+                          color: statusColor
                         }}
                       >
                         {Math.round(accountPercentage)}%

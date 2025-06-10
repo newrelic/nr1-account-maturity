@@ -8,7 +8,7 @@ export default function Loading() {
     completedPercentage,
     accountTotal,
     completedAccountTotal,
-    completedPercentageTotal,
+    completedPercentageTotal
   } = useContext(DataContext);
 
   const diffPercentage = (100 / accountTotal) * (completedPercentage / 100);
@@ -32,6 +32,6 @@ export default function Loading() {
     completedPercentage,
     completedPercentageTotal,
     accountTotal,
-    completedAccountTotal,
+    completedAccountTotal
   ]);
 }

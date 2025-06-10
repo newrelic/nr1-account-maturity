@@ -12,13 +12,10 @@ import {
   NerdGraphQuery,
   HeadingText,
   BlockText,
-  Select,
-  SelectItem,
   Card,
   CardBody,
   CardHeader,
-  Modal,
-  Icon,
+  Modal
 } from 'nr1';
 import DataContext from '../../../src/context/data';
 import { useSetState } from '@mantine/hooks';
@@ -39,9 +36,8 @@ export default function CreateView() {
     setDataState,
     view,
     prevView,
-    showSkipThisStep,
     clearWelcome,
-    userSettings,
+    userSettings
   } = useContext(DataContext);
   const [entityCount, setEntityCount] = useState(0);
   const [runParams, setRunParams] = useState(null);
@@ -49,7 +45,7 @@ export default function CreateView() {
   useEffect(() => {
     nerdlet.setConfig({
       actionControls: true,
-      actionControlButtons: [...defaultActions(setDataState)],
+      actionControlButtons: [...defaultActions(setDataState)]
     });
   }, []);
 
@@ -90,7 +86,7 @@ export default function CreateView() {
     accountsFilterEnabled: selectedReport?.document?.accountsFilterEnabled,
     products,
     setAsDefault: false,
-    hideNotReporting,
+    hideNotReporting
   });
 
   useEffect(() => {
@@ -120,13 +116,13 @@ export default function CreateView() {
             count
           }
         }
-      }`,
+      }`
       }).then(res => {
         if (res.error) {
           Toast.showToast({
             title: 'Bad entity search query',
             description: res?.error?.message,
-            type: Toast.TYPE.CRITICAL,
+            type: Toast.TYPE.CRITICAL
           });
           resolve(false);
         } else {
@@ -135,7 +131,7 @@ export default function CreateView() {
             Toast.showToast({
               title: 'Bad entity search query',
               description: 'No entities returned',
-              type: Toast.TYPE.CRITICAL,
+              type: Toast.TYPE.CRITICAL
             });
             resolve(false);
           } else {
@@ -165,7 +161,7 @@ export default function CreateView() {
 
     let summarizedArray = Object.values(summary);
 
-    let selectedProducts = allProducts ? Object.keys(rules) : products;
+    const selectedProducts = allProducts ? Object.keys(rules) : products;
 
     summarizedArray = summarizedArray.filter(type => {
       return selectedProducts.some(product => {
@@ -205,7 +201,7 @@ export default function CreateView() {
               }
             }
           }
-        }`,
+        }`
       });
     });
 
@@ -255,12 +251,6 @@ export default function CreateView() {
       state?.accounts || []
     );
 
-    console.log(
-      hnrChanged,
-      selectedReport?.document?.hideNotReporting,
-      state?.hideNotReporting
-    );
-
     if (
       nameChanged ||
       descChanged ||
@@ -307,7 +297,7 @@ export default function CreateView() {
           <BlockText
             spacingType={[
               BlockText.SPACING_TYPE.EXTRA_LARGE,
-              BlockText.SPACING_TYPE.OMIT,
+              BlockText.SPACING_TYPE.OMIT
             ]}
           >
             This query will target {entityCount} of entities; due to this high
@@ -406,13 +396,13 @@ export default function CreateView() {
               Toast.showToast({
                 description: `'All Data' is a reserved name`,
                 title: 'Cannot use this name',
-                type: Toast.TYPE.CRITICAL,
+                type: Toast.TYPE.CRITICAL
               });
             }
 
             setState({
               name: e.target.value,
-              setAsDefault: !e.target.value ? false : state.setAsDefault,
+              setAsDefault: !e.target.value ? false : state.setAsDefault
             });
           }}
           placeholder="e.g. DevOps Team"
@@ -429,17 +419,17 @@ export default function CreateView() {
         {state.name && (
           <div style={{ display: 'inline-block', verticalAlign: 'middle' }}>
             <Checkbox
-              label={'Set as default view'}
+              label="Set as default view"
               checked={state.setAsDefault}
               disabled={!state.name}
               style={{
                 marginBottom: '-45px',
                 paddingBottom: '0px',
-                verticalAlign: 'middle',
+                verticalAlign: 'middle'
               }}
               onChange={() => {
                 setState({
-                  setAsDefault: !state.setAsDefault,
+                  setAsDefault: !state.setAsDefault
                 });
               }}
             />
@@ -452,14 +442,14 @@ export default function CreateView() {
             style={{
               fontSize: '16px',
               fontWeight: 'bold',
-              marginBottom: '5px',
+              marginBottom: '5px'
             }}
           >
             <div style={{ display: 'flex', justifyContent: 'space-between' }}>
               <div style={{ flex: -1 }}>Capabilities&nbsp;&nbsp;&nbsp;</div>
               <div style={{ flex: -1 }}>
                 <Checkbox
-                  label={'All Capabilities'}
+                  label="All Capabilities"
                   checked={state.products.length === Object.keys(rules).length}
                   style={{ paddingBottom: '0px', paddingTop: '2px' }}
                   onChange={() => {
@@ -468,13 +458,13 @@ export default function CreateView() {
                     } else {
                       setState({
                         products: Object.keys(rules),
-                        allProducts: true,
+                        allProducts: true
                       });
                     }
                   }}
                 />
               </div>
-              <div style={{ flex: 'auto' }}></div>
+              <div style={{ flex: 'auto' }} />
             </div>
           </CardHeader>
           <CardBody style={{ paddingLeft: '20px', marginTop: '5px' }}>
@@ -498,7 +488,7 @@ export default function CreateView() {
 
                           setState({
                             products,
-                            allProducts,
+                            allProducts
                           });
                         } else {
                           const products = [...state.products, key];
@@ -520,14 +510,14 @@ export default function CreateView() {
             style={{
               fontSize: '16px',
               fontWeight: 'bold',
-              marginBottom: '5px',
+              marginBottom: '5px'
             }}
           >
             <div style={{ display: 'flex', justifyContent: 'space-between' }}>
               <div style={{ flex: -1 }}>Accounts&nbsp;&nbsp;&nbsp;</div>
               <div style={{ flex: -1 }}>
                 <Checkbox
-                  label={'All Accounts'}
+                  label="All Accounts"
                   disabled={state?.accountsFilterEnabled}
                   checked={state.accounts.length === accounts.length}
                   style={{ paddingBottom: '0px', paddingTop: '2px' }}
@@ -546,7 +536,7 @@ export default function CreateView() {
                   style={{
                     fontSize: '12px',
                     fontWeight: 'normal',
-                    width: '99%',
+                    width: '99%'
                   }}
                   value={state.accountsFilter}
                   onChange={e => setState({ accountsFilter: e.target.value })}
@@ -557,7 +547,7 @@ export default function CreateView() {
                 <Switch
                   onChange={() =>
                     setState({
-                      accountsFilterEnabled: !state?.accountsFilterEnabled,
+                      accountsFilterEnabled: !state?.accountsFilterEnabled
                     })
                   }
                   checked={state?.accountsFilterEnabled}
@@ -593,9 +583,7 @@ export default function CreateView() {
                         onChange={() => {
                           if (state.accounts.includes(a.id)) {
                             setState({
-                              accounts: state.accounts.filter(
-                                id => id !== a.id
-                              ),
+                              accounts: state.accounts.filter(id => id !== a.id)
                             });
                           } else {
                             setState({ accounts: [...state.accounts, a.id] });
@@ -613,7 +601,7 @@ export default function CreateView() {
             style={{
               fontSize: '16px',
               fontWeight: 'bold',
-              marginBottom: '5px',
+              marginBottom: '5px'
             }}
           >
             Advanced Filtering
@@ -621,14 +609,14 @@ export default function CreateView() {
           <CardBody style={{ paddingLeft: '20px', marginTop: '5px' }}>
             <div style={{ display: 'inline-block', verticalAlign: 'middle' }}>
               <Checkbox
-                label={'Hide not reporting entities'}
+                label="Hide not reporting entities"
                 checked={state.hideNotReporting}
                 style={{
-                  verticalAlign: 'middle',
+                  verticalAlign: 'middle'
                 }}
                 onChange={() => {
                   setState({
-                    hideNotReporting: !state.hideNotReporting,
+                    hideNotReporting: !state.hideNotReporting
                   });
                 }}
               />
@@ -655,7 +643,8 @@ export default function CreateView() {
                 run = await validateEntitySearchQuery();
               }
 
-              let { totalEntities, summarizedData } = await checkEntityCount({
+              // eslint-disable-next-line
+              const { totalEntities, summarizedData } = await checkEntityCount({
                 accounts: state.accounts,
                 allAccounts: state.accounts.length === accounts.length,
                 entitySearchQuery: state.entitySearchQuery,
@@ -663,13 +652,13 @@ export default function CreateView() {
                 accountsFilterEnabled: state.accountsFilterEnabled,
                 allProducts: state.allProducts,
                 products: state.products,
-                hideNotReporting: state.hideNotReporting,
+                hideNotReporting: state.hideNotReporting
               });
 
               const runParams = {
                 selectedView: {
                   name: state.name,
-                  account: selectedAccountId,
+                  account: selectedAccountId
                 },
                 selectedReport: {
                   id: selectedReport?.id,
@@ -683,11 +672,11 @@ export default function CreateView() {
                     accountsFilterEnabled: state.accountsFilterEnabled,
                     allProducts: state.allProducts,
                     products: state.products,
-                    hideNotReporting: state.hideNotReporting,
-                  },
+                    hideNotReporting: state.hideNotReporting
+                  }
                 },
                 doSaveView: true,
-                setAsDefault: state.setAsDefault,
+                setAsDefault: state.setAsDefault
               };
 
               if (totalEntities > ENTITY_COUNT_WARNING) {
@@ -718,7 +707,8 @@ export default function CreateView() {
                 run = await validateEntitySearchQuery();
               }
 
-              let { totalEntities, summarizedData } = await checkEntityCount({
+              // eslint-disable-next-line
+              const { totalEntities, summarizedData } = await checkEntityCount({
                 accounts: state.accounts,
                 allAccounts: state.accounts.length === accounts.length,
                 entitySearchQuery: state.entitySearchQuery,
@@ -726,14 +716,14 @@ export default function CreateView() {
                 accountsFilterEnabled: state.accountsFilterEnabled,
                 allProducts: state.allProducts,
                 products: state.products,
-                hideNotReporting: state.hideNotReporting,
+                hideNotReporting: state.hideNotReporting
               });
 
               const runParams = {
                 selectedView: {
                   name: state.name,
                   account: selectedAccountId,
-                  unsavedRun: true,
+                  unsavedRun: true
                 },
                 selectedReport: {
                   document: {
@@ -747,12 +737,13 @@ export default function CreateView() {
                     accountsFilterEnabled: state.accountsFilterEnabled,
                     allProducts: state.allProducts,
                     products: state.products,
-                    hideNotReporting: state.hideNotReporting,
-                  },
+                    hideNotReporting: state.hideNotReporting
+                  }
                 },
-                setAsDefault: state.setAsDefault,
+                setAsDefault: state.setAsDefault
               };
 
+              // eslint-disable-next-line
               console.log(totalEntities, ENTITY_COUNT_WARNING);
 
               if (totalEntities > ENTITY_COUNT_WARNING) {
@@ -787,7 +778,7 @@ export default function CreateView() {
     runParams,
     products,
     allProducts,
-    hideNotReporting,
+    hideNotReporting
   ]);
 }
 

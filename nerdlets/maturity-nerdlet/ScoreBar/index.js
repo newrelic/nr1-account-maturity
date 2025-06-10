@@ -83,7 +83,7 @@ export default function ScoreBar(props) {
               style={{
                 width: '160px',
                 paddingLeft: '0px',
-                paddingRight: '5px',
+                paddingRight: '5px'
               }}
             >
               <ProgressBar
@@ -99,7 +99,7 @@ export default function ScoreBar(props) {
                 runView(
                   {
                     name: selectedReport.document.name,
-                    account: selectedAccountId,
+                    account: selectedAccountId
                   },
                   { ...selectedReport },
                   false,
@@ -130,7 +130,7 @@ export default function ScoreBar(props) {
                         data: data,
                         filename: `${new Date().getTime()}-${props.viewGroupBy ||
                           'account'}-summary-export.csv`,
-                        delimiter: ',',
+                        delimiter: ','
                       })
                     }
                     type={Button.TYPE.PRIMARY}

@@ -15,11 +15,11 @@ import {
   MobilePanel,
   WorkloadPanel,
   SLMPanel,
-  NPMPanel,
+  NPMPanel
 } from 'maturity-products/dist/entities';
 import {
   ApplicationCtxProvider,
-  MaturityScoreCtxProvider,
+  MaturityScoreCtxProvider
 } from 'maturity-products/dist/contexts';
 
 export default class MaturityApplication extends React.Component {
@@ -36,9 +36,9 @@ export default class MaturityApplication extends React.Component {
           type: 'secondary',
           hint: 'Launch the new version',
           iconType: Icon.TYPE.INTERFACE__OPERATIONS__EXTERNAL_LINK,
-          onClick: () => navigation.openNerdlet({ id: 'maturity-nerdlet' }),
-        },
-      ],
+          onClick: () => navigation.openNerdlet({ id: 'maturity-nerdlet' })
+        }
+      ]
     });
   }
 
@@ -52,8 +52,8 @@ export default class MaturityApplication extends React.Component {
           actions={[
             {
               label: 'Launch the new version',
-              onClick: () => navigation.openNerdlet({ id: 'maturity-nerdlet' }),
-            },
+              onClick: () => navigation.openNerdlet({ id: 'maturity-nerdlet' })
+            }
           ]}
         />
         <Tabs forceRenderTabPanel>

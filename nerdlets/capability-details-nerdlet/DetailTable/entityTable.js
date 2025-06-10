@@ -3,15 +3,20 @@ import { navigation } from 'nr1';
 import ExtendedDetailsTable from '../../details-table-nerdlet';
 
 export default function EntityTable(props) {
-  const { accountId, accountName, categoryName, allEntities, isCapability } =
-    props;
+  const {
+    accountId,
+    accountName,
+    categoryName,
+    allEntities,
+    isCapability
+  } = props;
 
   return (
     <div style={{ paddingTop: '15px' }}>
       <ExtendedDetailsTable
         limit={5}
-        noMeta={true}
-        hideDownload={true}
+        noMeta
+        hideDownload
         categoryName={categoryName}
         accountId={accountId}
         accountName={accountName}
@@ -31,8 +36,8 @@ export default function EntityTable(props) {
                     accountId,
                     accountName,
                     allEntities,
-                    isCapability: true,
-                  },
+                    isCapability: true
+                  }
                 })
               }
             >

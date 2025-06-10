@@ -6,7 +6,7 @@ import {
   Button,
   Select,
   SelectItem,
-  Checkbox,
+  Checkbox
 } from 'nr1';
 import DataContext from '../../../src/context/data';
 
@@ -22,7 +22,7 @@ export default function SaveView() {
     setDefaultView,
     saveView,
     savingView,
-    selectedReport,
+    selectedReport
   } = useContext(DataContext);
 
   return (
@@ -35,7 +35,7 @@ export default function SaveView() {
         <TextField
           label="View name"
           value={selectedReport?.document?.name}
-          onChange={(e) => {
+          onChange={e => {
             selectedReport.document.name = e.target.value;
             setDataState({ selectedReport });
           }}
@@ -45,7 +45,7 @@ export default function SaveView() {
         <TextField
           label="Description (optional)"
           value={selectedReport?.document?.description}
-          onChange={(e) => {
+          onChange={e => {
             selectedReport.document.description = e.target.value;
             setDataState({ selectedReport });
           }}
@@ -55,7 +55,7 @@ export default function SaveView() {
         <Checkbox
           defaultChecked={userSettings?.defaultViewId === selectedView.id}
           checked={defaultViewId === selectedView.id}
-          onChange={(e) => {
+          onChange={e => {
             if (e.target.checked) {
               setDataState({ defaultViewId: selectedView.id });
             } else {
@@ -75,7 +75,7 @@ export default function SaveView() {
               setDataState({ selectedAccountId: value })
             }
           >
-            {accounts.map((a) => (
+            {accounts.map(a => (
               <SelectItem key={a.id} value={a.id}>
                 {a.name}
               </SelectItem>

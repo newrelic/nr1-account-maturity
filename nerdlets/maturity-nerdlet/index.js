@@ -11,7 +11,7 @@ export default function AccountMaturityRoot() {
     nerdlet.setConfig({
       accountPicker: true,
       timePicker: false,
-      actionControls: true,
+      actionControls: true
     });
   }, []);
 
