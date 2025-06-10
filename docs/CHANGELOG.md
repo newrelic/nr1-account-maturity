@@ -1,3 +1,31 @@
+# [0.16.0](https://github.com/newrelic/nr1-account-maturity/compare/v0.15.0...v0.16.0) (2024-06-14)
+
+
+### Features
+
+* bump account maturity products pkg ([b9fde10](https://github.com/newrelic/nr1-account-maturity/commit/b9fde10e95c1eb3e52bc37d454bc8076d5dc82e7))
+
+# [0.15.0](https://github.com/newrelic/nr1-account-maturity/compare/v0.14.2...v0.15.0) (2024-06-11)
+
+
+### Features
+
+* version bump for new maturity products ([89408cc](https://github.com/newrelic/nr1-account-maturity/commit/89408cce3ddef050b6d8e6b1eba6681eb82dd47c))
+
+## [0.14.2](https://github.com/newrelic/nr1-account-maturity/compare/v0.14.1...v0.14.2) (2023-07-21)
+
+
+### Bug Fixes
+
+* regenerate package-lock.json ([4546ca6](https://github.com/newrelic/nr1-account-maturity/commit/4546ca68b7f83da0f7fd2ecf23afc91f33dac20b))
+
+## [0.14.1](https://github.com/newrelic/nr1-account-maturity/compare/v0.14.0...v0.14.1) (2023-06-15)
+
+
+### Bug Fixes
+
+* Update deployment API in maturity-products ([10bfd9c](https://github.com/newrelic/nr1-account-maturity/commit/10bfd9cff4a5643ebbaa4ba59cb4ea7f8ef46ec7))
+
 # [0.14.0](https://github.com/newrelic/nr1-account-maturity/compare/v0.13.0...v0.14.0) (2022-11-04)
 
 
