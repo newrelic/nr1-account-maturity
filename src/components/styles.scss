@@ -1,0 +1,10 @@
+@import './variables.scss';
+@import './mixins.scss';
+
+hr {
+    background-color: #F3F4F4;
+    border: 0 none;
+    color: #F3F4F4;
+    height: 5px;
+    margin-left: -15px;
+}

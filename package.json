@@ -5,38 +5,47 @@
   "version": "0.16.0",
   "scripts": {
     "start": "nr1 nerdpack:serve",
-    "test": "exit 0",
     "eslint-check": "eslint nerdlets/",
     "eslint-fix": "eslint nerdlets/ --fix",
-    "snyk-protect": "snyk protect",
-    "prepare": "npm run snyk-protect"
+    "test": "exit 0"
   },
   "bugs": {
     "email": "opensource+maturity@newrelic.com"
-  },
-  "dependencies": {
-    "maturity-products": "github:newrelic-experimental/nr1-account-maturity-products",
-    "react-tabs": "^3.2.1",
-    "snyk": "^1.996.0"
   },
   "browserslist": [
     "last 2 versions",
     "not ie < 11",
     "not dead"
   ],
+  "nr1": {
+    "idOld": "b54addf7-3663-47e0-8862-3ec058588b58",
+    "id": "ec734258-b5ca-41b2-84ef-d97352e0ea19",
+    "dv2": "ec734258-b5ca-41b2-84ef-d97352e0ea19",
+    "esb": "0307f9fe-8a83-4752-b2b4-215a08adfbd8",
+    "ditcert": "49417ec5-182c-4141-b52f-4de83724e42a",
+    "ditp": "d392bf86-98fd-4759-9120-097587f0e018"
+  },
+  "dependencies": {
+    "@mantine/hooks": "^6.0.10",
+    "@newrelic/nr-labs-components": "^1.23.5",
+    "async": "^3.2.4",
+    "json-to-csv-export": "^2.1.1",
+    "maturity-products": "github:newrelic-experimental/nr1-account-maturity-products",
+    "react": "17.0.2",
+    "react-dom": "17.0.2",
+    "react-json-to-csv": "^1.2.0",
+    "react-tabs": "^3.2.1",
+    "semver": "^7.5.1",
+    "uuid": "^9.0.0"
+  },
   "devDependencies": {
     "@newrelic/eslint-plugin-newrelic": "^0.3.1",
     "@semantic-release/changelog": "^5.0.1",
     "@semantic-release/git": "^9.0.0",
-    "babel-eslint": "^10.0.3",
-    "babel-runtime": "^6.26.0",
-    "eslint": "^6.7.2",
-    "eslint-config-prettier": "^6.7.0",
-    "eslint-plugin-prettier": "^3.1.2",
-    "file-loader": "^5.0.2",
-    "prettier": "^1.19.1",
-    "react": "16.6.3",
-    "react-dom": "16.6.3"
-  },
-  "snyk": true
+    "eslint": "^6.8.0",
+    "eslint-config-prettier": "^6.4.0",
+    "eslint-plugin-prettier": "^3.4.1",
+    "eslint-plugin-promise": "^4.2.1",
+    "prettier": "^1.19.1"
+  }
 }
