@@ -20,7 +20,7 @@ export const userQuery = ngql`{
       name
     }
   }
-}`
+}`;
 
 // eslint-disable-next-line
 export const nrqlGqlQuery = (accountId, query, alias) => ngql`{
@@ -33,7 +33,79 @@ export const nrqlGqlQuery = (accountId, query, alias) => ngql`{
   }
 }`;
 
-export const accountDataQuery = (accountId) => ngql`{
+export const batchAccountQuery = accounts => {
+  const fragments = accounts.map(account => {
+    const id = account.id;
+    const alias = `account_${id}`;
+    return `
+      ${alias}: actor {
+        entityInfo: entitySearch(query: "tags.accountId = '${id}'") {
+          types {
+            count
+            entityType
+            type
+            domain
+          }
+        }
+        account(id: ${id}) {
+          cloud {
+            linkedAccounts {
+              disabled
+              name
+              id
+              nrAccountId
+              provider {
+                id
+                name
+              }
+            }
+          }
+          awsBilling: nrql(query: "SELECT count(*) as 'count' FROM FinanceSample", timeout: 120) {
+            results
+          }
+          logMessageCount: nrql(query: "SELECT count(*) as 'count' FROM Log since 12 hours ago ", timeout: 120) {
+            results
+          }
+          nrqlLoggingAlertCount:alerts {
+            nrqlConditionsSearch(searchCriteria: {queryLike: "FROM log"}) {
+              totalCount
+            }
+          }
+          slmAlertCount:alerts {
+            nrqlConditionsSearch(searchCriteria: {queryLike: "newrelic.sli"}) {
+              totalCount
+            }
+          }
+          npmNoEntityDefinitionDevices: nrql(query: "SELECT uniqueCount(device_name) from Metric where entity.name is null and instrumentation.provider = 'kentik' and instrumentation.name != 'heartbeat'", timeout: 120) {
+            results
+          }
+          npmSnmpPollingFailures: nrql(query: "SELECT uniqueCount(device_name) From Metric where PollingHealth = 'BAD' SINCE 1 day ago", timeout: 120) {
+            results
+          }
+          npmKtranslateSyslogDevices: nrql(query: "SELECT uniqueCount(device_name) from Log where plugin.type = 'ktranslate-syslog' since 1 day ago", timeout: 120) {
+            results
+          }  
+          programDeployCount: nrql(query: "SELECT count(*) FROM NrAuditEvent  WHERE targetType = 'nerdpack' and actionIdentifier ='nerdpack.subscribe' SINCE 7 days ago", timeout: 120) {
+            results
+          }
+          KeySet_Transaction: nrql(query: "SELECT keyset() FROM Transaction") {
+            results
+          }
+          KeySet_PageView: nrql(query: "SELECT keyset() FROM PageView") {
+            results
+          }
+          KeySet_SystemSample: nrql(query: "SELECT keyset() FROM SystemSample") {
+            results
+          }
+        }
+      }
+    `;
+  });
+
+  return `{ ${fragments.join('\n')} }`;
+};
+
+export const accountDataQuery = accountId => ngql`{
   actor {
     entityInfo: entitySearch(query: "tags.accountId = '${accountId}'") {
       types {
@@ -102,8 +174,8 @@ export const entitySearchQueryByAccount = (
   searchClause
 ) => ngql`query ($cursor: String) {
   actor {
-    entitySearch(query: "tags.accountId = '${accountId}' ${searchClause || ''
-  }  ") {
+    entitySearch(query: "tags.accountId = '${accountId}' ${searchClause ||
+  ''}  ") {
       count
       results(cursor: $cursor) {
         nextCursor
@@ -128,7 +200,7 @@ export const entitySearchQueryByAccount = (
   }
 }`;
 
-export const entityTypesQueryByAccount = (accountId) => ngql`{
+export const entityTypesQueryByAccount = accountId => ngql`{
   actor {
     entitySearch(query: "name LIKE '%' AND tags.accountId = '${accountId}'") {
       types {
@@ -245,7 +317,7 @@ export const agentReleasesQuery = ngql`{
     }`;
 
 // eslint-disable-next-line
-const nerdpackSubscriptionCheckQuery = (id) => `{
+const nerdpackSubscriptionCheckQuery = id => `{
       actor {
         nerdpacks {
           nerdpack(id: "${id}") {
