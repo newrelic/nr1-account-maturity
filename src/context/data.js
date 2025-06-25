@@ -459,7 +459,7 @@ export function useProvideData(props) {
       ...[...dataState.accounts].find(a => a.id === id)
     }));
 
-    accounts = decorateAccountData(accounts);
+    accounts = await decorateAccountData(accounts);
 
     // inject hideNotReporting to entitySearchQuery
     let entitySearchQuery = report.document?.entitySearchQuery || '';
