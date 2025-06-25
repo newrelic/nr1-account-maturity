@@ -125,131 +125,121 @@ export function useProvideData(props) {
   };
 
   // handle initial load
-  useEffect(async () => {
-    // await wipeUserDetails();
-    // eslint-disable-next-line
-    console.log('DataProvider initialized');
-    // wipeAccountHistory(); // testing
-    const state = {};
-    await getUserEmail();
+  useEffect(() => {
+    const initializeData = async () => {
+      console.log('DataProvider initialized');
+      const state = {};
+      await getUserEmail();
 
-    // const defaultView = await getUserReport(); // needs to be removed
-    const userSettings = await getUserSettings();
-    state.userSettings = userSettings;
-    console.log('userSettings =>', userSettings);
+      const userSettings = await getUserSettings();
+      state.userSettings = userSettings;
+      console.log('userSettings =>', userSettings);
 
-    // there will always be at least one view config because of allData
-    // load list view if welcome has been done
-    if (userSettings?.doneWelcomeTest23) {
-      state.view = {
-        page: 'ViewList'
-      };
-    }
+      // load list view if welcome has been done
+      if (userSettings?.doneWelcomeTest23) {
+        state.view = {
+          page: 'ViewList'
+        };
+      }
 
-    const user = await NerdGraphQuery.query({ query: userQuery });
-    state.user = user?.data?.actor?.user;
+      const user = await NerdGraphQuery.query({ query: userQuery });
+      state.user = user?.data?.actor?.user;
 
-    const viewConfigs = await fetchViewConfigs(null, state.user);
-    const accounts = await getAccounts();
+      const viewConfigs = await fetchViewConfigs(null, state.user);
+      const accounts = await getAccounts();
 
-    state.accounts = accounts;
-    state.selectedAccountId = accounts[0].id;
+      state.accounts = accounts;
+      state.selectedAccountId = accounts[0].id;
 
-    setDataState(state);
+      setDataState(state);
+    };
+
+    initializeData();
   }, []);
 
   // handle account picker changes
-  useEffect(async () => {
-    const { accountId } = props;
-    const state = {};
+  useEffect(() => {
+    const handleAccountChange = async () => {
+      const { accountId } = props;
+      const state = {};
 
-    console.log('account id changed => ', accountId);
-    if (accountId === 'cross-account') {
-      console.log('cross account should not be selected, reloading...');
-      navigation.openNerdlet({ id: 'maturity-nerdlet' });
-      return;
-    }
-
-    const accountsInit = await getAccounts();
-
-    if (!accountsInit.find(a => a.id === accountId)) {
-      Toast.showToast({
-        title: 'Account Maturity is not subscribed to the selected account',
-        description: `Change account or subscribe account: ${accountId}`,
-        type: Toast.TYPE.CRITICAL
-      });
-      state.view = { page: 'unavailable-account' };
-      state.viewSegment = 'unavailable-account';
-    } else {
-      state.view = { page: 'ViewList' };
-      state.viewSegment = 'list';
-    }
-
-    await getUserEmail();
-
-    const userSettings = await getUserSettings();
-    state.userSettings = userSettings;
-    console.log('userSettings =>', userSettings);
-    if (userSettings?.doneWelcomeTest23) {
-      state.view = { page: 'ViewList' };
-      state.viewSegment = 'list';
-    }
-
-    const user = await NerdGraphQuery.query({ query: userQuery });
-    state.user = user?.data?.actor?.user;
-
-    setDataState({
-      fetchingData: true,
-      selectedAccountId: accountId,
-      ...state
-    });
-
-    // if (!state.userSettings.doneWelcome) {
-    //   console.log('Welcome not complete');
-    //   state.view = {
-    //     page: 'Welcome',
-    //   };
-
-    //   setDataState({
-    //     fetchingData: false,
-    //     view: state.view,
-    //   });
-    // } else
-    if (state.viewSegment == 'unavailable-account') {
-      setDataState({
-        selectedAccountId: accountId,
-        fetchingData: false,
-        view: state.view,
-        viewSegment: 'unavailable-account'
-      });
-    } else {
-      const viewConfigs = await fetchViewConfigs(accountId, state.user);
-      const viewHistory = await fetchViewHistory(accountId);
-
-      const [agentReleases, dataDictionary] = await Promise.all([
-        getAgentReleases(),
-        getDataDictionary()
-      ]);
-
-      // const accounts = await decorateAccountData(accountsInit);
-
-      deleteOrphanedReports(viewConfigs, viewHistory, accountId);
-
-      let view = dataState.view;
-      if (userSettings?.doneWelcomeTest23) {
-        view = { page: 'ViewList' };
+      console.log('account id changed => ', accountId);
+      if (accountId === 'cross-account') {
+        console.log('cross account should not be selected, reloading...');
+        navigation.openNerdlet({ id: 'maturity-nerdlet' });
+        return;
       }
 
+      const accountsInit = await getAccounts();
+
+      if (!accountsInit.find(a => a.id === accountId)) {
+        Toast.showToast({
+          title: 'Account Maturity is not subscribed to the selected account',
+          description: `Change account or subscribe account: ${accountId}`,
+          type: Toast.TYPE.CRITICAL
+        });
+        state.view = { page: 'unavailable-account' };
+        state.viewSegment = 'unavailable-account';
+      } else {
+        state.view = { page: 'ViewList' };
+        state.viewSegment = 'list';
+      }
+
+      await getUserEmail();
+
+      const userSettings = await getUserSettings();
+      state.userSettings = userSettings;
+      console.log('userSettings =>', userSettings);
+      if (userSettings?.doneWelcomeTest23) {
+        state.view = { page: 'ViewList' };
+        state.viewSegment = 'list';
+      }
+
+      const user = await NerdGraphQuery.query({ query: userQuery });
+      state.user = user?.data?.actor?.user;
+
       setDataState({
+        fetchingData: true,
         selectedAccountId: accountId,
-        accounts: accountsInit,
-        agentReleases,
-        dataDictionary,
-        viewConfigs,
-        fetchingData: false,
-        view
+        ...state
       });
-    }
+
+      if (state.viewSegment == 'unavailable-account') {
+        setDataState({
+          selectedAccountId: accountId,
+          fetchingData: false,
+          view: state.view,
+          viewSegment: 'unavailable-account'
+        });
+      } else {
+        const viewConfigs = await fetchViewConfigs(accountId, state.user);
+        const viewHistory = await fetchViewHistory(accountId);
+
+        const [agentReleases, dataDictionary] = await Promise.all([
+          getAgentReleases(),
+          getDataDictionary()
+        ]);
+
+        deleteOrphanedReports(viewConfigs, viewHistory, accountId);
+
+        let view = dataState.view;
+        if (userSettings?.doneWelcomeTest23) {
+          view = { page: 'ViewList' };
+        }
+
+        setDataState({
+          selectedAccountId: accountId,
+          accounts: accountsInit,
+          agentReleases,
+          dataDictionary,
+          viewConfigs,
+          fetchingData: false,
+          view
+        });
+      }
+    };
+
+    handleAccountChange();
   }, [props.accountId]);
 
   const loadHistoricalResult = (report, result) => {
@@ -693,25 +683,22 @@ export function useProvideData(props) {
         batches.push(accounts.slice(i, i + 10));
       }
 
-      const q = async.queue(async (batch, callback) => {
-        try {
-          const query = batchAccountQuery(batch); // dynamic multi-alias query
-          const res = await NerdGraphQuery.query({ query });
-          const data = res?.data || {};
-
-          for (const account of batch) {
-            const alias = `account_${account.id}`;
-            const result = data[alias];
-            if (result) {
-              account.data = result.account;
-              account.entityInfo = result.entityInfo;
+      const q = async.queue((batch, callback) => {
+        const query = batchAccountQuery(batch);
+        NerdGraphQuery.query({ query })
+          .then(res => {
+            const data = res?.data || {};
+            for (const account of batch) {
+              const alias = `account_${account.id}`;
+              const result = data[alias];
+              if (result) {
+                account.data = result.account;
+                account.entityInfo = result.entityInfo;
+              }
             }
-          }
-
-          callback();
-        } catch (err) {
-          callback(err);
-        }
+            callback();
+          })
+          .catch(err => callback(err));
       }, 5);
 
       q.push(batches);

@@ -26,10 +26,14 @@ export default function TrendView(props) {
     getAccounts
   } = useContext(DataContext);
 
-  useEffect(async () => {
-    const x = await getAccounts();
-    setAccountInfo(x);
-  });
+  useEffect(() => {
+    const fetchAccounts = async () => {
+      const x = await getAccounts();
+      setAccountInfo(x);
+    };
+
+    fetchAccounts();
+  }, []);
 
   const viewConfig = (viewConfigs || []).find(vc => vc.id === documentId);
   let { history } = viewConfig || [];
