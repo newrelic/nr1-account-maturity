@@ -455,7 +455,7 @@ export function useProvideData(props) {
       report.document.accounts = (dataState?.accounts || []).map(a => a.id);
     }
 
-    const accounts = [...report.document.accounts].map(id => ({
+    let accounts = [...report.document.accounts].map(id => ({
       ...[...dataState.accounts].find(a => a.id === id)
     }));
 
