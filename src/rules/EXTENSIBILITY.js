@@ -4,12 +4,12 @@ export default {
       name: 'Has Dashboards',
       accountCheck: account =>
         ((account?.entityInfo?.types || []).find(t => t.type === 'DASHBOARD')
-          ?.count || 0) > 0,
+          ?.count || 0) > 0
     },
     {
       name: 'Uses Flex',
       accountCheck: account =>
-        (account.reportingEventTypes || []).includes('flexStatusSample'),
+        (account.reportingEventTypes || []).includes('flexStatusSample')
     },
     {
       name: 'Using Programmability',
@@ -17,7 +17,7 @@ export default {
         return (
           (account?.data?.programDeployCount?.results?.[0]?.count || 0) > 0
         );
-      },
-    },
-  ],
+      }
+    }
+  ]
 };

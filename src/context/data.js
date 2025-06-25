@@ -231,7 +231,7 @@ export function useProvideData(props) {
         getDataDictionary()
       ]);
 
-      const accounts = await decorateAccountData(accountsInit);
+      // const accounts = await decorateAccountData(accountsInit);
 
       deleteOrphanedReports(viewConfigs, viewHistory, accountId);
 
@@ -242,7 +242,7 @@ export function useProvideData(props) {
 
       setDataState({
         selectedAccountId: accountId,
-        accounts,
+        accounts: accountsInit,
         agentReleases,
         dataDictionary,
         viewConfigs,
@@ -459,6 +459,8 @@ export function useProvideData(props) {
       ...[...dataState.accounts].find(a => a.id === id)
     }));
 
+    accounts = decorateAccountData(accounts);
+
     // inject hideNotReporting to entitySearchQuery
     let entitySearchQuery = report.document?.entitySearchQuery || '';
 
@@ -510,6 +512,7 @@ export function useProvideData(props) {
 
     const prepareState = {
       runningReport: false,
+      accounts,
       [`runningReport.${report?.id || selectedView.id}`]: true,
       lastRunAt: runAt,
       entitiesByAccount,
@@ -684,10 +687,10 @@ export function useProvideData(props) {
   // decorate additional account data
   const decorateAccountData = async accounts => {
     return new Promise((resolve, reject) => {
-      // Split into batches of 5
+      // Split into batches of 10
       const batches = [];
-      for (let i = 0; i < accounts.length; i += 5) {
-        batches.push(accounts.slice(i, i + 5));
+      for (let i = 0; i < accounts.length; i += 10) {
+        batches.push(accounts.slice(i, i + 10));
       }
 
       const q = async.queue(async (batch, callback) => {

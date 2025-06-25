@@ -39,14 +39,6 @@ export const batchAccountQuery = accounts => {
     const alias = `account_${id}`;
     return `
       ${alias}: actor {
-        entityInfo: entitySearch(query: "tags.accountId = '${id}'") {
-          types {
-            count
-            entityType
-            type
-            domain
-          }
-        }
         account(id: ${id}) {
           cloud {
             linkedAccounts {
