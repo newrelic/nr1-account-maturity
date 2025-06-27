@@ -51,16 +51,12 @@ export default function CreateView() {
   }, []);
 
   useEffect(() => {
-    // If accounts from context seems to be filtered (selected accounts > available accounts),
-    // or if we don't have accounts data, we need to get the full list
     if (
       !accounts ||
       accounts.length === 0 ||
       (selectedReport?.document?.accounts &&
         selectedReport.document.accounts.length > accounts.length)
     ) {
-      // eslint-disable-next-line
-      console.warn('Accounts list may be incomplete in edit mode');
       setAllAccounts(accounts || []);
     } else {
       setAllAccounts(accounts);
