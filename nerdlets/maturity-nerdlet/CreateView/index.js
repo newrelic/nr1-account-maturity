@@ -524,7 +524,12 @@ export default function CreateView() {
                   .filter(a =>
                     a.name
                       .toLowerCase()
-                      .includes((state?.accountsFilter || '').toLowerCase())
+                      .includes(
+                        (state?.accountsFilterEnabled
+                          ? state?.accountsFilter || ''
+                          : ''
+                        ).toLowerCase()
+                      )
                   )
                   // Sort accounts: selected ones first, then unselected
                   .sort((a, b) => {
