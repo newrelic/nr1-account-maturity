@@ -41,6 +41,7 @@ export default function CreateView() {
   } = useContext(DataContext);
   const [entityCount, setEntityCount] = useState(0);
   const [runParams, setRunParams] = useState(null);
+  const [allAccounts, setAllAccounts] = useState([]);
 
   useEffect(() => {
     nerdlet.setConfig({
@@ -48,6 +49,23 @@ export default function CreateView() {
       actionControlButtons: [...defaultActions(setDataState)]
     });
   }, []);
+
+  useEffect(() => {
+    // If accounts from context seems to be filtered (selected accounts > available accounts),
+    // or if we don't have accounts data, we need to get the full list
+    if (
+      !accounts ||
+      accounts.length === 0 ||
+      (selectedReport?.document?.accounts &&
+        selectedReport.document.accounts.length > accounts.length)
+    ) {
+      // eslint-disable-next-line
+      console.warn('Accounts list may be incomplete in edit mode');
+      setAllAccounts(accounts || []);
+    } else {
+      setAllAccounts(accounts);
+    }
+  }, [accounts, selectedReport]);
 
   let allProducts = selectedReport?.document?.allProducts;
   let products = selectedReport?.document?.products;
@@ -465,13 +483,13 @@ export default function CreateView() {
                 <Checkbox
                   label="All Accounts"
                   disabled={state?.accountsFilterEnabled}
-                  checked={state.accounts.length === accounts.length}
+                  checked={state.accounts.length === allAccounts.length}
                   style={{ paddingBottom: '0px', paddingTop: '2px' }}
                   onChange={() => {
-                    if (state.accounts.length === accounts.length) {
+                    if (state.accounts.length === allAccounts.length) {
                       setState({ accounts: [] });
                     } else {
-                      setState({ accounts: accounts.map(a => a.id) });
+                      setState({ accounts: allAccounts.map(a => a.id) });
                     }
                   }}
                 />
@@ -506,7 +524,7 @@ export default function CreateView() {
           <CardBody style={{ paddingLeft: '20px', marginTop: '5px' }}>
             <div style={{ paddingTop: '10px' }}>
               <Grid style={{ maxHeight: '100px' }}>
-                {accounts
+                {allAccounts
                   .filter(a =>
                     a.name
                       .toLowerCase()
@@ -526,11 +544,9 @@ export default function CreateView() {
                   .map(a => (
                     <GridItem columnSpan={3} key={a.id}>
                       <Checkbox
-                        // description={`${a.id}`}
                         label={`${a.name} (${a.id})`}
                         style={{
                           paddingBottom: '0px',
-                          // Highlight selected accounts
                           backgroundColor: state.accounts.includes(a.id)
                             ? '#f0f8ff'
                             : 'transparent',
@@ -541,10 +557,7 @@ export default function CreateView() {
                           state.accounts.includes(a.id) ||
                           state?.accountsFilterEnabled === true
                         }
-                        disabled={
-                          // state.accounts.length === accounts.length ||
-                          state?.accountsFilterEnabled
-                        }
+                        disabled={state?.accountsFilterEnabled}
                         onChange={() => {
                           if (state.accounts.includes(a.id)) {
                             setState({
@@ -732,7 +745,7 @@ export default function CreateView() {
     );
   }, [
     userSettings,
-    accounts,
+    allAccounts,
     user,
     state,
     selectedReport,
