@@ -446,75 +446,21 @@ export default function CreateView() {
             }}
           >
             <div style={{ display: 'flex', justifyContent: 'space-between' }}>
-              <div style={{ flex: -1 }}>Capabilities&nbsp;&nbsp;&nbsp;</div>
               <div style={{ flex: -1 }}>
-                <Checkbox
-                  label="All Capabilities"
-                  checked={state.products.length === Object.keys(rules).length}
-                  style={{ paddingBottom: '0px', paddingTop: '2px' }}
-                  onChange={() => {
-                    if (state.products.length === Object.keys(rules).length) {
-                      setState({ products: [], allProducts: false });
-                    } else {
-                      setState({
-                        products: Object.keys(rules),
-                        allProducts: true
-                      });
-                    }
-                  }}
-                />
+                Accounts&nbsp;
+                {!state?.accountsFilterEnabled && (
+                  <span
+                    style={{
+                      fontWeight: 'normal',
+                      fontSize: '14px',
+                      color: '#666'
+                    }}
+                  >
+                    ({state.accounts.length} selected)
+                  </span>
+                )}
+                &nbsp;&nbsp;&nbsp;
               </div>
-              <div style={{ flex: 'auto' }} />
-            </div>
-          </CardHeader>
-          <CardBody style={{ paddingLeft: '20px', marginTop: '5px' }}>
-            <div style={{ paddingTop: '10px' }}>
-              <Grid>
-                {Object.keys(rules).map(key => (
-                  <GridItem columnSpan={3} key={key}>
-                    <Checkbox
-                      key={key}
-                      label={key}
-                      style={{ paddingBottom: '0px' }}
-                      // disabled={state.allProducts}
-                      checked={state.products.includes(key)}
-                      onChange={() => {
-                        if (state.products.includes(key)) {
-                          const products = state.products.filter(
-                            id => id !== key
-                          );
-                          const allProducts =
-                            products.length === Object.keys(rules).length;
-
-                          setState({
-                            products,
-                            allProducts
-                          });
-                        } else {
-                          const products = [...state.products, key];
-                          const allProducts =
-                            products.length === Object.keys(rules).length;
-
-                          setState({ products, allProducts });
-                        }
-                      }}
-                    />
-                  </GridItem>
-                ))}
-              </Grid>
-            </div>
-          </CardBody>
-        </Card>
-        <Card collapsible>
-          <CardHeader
-            style={{
-              fontSize: '16px',
-              fontWeight: 'bold',
-              marginBottom: '5px'
-            }}
-          >
-            <div style={{ display: 'flex', justifyContent: 'space-between' }}>
-              <div style={{ flex: -1 }}>Accounts&nbsp;&nbsp;&nbsp;</div>
               <div style={{ flex: -1 }}>
                 <Checkbox
                   label="All Accounts"
@@ -566,12 +512,31 @@ export default function CreateView() {
                       .toLowerCase()
                       .includes((state?.accountsFilter || '').toLowerCase())
                   )
+                  // Sort accounts: selected ones first, then unselected
+                  .sort((a, b) => {
+                    const aSelected = state.accounts.includes(a.id);
+                    const bSelected = state.accounts.includes(b.id);
+
+                    // If both are selected or both are unselected, maintain original order
+                    if (aSelected === bSelected) return 0;
+
+                    // Selected accounts come first
+                    return aSelected ? -1 : 1;
+                  })
                   .map(a => (
                     <GridItem columnSpan={3} key={a.id}>
                       <Checkbox
                         // description={`${a.id}`}
                         label={`${a.name} (${a.id})`}
-                        style={{ paddingBottom: '0px' }}
+                        style={{
+                          paddingBottom: '0px',
+                          // Highlight selected accounts
+                          backgroundColor: state.accounts.includes(a.id)
+                            ? '#f0f8ff'
+                            : 'transparent',
+                          padding: '2px 4px',
+                          borderRadius: '4px'
+                        }}
                         checked={
                           state.accounts.includes(a.id) ||
                           state?.accountsFilterEnabled === true
