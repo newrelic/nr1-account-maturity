@@ -179,7 +179,9 @@ export default function ViewList() {
       label: 'Edit',
       onClick: (evt, { item }) => {
         const documentId =
-          item.id === 'allData+undefined' ? `allData+${email}` : documentId;
+          item.id === 'allData+undefined'
+            ? `allData+${email}`
+            : item.document.id;
 
         if (documentId === `allData+${email}`) {
           Toast.showToast({
