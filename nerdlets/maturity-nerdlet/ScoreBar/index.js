@@ -58,7 +58,7 @@ export default function ScoreBar(props) {
 
   return useMemo(() => {
     const allAccountsAvailable = areAllAccountsAvailable(
-      selectedReport.document.accounts,
+      selectedReport?.document?.accounts || [],
       accounts
     );
 

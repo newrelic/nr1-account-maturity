@@ -38,7 +38,7 @@ export default function MaturityView(props) {
                 page: 'CreateView',
                 title: 'Create New View'
               },
-              selectedReport: {},
+              selectedReport,
               selectedView: {}
             })
         },
