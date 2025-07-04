@@ -522,7 +522,12 @@ export default function CreateView() {
           </CardHeader>
           <CardBody style={{ paddingLeft: '20px', marginTop: '5px' }}>
             <div style={{ paddingTop: '10px' }}>
-              <Grid style={{ maxHeight: '100px' }}>
+              <Grid
+                style={{
+                  maxHeight: '200px',
+                  overflow: 'auto'
+                }}
+              >
                 {allAccounts
                   .filter(a =>
                     a.name
