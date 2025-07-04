@@ -1063,9 +1063,7 @@ export function useProvideData(props) {
       const summarizedScores = {};
 
       accounts.forEach(account => {
-        if (!account.scores) {
-          account.scores = {};
-        }
+        account.scores = {};
 
         Object.keys(rules).forEach(key => {
           const { scores } = rules[key];
