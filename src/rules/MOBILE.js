@@ -1,4 +1,5 @@
 export default {
+  domain: 'MOBILE',
   entityType: 'MOBILE_APPLICATION_ENTITY',
   // some entities require additional data that can only be performed with a direct guid query
   graphql: `query ($guids: [EntityGuid]!) {
@@ -46,21 +47,21 @@ export default {
       name: 'Launch count',
       entityCheck: entity =>
         (entity.mobileAppLaunch?.results?.[0]?.['uniqueCount.sessionId'] || 0) >
-        0,
+        0
     },
     {
       name: 'Breadcrumbs',
       entityCheck: entity =>
-        (entity.mobileBreadcrumbs?.results?.[0]?.count || 0) > 0,
+        (entity.mobileBreadcrumbs?.results?.[0]?.count || 0) > 0
     },
     {
       name: 'Handled Exceptions',
       entityCheck: entity =>
-        (entity.mobileHandledExceptions?.results?.[0]?.count || 0) > 0,
+        (entity.mobileHandledExceptions?.results?.[0]?.count || 0) > 0
     },
     {
       name: 'Alerts',
-      entityCheck: entity => entity?.alertSeverity !== 'NOT_CONFIGURED',
-    },
-  ],
+      entityCheck: entity => entity?.alertSeverity !== 'NOT_CONFIGURED'
+    }
+  ]
 };

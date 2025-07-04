@@ -25,7 +25,8 @@ import { v4 as uuidv4 } from 'uuid';
 import { chunk, chunkString, generateAccountSummary } from '../utils';
 import {
   ACCOUNT_CONFIG_COLLECTION,
-  ACCOUNT_HISTORY_COLLECTION
+  ACCOUNT_HISTORY_COLLECTION,
+  NRQL_BATCH_SIZE
 } from '../constants';
 
 const DataContext = createContext();
@@ -422,7 +423,7 @@ export function useProvideData(props) {
       if (report.document?.accountsFilterEnabled) {
         report.document.accounts = dataState.accounts
           .filter(a =>
-            a.name
+            (a?.name || `UNAUTHORIZED ${a?.id}`)
               .toLowerCase()
               .includes((report.document?.accountsFilter || '').toLowerCase())
           )
@@ -469,7 +470,8 @@ export function useProvideData(props) {
       accounts,
       entitySearchQuery || '',
       dataState.agentReleases,
-      dataState.dataDictionary
+      dataState.dataDictionary,
+      report.document.products
     );
 
     console.log(summarizedScores);
@@ -563,7 +565,8 @@ export function useProvideData(props) {
       accounts,
       report.document?.entitySearchQuery || '',
       dataState.agentReleases,
-      dataState.dataDictionary
+      dataState.dataDictionary,
+      report.products
     );
 
     const accountSummaries = generateAccountSummary(
@@ -1011,7 +1014,8 @@ export function useProvideData(props) {
     accounts,
     entitySearchQuery,
     agentReleases,
-    dataDictionary
+    dataDictionary,
+    products
   ) => {
     setDataState({ gettingEntities: true });
 
@@ -1032,15 +1036,17 @@ export function useProvideData(props) {
 
       console.log(`${new Date().toLocaleTimeString()} - fetch accounts start`);
       const q = async.queue((task, callback) => {
-        getEntitiesByAccount(task, entitySearchQuery).then(entities => {
-          task.entities = entities;
-          completedAccounts.push(task);
+        getEntitiesByAccount(task, entitySearchQuery, products).then(
+          entities => {
+            task.entities = entities;
+            completedAccounts.push(task);
 
-          completedAccountTotal = completedAccounts.length;
-          completedPercentageTotal =
-            (completedAccounts.length / accounts.length) * 100;
-          callback();
-        });
+            completedAccountTotal = completedAccounts.length;
+            completedPercentageTotal =
+              (completedAccounts.length / accounts.length) * 100;
+            callback();
+          }
+        );
       }, 5);
 
       q.push(accounts);
@@ -1208,7 +1214,7 @@ export function useProvideData(props) {
     });
   };
 
-  const getEntitiesByAccount = (account, entitySearchQuery) => {
+  const getEntitiesByAccount = (account, entitySearchQuery, products) => {
     return new Promise(resolve => {
       let completedEntities = [];
       let totalEntityCount = 0;
@@ -1226,7 +1232,15 @@ export function useProvideData(props) {
         const entityClause = entitySearchQuery
           ? `AND ${entitySearchQuery}`
           : '';
-        const searchClause = ` AND type NOT IN ('DASHBOARD') ${entityClause}`;
+
+        const productDomains = products
+          .map(p => rules[p]?.domain)
+          .filter(p => p);
+
+        const domainClause = productDomains
+          ? ` AND domain IN ('${productDomains.join("','")}')`
+          : '';
+        const searchClause = ` AND type NOT IN ('DASHBOARD') ${domainClause} ${entityClause}`;
 
         async.retry(
           {
@@ -1298,7 +1312,194 @@ export function useProvideData(props) {
     });
   };
 
+  const chunkArray = (array, size) => {
+    const chunks = [];
+    for (let i = 0; i < array.length; i += size) {
+      chunks.push(array.slice(i, i + size));
+    }
+    return chunks;
+  };
+
+  // Helper function to process a batch of NRQL queries
+  const processBatchedNrqlQueries = async batch => {
+    // Group by account ID for efficient querying
+    const accountGroups = batch.reduce((acc, entity) => {
+      const accountId = entity.accountId;
+      if (!acc[accountId]) {
+        acc[accountId] = [];
+      }
+      acc[accountId].push(entity);
+      return acc;
+    }, {});
+
+    const results = [];
+
+    // Process each account group
+    for (const [accountId, entities] of Object.entries(accountGroups)) {
+      const entityQueries = entities.map(entity => ({
+        guid: entity.guid,
+        nrqlQueries: entity.nrqlQueries
+      }));
+
+      try {
+        const response = await NerdGraphQuery.query({
+          query: nrqlGqlQuery(accountId, entityQueries)
+        });
+
+        // Parse the aliased results back to individual entities
+        const accountData = response?.data?.actor?.account;
+        if (accountData) {
+          entities.forEach(entity => {
+            const nrqlData = {};
+
+            Object.keys(entity.nrqlQueries).forEach(queryKey => {
+              const alias = `${entity.guid}_${queryKey}`.replace(
+                /[^a-zA-Z0-9_]/g,
+                '_'
+              );
+              nrqlData[queryKey] = accountData[alias]?.results;
+            });
+
+            results.push({
+              guid: entity.guid,
+              nrqlData
+            });
+          });
+        }
+      } catch (error) {
+        console.error(
+          `Error processing batch for account ${accountId}:`,
+          error
+        );
+        // Fallback to individual queries for this batch if needed
+        // You could implement fallback logic here
+      }
+    }
+
+    return results;
+  };
+
   const decorateEntities = entities => {
+    return new Promise(async resolve => {
+      const entityTypesToQuery = [];
+      const entityNrqlQueries = [];
+
+      Object.keys(rules).forEach(key => {
+        const rule = rules[key];
+
+        if (rule.graphql) {
+          const foundEntities = entities.filter(
+            e => e.entityType === rule.entityType
+          );
+
+          if (foundEntities.length > 0) {
+            entityTypesToQuery.push({
+              entities: foundEntities,
+              graphql: rule.graphql
+            });
+          }
+        }
+
+        if (rule.nrqlQueries) {
+          const foundEntities = entities.filter(
+            e =>
+              e.entityType === rule.entityType &&
+              (rule.type ? e.type === rule.type : true)
+          );
+
+          foundEntities.forEach(e => {
+            entityNrqlQueries.push({
+              guid: e.guid,
+              name: e.name,
+              accountId: e.account.id,
+              nrqlQueries: rule.nrqlQueries(e)
+            });
+          });
+        }
+      });
+
+      if (entityNrqlQueries.length > 0) {
+        let entityNrqlData = [];
+
+        console.log(
+          `${new Date().toLocaleTimeString()} - fetch entity nrql data start (${
+            entityNrqlQueries.length
+          } entities)`
+        );
+
+        // Split into batches for processing
+        const batches = chunkArray(entityNrqlQueries, NRQL_BATCH_SIZE);
+        console.log(
+          `Processing ${batches.length} batches of max ${NRQL_BATCH_SIZE} entities each`
+        );
+
+        // Process batches with concurrency control
+        const nrqlQueue = async.queue(async (batch, callback) => {
+          try {
+            const batchResults = await processBatchedNrqlQueries(batch);
+            entityNrqlData = [...entityNrqlData, ...batchResults];
+            callback();
+          } catch (error) {
+            console.error('Error processing NRQL batch:', error);
+            callback(error);
+          }
+        }, 3); // Reduced concurrency since each batch processes multiple entities
+
+        nrqlQueue.push(batches);
+
+        await nrqlQueue.drain();
+        console.log(
+          `${new Date().toLocaleTimeString()} - fetch entity nrql data end`
+        );
+
+        // Merge results back to entities
+        entities.forEach((entity, i) => {
+          const foundEntity = entityNrqlData.find(e => e.guid === entity.guid);
+          if (foundEntity) {
+            entities[i] = { ...foundEntity, ...entity };
+          }
+        });
+      }
+
+      if (entityTypesToQuery.length > 0) {
+        let entityData = [];
+
+        console.log(
+          `${new Date().toLocaleTimeString()} - entity type queue start`
+        );
+        const entityTypeQueue = async.queue((task, callback) => {
+          getEntityData(task).then(data => {
+            entityData = [...entityData, ...data];
+            callback();
+          });
+        }, 5);
+
+        entityTypeQueue.push(entityTypesToQuery);
+
+        entityTypeQueue.drain(() => {
+          console.log(
+            `${new Date().toLocaleTimeString()} - entity type queue end`
+          );
+
+          // merge entity data
+          entities.forEach((entity, i) => {
+            const foundEntity = entityData.find(e => e.guid === entity.guid);
+            if (foundEntity) {
+              entities[i] = { ...foundEntity, ...entity };
+            }
+          });
+
+          resolve(entities);
+        });
+      }
+
+      if (entityTypesToQuery.length === 0 && entityNrqlQueries.length === 0) {
+        resolve(entities);
+      }
+    });
+  };
+
+  const decorateEntitiesOld = entities => {
     //eslint-disable-next-line
     return new Promise(async resolve => {
       const entityTypesToQuery = [];

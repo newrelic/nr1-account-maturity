@@ -6,7 +6,7 @@ import ScoreBar from '../ScoreBar';
 
 export default function Navigator(props) {
   const { scoredCollection } = props;
-  const { viewGroupBy, selectedReport } = useContext(DataContext);
+  const { viewGroupBy, selectedReport, accounts } = useContext(DataContext);
 
   return useMemo(() => {
     if (!scoredCollection || scoredCollection.length === 0) {
@@ -43,15 +43,15 @@ export default function Navigator(props) {
                               accountPercentage: rollUpScore,
                               accountSummary: (
                                 props.accountSummaries || []
-                              ).find(a => a.id === parseInt(subtitle)),
-                            },
+                              ).find(a => a.id === parseInt(subtitle))
+                            }
                           })
                       : () =>
                           navigation.openStackedNerdlet({
                             id: 'capability-details-nerdlet',
                             urlState: {
-                              ...collection,
-                            },
+                              ...collection
+                            }
                           })
                     /* eslint-enable */
                   }
@@ -77,5 +77,5 @@ export default function Navigator(props) {
         </div>
       </>
     );
-  }, [scoredCollection, viewGroupBy]);
+  }, [scoredCollection, viewGroupBy, accounts]);
 }

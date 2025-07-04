@@ -23,7 +23,7 @@ export default function ListView(props) {
   const [sortingType, setSortingType] = useState(
     TableHeaderCell.SORTING_TYPE.NONE
   );
-  const { selectedView, selectedReport } = useContext(DataContext);
+  const { selectedView, selectedReport, accounts } = useContext(DataContext);
 
   const onClickTableHeaderCell = (nextColumn, { nextSortingType }) => {
     if (nextColumn === column) {
@@ -254,5 +254,5 @@ export default function ListView(props) {
         </Table>
       </div>
     );
-  }, [column, sortingType, modal, selectedView]);
+  }, [column, sortingType, modal, selectedView, accounts]);
 }

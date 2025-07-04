@@ -22,8 +22,30 @@ export const userQuery = ngql`{
   }
 }`;
 
-// eslint-disable-next-line
-export const nrqlGqlQuery = (accountId, query, alias) => ngql`{
+export const nrqlGqlQuery = (accountId, entityQueries) => {
+  const queryParts = [];
+
+  entityQueries.forEach(({ guid, nrqlQueries }) => {
+    Object.keys(nrqlQueries).forEach(queryKey => {
+      const alias = `${guid}_${queryKey}`.replace(/[^a-zA-Z0-9_]/g, '_');
+      queryParts.push(`
+        ${alias}: nrql(query: "${nrqlQueries[queryKey]}", timeout: 120) {
+          results
+        }
+      `);
+    });
+  });
+
+  return ngql`{
+    actor {
+      account(id: ${accountId}) {
+        ${queryParts.join('')}
+      }
+    }
+  }`;
+};
+
+export const nrqlGqlQueryOld = (accountId, query) => ngql`{
   actor {
     account(id: ${accountId}) {
       nrql(query: "${query}", timeout: 120) {

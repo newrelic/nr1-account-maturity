@@ -37,7 +37,8 @@ export default function CreateView() {
     view,
     prevView,
     clearWelcome,
-    userSettings
+    userSettings,
+    getAccounts
   } = useContext(DataContext);
   const [entityCount, setEntityCount] = useState(0);
   const [runParams, setRunParams] = useState(null);
@@ -51,18 +52,24 @@ export default function CreateView() {
   }, []);
 
   useEffect(() => {
-    if (
-      !accounts ||
-      accounts.length === 0 ||
-      (selectedReport?.document?.accounts &&
-        selectedReport.document.accounts.length > accounts.length)
-    ) {
-      setAllAccounts(accounts || []);
-    } else {
-      setAllAccounts(accounts);
-    }
-  }, [accounts, selectedReport]);
+    const fetchData = async () => {
+      if (
+        !accounts ||
+        accounts.length === 0 ||
+        (selectedReport?.document?.accounts &&
+          selectedReport.document.accounts.length > accounts.length)
+      ) {
+        setAllAccounts(accounts || []);
+      } else if (accounts.length === 1) {
+        const fetchedAccounts = await getAccounts();
+        setDataState({ accounts: fetchedAccounts });
+      } else {
+        setAllAccounts(accounts);
+      }
+    };
 
+    fetchData();
+  }, [accounts, selectedReport]);
   let allProducts = selectedReport?.document?.allProducts;
   let products = selectedReport?.document?.products;
   let hideNotReporting = selectedReport?.document?.hideNotReporting;
@@ -590,7 +597,7 @@ export default function CreateView() {
               <Grid style={{ maxHeight: '100px' }}>
                 {allAccounts
                   .filter(a =>
-                    a.name
+                    (a?.name || `UNAUTHORIZED ${a?.id}`)
                       .toLowerCase()
                       .includes(
                         (state?.accountsFilterEnabled

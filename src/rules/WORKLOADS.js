@@ -1,4 +1,5 @@
 export default {
+  domain: 'NR1',
   entityType: 'WORKLOAD_ENTITY',
   // some entities require additional data that can only be performed with a direct guid query
   graphql: `query ($guids: [EntityGuid]!) {
@@ -33,16 +34,16 @@ export default {
   scores: [
     {
       name: 'Reporting',
-      entityCheck: (entity) => entity.reporting,
+      entityCheck: entity => entity.reporting
     },
     {
       name: 'Alerts',
-      entityCheck: (entity) => entity?.alertSeverity !== 'NOT_CONFIGURED',
+      entityCheck: entity => entity?.alertSeverity !== 'NOT_CONFIGURED'
     },
     {
       name: 'Has Dashboards',
-      entityCheck: (entity) =>
-        (entity?.dashboardEntities?.results || []).length > 0,
-    },
-  ],
+      entityCheck: entity =>
+        (entity?.dashboardEntities?.results || []).length > 0
+    }
+  ]
 };

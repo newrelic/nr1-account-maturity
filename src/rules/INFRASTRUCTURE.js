@@ -1,3 +1,4 @@
+/* eslint-disable */
 import semver from 'semver';
 
 // notes
@@ -5,6 +6,7 @@ import semver from 'semver';
 //
 
 export default {
+  domain: 'INFRA',
   // what entity types to check against
   entityType: 'INFRASTRUCTURE_HOST_ENTITY',
   // some entities require additional data that can only be performed with a direct guid query
@@ -37,34 +39,34 @@ export default {
   scores: [
     {
       name: 'Reporting',
-      entityCheck: (entity) => entity.reporting,
+      entityCheck: entity => entity.reporting
     },
     {
       name: 'Alerts',
-      entityCheck: (entity) => entity?.alertSeverity !== 'NOT_CONFIGURED',
+      entityCheck: entity => entity?.alertSeverity !== 'NOT_CONFIGURED'
     },
     {
       name: 'Tags', // this was previously the labels check, which is really just checking for non-standard tags (value of this check is questionable)
-      entityCheck: (entity) =>
+      entityCheck: entity =>
         entity.tags
-          .map((tag) => tag.key)
+          .map(tag => tag.key)
           .some(
-            (key) =>
+            key =>
               ![
                 'account',
                 'accountId',
                 'language',
                 'trustedAccountId',
-                'guid',
+                'guid'
               ].includes(key)
-          ),
+          )
     },
     {
       name: 'Latest Release',
       entityCheck: (entity, releases) => {
         const { tags } = entity;
 
-        const agentVersion = tags.find((t) => t.key === 'agentVersion')
+        const agentVersion = tags.find(t => t.key === 'agentVersion')
           ?.values?.[0];
 
         if (releases.infrastructure) {
@@ -85,12 +87,12 @@ export default {
           );
           return false;
         }
-      },
+      }
     },
     {
       name: 'Deployments',
-      entityCheck: (entity) =>
-        (entity?.deploymentSearch?.results || []).length > 0,
+      entityCheck: entity =>
+        (entity?.deploymentSearch?.results || []).length > 0
     },
     {
       name: 'Custom Attributes',
@@ -107,17 +109,17 @@ export default {
           );
           return true;
         }
-      },
+      }
     },
     {
       name: 'Cloud Integration Enabled',
-      accountCheck: (account) =>
-        (account?.data?.cloud?.linkedAccounts || []).length > 0,
+      accountCheck: account =>
+        (account?.data?.cloud?.linkedAccounts || []).length > 0
     },
     {
       name: 'AWS Billing Enabled',
-      accountCheck: (account) =>
-        (account?.data?.awsBilling?.results || []).length > 0,
-    },
-  ],
+      accountCheck: account =>
+        (account?.data?.awsBilling?.results || []).length > 0
+    }
+  ]
 };

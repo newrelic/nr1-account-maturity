@@ -1,8 +1,10 @@
+/* eslint-disable */
 import semver from 'semver';
 
 export default {
   short: 'Apps',
   long: 'Applications',
+  domain: 'APM',
   // what entity types to check against
   entityType: 'APM_APPLICATION_ENTITY',
   // some entities require additional data that can only be performed with a direct guid query
@@ -44,20 +46,20 @@ export default {
 
   tagMeta: [
     { key: 'language', name: 'Language' },
-    { key: 'agentVersion', name: 'Version' },
+    { key: 'agentVersion', name: 'Version' }
   ],
   nrqlQueries: entity => ({
-    agentUpdate: `FROM AgentUpdate SELECT latest(currentVersion) as 'currentVersion', latest(recommendedVersion) as 'recVersion' WHERE entity.guid = '${entity.guid}' SINCE 30 hours ago`,
+    agentUpdate: `FROM AgentUpdate SELECT latest(currentVersion) as 'currentVersion', latest(recommendedVersion) as 'recVersion' WHERE entity.guid = '${entity.guid}' SINCE 30 hours ago`
   }),
   // scores and values to run and display
   scores: [
     {
       name: 'Reporting',
-      entityCheck: entity => entity.reporting,
+      entityCheck: entity => entity.reporting
     },
     {
       name: 'Alerts',
-      entityCheck: entity => entity?.alertSeverity !== 'NOT_CONFIGURED',
+      entityCheck: entity => entity?.alertSeverity !== 'NOT_CONFIGURED'
     },
     {
       name: 'Custom Apdex',
@@ -67,7 +69,7 @@ export default {
           (settings?.apdexTarget !== 0.5 && language !== 'nodejs') ||
           (settings?.apdexTarget !== 0.1 && language === 'nodejs')
         );
-      },
+      }
     },
     {
       name: 'Tags', // this was previously the labels check, which is really just checking for non-standard tags (value of this check is questionable)
@@ -81,9 +83,9 @@ export default {
                 'accountId',
                 'language',
                 'trustedAccountId',
-                'guid',
+                'guid'
               ].includes(key)
-          ),
+          )
     },
     // {
     //   name: 'Latest Release',
@@ -131,18 +133,18 @@ export default {
           );
           return false;
         }
-      },
+      }
     },
     {
       name: 'DT Enabled',
       entityCheck: entity =>
         entity.tags.find(tag => tag.key === 'nr.dt.enabled')?.values?.[0] ===
-        'true',
+        'true'
     },
     {
       name: 'Deployments',
       entityCheck: entity =>
-        (entity?.deploymentSearch?.results || []).length > 0,
+        (entity?.deploymentSearch?.results || []).length > 0
     },
     {
       name: 'Custom Attributes',
@@ -159,7 +161,7 @@ export default {
           );
           return true;
         }
-      },
-    },
-  ],
+      }
+    }
+  ]
 };

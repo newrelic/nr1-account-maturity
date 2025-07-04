@@ -1,6 +1,8 @@
+/* eslint-disable */
 import semver from 'semver';
 
 export default {
+  domain: 'BROWSER',
   // what entity types to check against
   entityType: 'BROWSER_APPLICATION_ENTITY',
   // some entities require additional data that can only be performed with a direct guid query
@@ -42,34 +44,34 @@ export default {
   scores: [
     {
       name: 'Reporting',
-      entityCheck: (entity) => entity.reporting,
+      entityCheck: entity => entity.reporting
     },
     {
       name: 'Alerts',
-      entityCheck: (entity) => entity?.alertSeverity !== 'NOT_CONFIGURED',
+      entityCheck: entity => entity?.alertSeverity !== 'NOT_CONFIGURED'
     },
     {
       name: 'Custom Apdex',
-      entityCheck: (entity) => {
+      entityCheck: entity => {
         const apdexTarget = entity?.settings?.apdexTarget || 0;
         return apdexTarget > 0 && apdexTarget !== 7;
-      },
+      }
     },
     {
       name: 'Tags', // this was previously the labels check, which is really just checking for non-standard tags (value of this check is questionable)
-      entityCheck: (entity) =>
+      entityCheck: entity =>
         entity.tags
-          .map((tag) => tag.key)
+          .map(tag => tag.key)
           .some(
-            (key) =>
+            key =>
               ![
                 'account',
                 'accountId',
                 'language',
                 'trustedAccountId',
-                'guid',
+                'guid'
               ].includes(key)
-          ),
+          )
     },
     {
       name: 'Latest Release',
@@ -99,18 +101,18 @@ export default {
           );
           return false;
         }
-      },
+      }
     },
     {
       name: 'DT Enabled',
-      entityCheck: (entity) =>
-        entity.tags.find((tag) => tag.key === 'nr.dt.enabled')?.values?.[0] ===
-        'true',
+      entityCheck: entity =>
+        entity.tags.find(tag => tag.key === 'nr.dt.enabled')?.values?.[0] ===
+        'true'
     },
     {
       name: 'Deployments',
-      entityCheck: (entity) =>
-        (entity?.deploymentSearch?.results || []).length > 0,
+      entityCheck: entity =>
+        (entity?.deploymentSearch?.results || []).length > 0
     },
     {
       name: 'Custom Attributes',
@@ -127,7 +129,7 @@ export default {
           );
           return true;
         }
-      },
-    },
-  ],
+      }
+    }
+  ]
 };
