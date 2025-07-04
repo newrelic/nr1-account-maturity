@@ -1434,15 +1434,16 @@ export function useProvideData(props) {
         );
 
         // Process batches with concurrency control
-        const nrqlQueue = async.queue(async (batch, callback) => {
-          try {
-            const batchResults = await processBatchedNrqlQueries(batch);
-            entityNrqlData = [...entityNrqlData, ...batchResults];
-            callback();
-          } catch (error) {
-            console.error('Error processing NRQL batch:', error);
-            callback(error);
-          }
+        const nrqlQueue = async.queue((batch, callback) => {
+          processBatchedNrqlQueries(batch)
+            .then(batchResults => {
+              entityNrqlData = [...entityNrqlData, ...batchResults];
+              callback();
+            })
+            .catch(error => {
+              console.error('Error processing NRQL batch:', error);
+              callback(error);
+            });
         }, 3); // Reduced concurrency since each batch processes multiple entities
 
         nrqlQueue.push(batches);
