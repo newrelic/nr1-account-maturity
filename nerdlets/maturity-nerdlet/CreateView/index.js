@@ -505,11 +505,14 @@ export default function CreateView() {
               </div>
               <div style={{ textAlign: 'right' }}>
                 <Switch
-                  onChange={() =>
+                  onChange={() => {
                     setState({
+                      accountsFilter: state.accountsFilterEnabled
+                        ? ''
+                        : state.accountsFilter,
                       accountsFilterEnabled: !state?.accountsFilterEnabled
-                    })
-                  }
+                    });
+                  }}
                   checked={state?.accountsFilterEnabled}
                   label="Apply dynamic filter"
                   info="Accounts will be automatically selected for assessment depending on filter eg. 'Production'"
