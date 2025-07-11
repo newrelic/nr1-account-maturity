@@ -580,11 +580,14 @@ export default function CreateView() {
               </div>
               <div style={{ textAlign: 'right' }}>
                 <Switch
-                  onChange={() =>
+                  onChange={() => {
                     setState({
+                      accountsFilter: state.accountsFilterEnabled
+                        ? ''
+                        : state.accountsFilter,
                       accountsFilterEnabled: !state?.accountsFilterEnabled
-                    })
-                  }
+                    });
+                  }}
                   checked={state?.accountsFilterEnabled}
                   label="Apply dynamic filter"
                   info="Accounts will be automatically selected for assessment depending on filter eg. 'Production'"
@@ -702,7 +705,9 @@ export default function CreateView() {
                 accounts: state.accounts,
                 allAccounts: state.accounts.length === accounts.length,
                 entitySearchQuery: state.entitySearchQuery,
-                accountsFilter: state.accountsFilter,
+                accountsFilter: state.accountsFilterEnabled
+                  ? state.accountsFilter
+                  : '',
                 accountsFilterEnabled: state.accountsFilterEnabled,
                 allProducts: state.allProducts,
                 products: state.products,
@@ -722,7 +727,9 @@ export default function CreateView() {
                     description: state.description,
                     accounts: state.accounts,
                     allAccounts: state.accounts.length === accounts.length,
-                    accountsFilter: state.accountsFilter,
+                    accountsFilter: state.accountsFilterEnabled
+                      ? state.accountsFilter
+                      : '',
                     accountsFilterEnabled: state.accountsFilterEnabled,
                     allProducts: state.allProducts,
                     products: state.products,

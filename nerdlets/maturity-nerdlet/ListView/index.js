@@ -135,6 +135,7 @@ export default function ListView(props) {
                 key={p.name}
                 value={({ item }) => item[p.name]}
                 sortable
+                alignmentType={TableHeaderCell.ALIGNMENT_TYPE.CENTER}
                 sortingType={
                   column === i + 2
                     ? sortingType
@@ -216,6 +217,7 @@ export default function ListView(props) {
                   <TableRowCell
                     key={h.name}
                     style={{
+                      textAlign: 'center',
                       fontWeight: 'bold',
                       fontSize: '15px',
                       color: scoreToColor(item[h.name])?.color

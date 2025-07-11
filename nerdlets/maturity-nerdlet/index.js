@@ -3,6 +3,7 @@ import { PlatformStateContext, nerdlet, AutoSizer } from 'nr1';
 import { ProvideData } from '../../src/context/data';
 import AccountMaturity from './AccountMaturity';
 import { Messages } from '@newrelic/nr-labs-components';
+import MemoryMonitor from './MemoryMonitor';
 
 export default function AccountMaturityRoot() {
   const platformContext = useContext(PlatformStateContext);
@@ -25,6 +26,7 @@ export default function AccountMaturityRoot() {
         fileName="messages"
         timeoutPeriod={8 * 7 * 24 * 60 * 60} // 8 weeks
       />
+      <MemoryMonitor />
 
       <ProvideData platformContext={platformContext}>
         <AutoSizer>

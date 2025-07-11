@@ -444,6 +444,7 @@ export function useProvideData(props) {
     //
     if (documentId.includes('allData')) {
       report.document.accounts = (dataState?.accounts || []).map(a => a.id);
+      report.document.products = Object.keys(rules);
     }
 
     let accounts = [...report.document.accounts].map(id => ({
@@ -462,7 +463,6 @@ export function useProvideData(props) {
     }
 
     //----------------------------------------------------
-
     const {
       entitiesByAccount,
       summarizedScores
