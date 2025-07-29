@@ -28,7 +28,7 @@ export const defaultActions = setDataState => {
       type: 'secondary',
       hint: 'Launch the old version',
       iconType: Icon.TYPE.INTERFACE__OPERATIONS__EXTERNAL_LINK,
-      onClick: () => navigation.openNerdlet({ id: 'old-maturity-nerdlet' })
+      onClick: () => navigation.openNerdlet({ id: 'old-maturity' })
     },
     {
       label: 'Help',

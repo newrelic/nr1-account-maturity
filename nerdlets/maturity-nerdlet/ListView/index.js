@@ -164,7 +164,7 @@ export default function ListView(props) {
                   }}
                   onClick={() =>
                     navigation.openStackedNerdlet({
-                      id: 'account-details-nerdlet',
+                      id: 'account-details',
                       urlState: {
                         accountName: accountSplit[0],
                         accountId: parseInt(accountSplit[1]),

@@ -46,7 +46,7 @@ export default function ViewList() {
         vc => vc.id === userSettings.defaultViewId
       );
 
-      if (viewConfig.id === `allData+${email}`) {
+      if (viewConfig?.id === `allData+${email}`) {
         runView(
           { id: `allData+${email}`, name: 'All data' },
           null,
@@ -155,7 +155,7 @@ export default function ViewList() {
     {
       label: 'Run',
       onClick: (evt, { item }) => {
-        if (item.id === `allData+${email}`) {
+        if (item?.id === `allData+${email}`) {
           runView(
             { id: `allData+${email}`, name: 'All data' },
             null,
@@ -179,9 +179,9 @@ export default function ViewList() {
       label: 'Edit',
       onClick: (evt, { item }) => {
         const documentId =
-          item.id === 'allData+undefined'
+          item?.id === 'allData+undefined'
             ? `allData+${email}`
-            : item.document.id;
+            : item.document?.id;
 
         if (documentId === `allData+${email}`) {
           Toast.showToast({
@@ -202,7 +202,7 @@ export default function ViewList() {
       type: TableRow.ACTION_TYPE.DESTRUCTIVE,
       onClick: (evt, { item }) => {
         const documentId =
-          item.id === 'allData+undefined' ? `allData+${email}` : documentId;
+          item?.id === 'allData+undefined' ? `allData+${email}` : documentId;
 
         if (documentId === `allData+${email}`) {
           Toast.showToast({
@@ -251,10 +251,10 @@ export default function ViewList() {
               <TableRow actions={actions}>
                 <FavoriteTableRowCell
                   style={{
-                    color: favorites.includes(item.id) ? '#F0B400' : undefined
+                    color: favorites.includes(item?.id) ? '#F0B400' : undefined
                   }}
-                  onChange={() => toggleFavoriteView(item.id)}
-                  checked={favorites.includes(item.id)}
+                  onChange={() => toggleFavoriteView(item?.id)}
+                  checked={favorites.includes(item?.id)}
                 />
 
                 {headers.map(header => {

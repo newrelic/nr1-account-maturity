@@ -38,22 +38,22 @@ export default function Summary(props) {
                       ? () =>
                           /* eslint-disable */
                           navigation.openStackedNerdlet({
-                            id: 'account-details-nerdlet',
+                            id: 'account-details',
                             urlState: {
                               accountName: title,
                               accountId: subtitle,
                               accountPercentage: rollUpScore,
                               accountSummary: (
                                 props.accountSummaries || []
-                              ).find(a => a.id === parseInt(subtitle)),
-                            },
+                              ).find(a => a.id === parseInt(subtitle))
+                            }
                           })
                       : () =>
                           navigation.openStackedNerdlet({
-                            id: 'capability-details-nerdlet',
+                            id: 'capability-details',
                             urlState: {
-                              ...collection,
-                            },
+                              ...collection
+                            }
                           })
                     /* eslint-enable */
                   }

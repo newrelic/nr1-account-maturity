@@ -36,7 +36,7 @@ export default function Navigator(props) {
                       ? () =>
                           /* eslint-disable */
                           navigation.openStackedNerdlet({
-                            id: 'account-details-nerdlet',
+                            id: 'account-details',
                             urlState: {
                               accountName: title,
                               accountId: subtitle,
@@ -48,7 +48,7 @@ export default function Navigator(props) {
                           })
                       : () =>
                           navigation.openStackedNerdlet({
-                            id: 'capability-details-nerdlet',
+                            id: 'capability-details',
                             urlState: {
                               ...collection
                             }

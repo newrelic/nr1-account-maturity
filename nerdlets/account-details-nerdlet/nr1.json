@@ -1,6 +1,6 @@
 {
     "schemaType": "NERDLET",
-    "id": "account-details-nerdlet",
+    "id": "account-details",
     "description": "",
     "displayName": "Account Details"
 }

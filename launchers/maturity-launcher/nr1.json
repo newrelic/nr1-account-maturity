@@ -3,5 +3,5 @@
   "id": "maturity-launcher",
   "description": "Evaluates maturity of your account/sub-accounts within New Relic",
   "displayName": "Account Maturity - V2 BETA",
-  "rootNerdletId": "maturity-nerdlet"
+  "rootNerdletId": "maturity-home"
 }

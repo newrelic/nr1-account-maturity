@@ -28,6 +28,7 @@ import {
   ACCOUNT_HISTORY_COLLECTION,
   NRQL_BATCH_SIZE
 } from '../constants';
+import { useResourceMonitor } from '../../nerdlets/maturity-nerdlet/ResourceMonitor';
 
 const DataContext = createContext();
 const async = require('async');
@@ -40,6 +41,7 @@ export function ProvideData(v) {
 export default DataContext;
 
 export function useProvideData(props) {
+  const { startTracking, stopTracking } = useResourceMonitor();
   const [dataState, setDataState] = useSetState({
     loadedDefaultView: false,
     showSkipThisStep: true,
@@ -167,7 +169,7 @@ export function useProvideData(props) {
       console.log('account id changed => ', accountId);
       if (accountId === 'cross-account') {
         console.log('cross account should not be selected, reloading...');
-        navigation.openNerdlet({ id: 'maturity-nerdlet' });
+        navigation.openNerdlet({ id: 'maturity-home' });
         return;
       }
 
@@ -390,6 +392,7 @@ export function useProvideData(props) {
         ? `allData+${dataState?.email}`
         : documentId;
 
+    startTracking();
     setDataState({
       runningReport: true,
       [`runningReport.${documentId}`]: true,
@@ -502,6 +505,7 @@ export function useProvideData(props) {
 
     console.log(totalScorePercentage, runAt);
 
+    stopTracking();
     const prepareState = {
       runningReport: false,
       accounts,
@@ -615,6 +619,7 @@ export function useProvideData(props) {
 
     await fetchViewHistory();
 
+    stopTracking();
     setDataState({
       runningReport: false,
       [`runningReport.${selectedReport.id}`]: false,
