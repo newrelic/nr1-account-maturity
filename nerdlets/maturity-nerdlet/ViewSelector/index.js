@@ -38,9 +38,6 @@ export default function ViewSelector() {
 
     const currentViewConfig = viewConfigs.find(vc => vc.id === selectedView.id);
 
-    // eslint-disable-next-line
-    console.log('view sel', selectedView, currentViewConfig);
-
     return (
       <div style={{ paddingRight: '5px' }}>
         <Dropdown

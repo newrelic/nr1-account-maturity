@@ -450,11 +450,19 @@ export function useProvideData(props) {
       report.document.products = Object.keys(rules);
     }
 
-    let accounts = [...report.document.accounts].map(id => ({
+    let accountsToDecorate = [...report.document.accounts].map(id => ({
       ...[...dataState.accounts].find(a => a.id === id)
     }));
 
-    accounts = await decorateAccountData(accounts);
+    accountsToDecorate = await decorateAccountData(accountsToDecorate);
+
+    // Create a new accounts array with decorated accounts replaced
+    const updatedAccounts = [...dataState.accounts].map(originalAccount => {
+      const decoratedAccount = accountsToDecorate.find(
+        decorated => decorated.id === originalAccount.id
+      );
+      return decoratedAccount || originalAccount;
+    });
 
     // inject hideNotReporting to entitySearchQuery
     let entitySearchQuery = report.document?.entitySearchQuery || '';
@@ -470,7 +478,7 @@ export function useProvideData(props) {
       entitiesByAccount,
       summarizedScores
     } = await getEntitiesForAccounts(
-      accounts,
+      accountsToDecorate,
       entitySearchQuery || '',
       dataState.agentReleases,
       dataState.dataDictionary,
@@ -508,7 +516,7 @@ export function useProvideData(props) {
     stopTracking();
     const prepareState = {
       runningReport: false,
-      accounts,
+      accounts: updatedAccounts,
       [`runningReport.${report?.id || selectedView.id}`]: true,
       lastRunAt: runAt,
       entitiesByAccount,
@@ -730,9 +738,10 @@ export function useProvideData(props) {
     );
 
   const getAccounts = () =>
-    NerdGraphQuery.query({ query: accountsQuery }).then(
-      res => res?.data?.actor?.accounts || []
-    );
+    NerdGraphQuery.query({ query: accountsQuery }).then(res => {
+      console.log('getAccounts', res?.data?.actor?.accounts);
+      return res?.data?.actor?.accounts || [];
+    });
 
   const checkUser = owner => {
     if (owner?.id !== dataState.user?.id) {

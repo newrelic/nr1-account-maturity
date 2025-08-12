@@ -1,4 +1,4 @@
-import React, { useContext, useMemo, useEffect } from 'react';
+import React, { useContext, useMemo } from 'react';
 import { Button, Icon, Tooltip } from 'nr1';
 import { ProgressBar } from '@newrelic/nr-labs-components';
 import { percentageToStatus, scoreToColor } from '../../../src/utils';
@@ -7,14 +7,9 @@ import HistorySelector from '../HistorySelector';
 import DataContext from '../../../src/context/data';
 
 export default function ScoreBar(props) {
-  const {
-    selectedReport,
-    selectedAccountId,
-    runView,
-    accounts,
-    getAccounts,
-    setDataState
-  } = useContext(DataContext);
+  const { selectedReport, selectedAccountId, runView, accounts } = useContext(
+    DataContext
+  );
   const status = percentageToStatus(props?.totalPercentage);
   const scoreColor = scoreToColor(props?.totalPercentage);
 
@@ -61,16 +56,21 @@ export default function ScoreBar(props) {
     return false;
   };
 
-  useEffect(() => {
-    const fetchData = async () => {
-      if (accounts.length === 1) {
-        const fetchedAccounts = await getAccounts();
-        setDataState({ accounts: fetchedAccounts });
-      }
-    };
+  // useEffect(() => {
+  //   const fetchData = async () => {
+  //     if (accounts.length === 1) {
+  //       const fetchedAccounts = await getAccounts();
+  //       setDataState({ accounts: fetchedAccounts });
+  //     }
+  //   };
 
-    fetchData();
-  }, [accounts]);
+  //   fetchData();
+  // }, [accounts]);
+
+  // const allAccountsAvailable = areAllAccountsAvailable(
+  //   selectedReport?.document?.accounts || [],
+  //   accounts
+  // );
 
   return useMemo(() => {
     const allAccountsAvailable = areAllAccountsAvailable(
