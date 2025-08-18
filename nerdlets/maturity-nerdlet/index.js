@@ -27,7 +27,7 @@ export default function AccountMaturityRoot() {
         timeoutPeriod={8 * 7 * 24 * 60 * 60} // 8 weeks
       />
 
-      <ResourceMonitorProvider timeLimitMinutes={0.01}>
+      <ResourceMonitorProvider timeLimitMinutes={5}>
         <ProvideData platformContext={platformContext}>
           <AutoSizer>
             {({ width, height }) => (
