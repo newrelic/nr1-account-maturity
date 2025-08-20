@@ -603,7 +603,7 @@ export default function CreateView() {
                     (a?.name || `UNAUTHORIZED ${a?.id}`)
                       .toLowerCase()
                       .includes(
-                        (state?.accountsFilterEnabled
+                        (state?.accountsFilter
                           ? state?.accountsFilter || ''
                           : ''
                         ).toLowerCase()
