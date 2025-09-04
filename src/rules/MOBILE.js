@@ -14,10 +14,10 @@ export default {
             mobileEvents: nrdbQuery(nrql: "SELECT count(*) FROM Mobile SINCE 60 minutes ago", timeout: 120) {
               results
             }
-            mobileAppLaunch: nrdbQuery(nrql: "SELECT uniqueCount(sessionId) from Mobile SINCE 7 days ago", timeout: 120) {
+            mobileAppLaunch: nrdbQuery(nrql: "SELECT uniqueCount(sessionId) from Mobile SINCE 30 hours ago", timeout: 120) {
               results
             }
-            mobileDeployedVersions: nrdbQuery(nrql: "SELECT uniqueCount(appId), latest(osName) FROM Mobile SINCE 7 days ago FACET newRelicVersion", timeout: 120) {
+            mobileDeployedVersions: nrdbQuery(nrql: "SELECT uniqueCount(appId), latest(osName) FROM Mobile SINCE 30 hours ago FACET newRelicVersion", timeout: 120) {
               results
             }
             guid

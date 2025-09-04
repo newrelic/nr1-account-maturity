@@ -203,10 +203,6 @@ export const entitySearchQueryByAccount = (
             id
             name
           }
-          tags {
-            key
-            values
-          }
           reporting
         }
       }

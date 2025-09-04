@@ -53,22 +53,29 @@ export default {
     },
     {
       name: 'Tags', // this was previously the labels check, which is really just checking for non-standard tags (value of this check is questionable)
-      entityCheck: entity =>
-        entity.tags
-          .map(tag => tag.key)
-          .some(
-            key =>
-              ![
-                'account',
-                'accountId',
-                'language',
-                'trustedAccountId',
-                'guid',
-                'monitorType',
-                'period',
-                'publicLocation'
-              ].includes(key)
-          )
+      entityCheck: entity => {
+        if (!entity.tags) {
+          // eslint-disable-next-line
+          console.log('no tags', entity);
+          return false;
+        } else {
+          return entity.tags
+            .map(tag => tag.key)
+            .some(
+              key =>
+                ![
+                  'account',
+                  'accountId',
+                  'language',
+                  'trustedAccountId',
+                  'guid',
+                  'monitorType',
+                  'period',
+                  'publicLocation'
+                ].includes(key)
+            );
+        }
+      }
     },
     {
       name: 'Deployments',
@@ -78,7 +85,7 @@ export default {
     {
       name: 'Using Private Locations',
       entityCheck: entity =>
-        entity.tags.some(tag => tag.key === 'privateLocation')
+        (entity?.tags || []).some(tag => tag.key === 'privateLocation')
     }
   ]
 };

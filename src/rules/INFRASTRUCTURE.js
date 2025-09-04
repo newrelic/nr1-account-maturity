@@ -1,4 +1,3 @@
-/* eslint-disable */
 import semver from 'semver';
 
 // notes
@@ -6,8 +5,9 @@ import semver from 'semver';
 //
 
 export default {
-  domain: 'INFRA',
   // what entity types to check against
+  domain: 'INFRA',
+  type: 'HOST',
   entityType: 'INFRASTRUCTURE_HOST_ENTITY',
   // some entities require additional data that can only be performed with a direct guid query
   graphql: `query ($guids: [EntityGuid]!) {
@@ -21,9 +21,6 @@ export default {
           }
           reporting
           ... on InfrastructureHostEntity {
-            hostSummary {
-              servicesCount
-            }
             tags {
               key
               values
@@ -47,24 +44,35 @@ export default {
     },
     {
       name: 'Tags', // this was previously the labels check, which is really just checking for non-standard tags (value of this check is questionable)
-      entityCheck: entity =>
-        entity.tags
-          .map(tag => tag.key)
-          .some(
-            key =>
-              ![
-                'account',
-                'accountId',
-                'language',
-                'trustedAccountId',
-                'guid'
-              ].includes(key)
-          )
+      entityCheck: entity => {
+        if (!entity.tags) {
+          // eslint-disable-next-line
+          console.log('no tags', entity);
+          return false;
+        } else {
+          return entity.tags
+            .map(tag => tag.key)
+            .some(
+              key =>
+                ![
+                  'account',
+                  'accountId',
+                  'language',
+                  'trustedAccountId',
+                  'guid'
+                ].includes(key)
+            );
+        }
+      }
     },
     {
       name: 'Latest Release',
       entityCheck: (entity, releases) => {
         const { tags } = entity;
+
+        if (!tags) {
+          return false;
+        }
 
         const agentVersion = tags.find(t => t.key === 'agentVersion')
           ?.values?.[0];
@@ -80,6 +88,7 @@ export default {
 
           return semver.satisfies(mversion?.raw, `>=${lversion?.raw}`);
         } else {
+          // eslint-disable-next-line
           console.log(
             "Can't determine agent release for",
             entity.name,
@@ -104,6 +113,7 @@ export default {
         if (attributes) {
           return currentKeySet.length > attributes.length;
         } else {
+          // eslint-disable-next-line
           console.log(
             'unable to determine if data dictionary or attributes exist, returning true'
           );

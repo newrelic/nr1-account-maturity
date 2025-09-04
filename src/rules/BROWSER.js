@@ -1,4 +1,3 @@
-/* eslint-disable */
 import semver from 'semver';
 
 export default {
@@ -59,19 +58,26 @@ export default {
     },
     {
       name: 'Tags', // this was previously the labels check, which is really just checking for non-standard tags (value of this check is questionable)
-      entityCheck: entity =>
-        entity.tags
-          .map(tag => tag.key)
-          .some(
-            key =>
-              ![
-                'account',
-                'accountId',
-                'language',
-                'trustedAccountId',
-                'guid'
-              ].includes(key)
-          )
+      entityCheck: entity => {
+        if (!entity.tags) {
+          // eslint-disable-next-line
+          console.log('no tags', entity);
+          return false;
+        } else {
+          return entity.tags
+            .map(tag => tag.key)
+            .some(
+              key =>
+                ![
+                  'account',
+                  'accountId',
+                  'language',
+                  'trustedAccountId',
+                  'guid'
+                ].includes(key)
+            );
+        }
+      }
     },
     {
       name: 'Latest Release',
@@ -94,6 +100,7 @@ export default {
 
           return semver.satisfies(mversion?.raw, `>=${lversion?.raw}`);
         } else {
+          // eslint-disable-next-line
           console.log(
             "Can't determine agent release for",
             entity.name,
@@ -106,8 +113,8 @@ export default {
     {
       name: 'DT Enabled',
       entityCheck: entity =>
-        entity.tags.find(tag => tag.key === 'nr.dt.enabled')?.values?.[0] ===
-        'true'
+        (entity?.tags || []).find(tag => tag.key === 'nr.dt.enabled')
+          ?.values?.[0] === 'true'
     },
     {
       name: 'Deployments',
@@ -124,6 +131,7 @@ export default {
         if (attributes) {
           return currentKeySet.length > attributes.length;
         } else {
+          // eslint-disable-next-line
           console.log(
             'unable to determine if data dictionary or attributes exist, returning true'
           );

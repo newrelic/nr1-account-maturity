@@ -1,5 +1,4 @@
 /* eslint-disable */
-import semver from 'semver';
 
 export default {
   short: 'Apps',
@@ -12,7 +11,7 @@ export default {
       actor {
         entities(guids: $guids) {
           guid
-          deploymentSearch {
+          deploymentSearch(filter: {limit: 1}) {
             results {
               commit
             }
@@ -22,15 +21,8 @@ export default {
             applicationId
             name
             language
-            apmSummary {
-              throughput
-            }
             settings {
               apdexTarget
-            }
-            runningAgentVersions {
-              minVersion
-              maxVersion
             }
             tags {
               key
@@ -48,9 +40,9 @@ export default {
     { key: 'language', name: 'Language' },
     { key: 'agentVersion', name: 'Version' }
   ],
-  nrqlQueries: entity => ({
-    agentUpdate: `FROM AgentUpdate SELECT latest(currentVersion) as 'currentVersion', latest(recommendedVersion) as 'recVersion' WHERE entity.guid = '${entity.guid}' SINCE 30 hours ago`
-  }),
+  // nrqlQueries: (entity) => ({
+  //   agentUpdate: `FROM AgentUpdate SELECT latest(currentVersion) as 'currentVersion', latest(recommendedVersion) as 'recVersion' WHERE entity.guid = '${entity.guid}' SINCE 30 hours ago`,
+  // }),
   // scores and values to run and display
   scores: [
     {
@@ -73,19 +65,25 @@ export default {
     },
     {
       name: 'Tags', // this was previously the labels check, which is really just checking for non-standard tags (value of this check is questionable)
-      entityCheck: entity =>
-        entity.tags
-          .map(tag => tag.key)
-          .some(
-            key =>
-              ![
-                'account',
-                'accountId',
-                'language',
-                'trustedAccountId',
-                'guid'
-              ].includes(key)
-          )
+      entityCheck: entity => {
+        if (!entity.tags) {
+          console.log('no tags', entity);
+          return false;
+        } else {
+          return entity.tags
+            .map(tag => tag.key)
+            .some(
+              key =>
+                ![
+                  'account',
+                  'accountId',
+                  'language',
+                  'trustedAccountId',
+                  'guid'
+                ].includes(key)
+            );
+        }
+      }
     },
     // {
     //   name: 'Latest Release',
