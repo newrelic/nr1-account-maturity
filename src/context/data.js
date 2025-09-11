@@ -23,7 +23,7 @@ import {
 import rules from '../rules';
 import { v4 as uuidv4 } from 'uuid';
 import { chunk, chunkString, generateAccountSummary } from '../utils';
-import { useResourceMonitor } from '../../nerdlets/maturity-nerdlet/ResourceMonitor';
+// import { useResourceMonitor } from '../../nerdlets/maturity-nerdlet/ResourceMonitor';
 
 import {
   ACCOUNT_CONFIG_COLLECTION,
@@ -76,7 +76,7 @@ const RETRY_LIMIT = 7;
 export default DataContext;
 
 export function useProvideData(props) {
-  const { startTracking, stopTracking } = useResourceMonitor();
+  // const { startTracking, stopTracking } = useResourceMonitor();
   const [dataState, setDataState] = useSetState({
     loadedDefaultView: false,
     showSkipThisStep: true,
@@ -469,7 +469,7 @@ export function useProvideData(props) {
         ? `allData+${dataState?.email}`
         : documentId;
 
-    startTracking();
+    // startTracking();
     setDataState({
       runningReport: true,
       [`runningReport.${documentId}`]: true,
@@ -590,7 +590,7 @@ export function useProvideData(props) {
 
     console.log(totalScorePercentage, runAt);
 
-    stopTracking();
+    // stopTracking();
     const prepareState = {
       runningReport: false,
       accounts: updatedAccounts,
@@ -704,7 +704,7 @@ export function useProvideData(props) {
 
     await fetchViewHistory();
 
-    stopTracking();
+    // stopTracking();
     setDataState({
       runningReport: false,
       [`runningReport.${selectedReport.id}`]: false,

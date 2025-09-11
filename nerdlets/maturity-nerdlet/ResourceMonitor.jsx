@@ -48,7 +48,7 @@ export function ResourceMonitorProvider({ children, timeLimitMinutes = 5 }) {
     if (!timerRef.current) {
       timerRef.current = setTimeout(() => {
         setShowPrompt(true);
-      }, 1000);
+      }, timeLimitMinutes * 60 * 1000);
     }
   };
 
@@ -102,10 +102,10 @@ export function ResourceMonitorProvider({ children, timeLimitMinutes = 5 }) {
               })
             }
           >
-            Reload
+            Cancel Query
           </Button>
           &nbsp;
-          <Button onClick={handleContinue}>Ignore</Button>
+          <Button onClick={handleContinue}>Continue</Button>
         </div>
       )}
     </ResourceMonitorContext.Provider>

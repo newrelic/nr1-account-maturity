@@ -34,39 +34,39 @@ export default {
   scores: [
     {
       name: 'Reporting',
-      entityCheck: (entity) => entity.reporting,
+      entityCheck: entity => entity.reporting
     },
     {
       name: 'Breadcrumbs',
-      entityCheck: (entity) =>
-        (entity.mobileBreadcrumbs?.results?.[0]?.count || 0) > 0,
+      entityCheck: entity =>
+        (entity.mobileBreadcrumbs?.results?.[0]?.count || 0) > 0
     },
     {
       name: 'Alerts',
-      entityCheck: (entity) => entity?.alertSeverity !== 'NOT_CONFIGURED',
+      entityCheck: entity => entity?.alertSeverity !== 'NOT_CONFIGURED'
     },
     {
       name: 'Tags', // this was previously the labels check, which is really just checking for non-standard tags (value of this check is questionable)
-      entityCheck: (entity) => {
+      entityCheck: entity => {
         if (!entity.tags) {
           console.log('no tags', entity);
           return false;
         } else {
           return entity.tags
-            .map((tag) => tag.key)
+            .map(tag => tag.key)
             .some(
-              (key) =>
+              key =>
                 ![
                   'account',
                   'accountId',
                   'language',
                   'trustedAccountId',
-                  'guid',
-                ].includes(key),
+                  'guid'
+                ].includes(key)
             );
         }
-      },
-    },
+      }
+    }
     // {
     //   name: 'Launch count',
     //   entityCheck: (entity) =>
@@ -78,7 +78,7 @@ export default {
     //   entityCheck: (entity) =>
     //     (entity.mobileHandledExceptions?.results?.[0]?.count || 0) > 0,
     // },
-  ],
+  ]
 };
 
 // mobileAppLaunch: nrdbQuery(nrql: "SELECT latest(sessionId) from Mobile SINCE 30 hours ago", timeout: 120) {

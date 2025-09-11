@@ -40,23 +40,23 @@ export default {
   scores: [
     {
       name: 'Reporting',
-      entityCheck: (entity) => entity.reporting,
+      entityCheck: entity => entity.reporting
     },
     {
       name: 'Alerts',
-      entityCheck: (entity) => entity?.alertSeverity !== 'NOT_CONFIGURED',
+      entityCheck: entity => entity?.alertSeverity !== 'NOT_CONFIGURED'
     },
     {
       name: 'Tags', // this was previously the labels check, which is really just checking for non-standard tags (value of this check is questionable)
-      entityCheck: (entity) => {
+      entityCheck: entity => {
         if (!entity.tags) {
           console.log('no tags', entity);
           return false;
         } else {
           return entity.tags
-            .map((tag) => tag.key)
+            .map(tag => tag.key)
             .some(
-              (key) =>
+              key =>
                 ![
                   'account',
                   'accountId',
@@ -65,21 +65,21 @@ export default {
                   'guid',
                   'monitorType',
                   'period',
-                  'publicLocation',
-                ].includes(key),
+                  'publicLocation'
+                ].includes(key)
             );
         }
-      },
+      }
     },
     {
       name: 'Deployments',
-      entityCheck: (entity) =>
-        (entity?.deploymentSearch?.results || []).length > 0,
-    },
+      entityCheck: entity =>
+        (entity?.deploymentSearch?.results || []).length > 0
+    }
     // {
     //   name: 'Using Private Locations',
     //   entityCheck: (entity) =>
     //     (entity?.tags || []).some((tag) => tag.key === 'privateLocation'),
     // },
-  ],
+  ]
 };

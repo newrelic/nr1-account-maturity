@@ -40,40 +40,40 @@ export default {
   scores: [
     {
       name: 'Reporting',
-      entityCheck: (entity) => entity.reporting,
+      entityCheck: entity => entity.reporting
     },
     {
       name: 'Alerts',
-      entityCheck: (entity) => entity?.alertSeverity !== 'NOT_CONFIGURED',
+      entityCheck: entity => entity?.alertSeverity !== 'NOT_CONFIGURED'
     },
     {
       name: 'Custom Apdex',
-      entityCheck: (entity) => {
+      entityCheck: entity => {
         const apdexTarget = entity?.settings?.apdexTarget || 0;
         return apdexTarget > 0 && apdexTarget !== 7;
-      },
+      }
     },
     {
       name: 'Tags', // this was previously the labels check, which is really just checking for non-standard tags (value of this check is questionable)
-      entityCheck: (entity) => {
+      entityCheck: entity => {
         if (!entity.tags) {
           console.log('no tags', entity);
           return false;
         } else {
           return entity.tags
-            .map((tag) => tag.key)
+            .map(tag => tag.key)
             .some(
-              (key) =>
+              key =>
                 ![
                   'account',
                   'accountId',
                   'language',
                   'trustedAccountId',
-                  'guid',
-                ].includes(key),
+                  'guid'
+                ].includes(key)
             );
         }
-      },
+      }
     },
     {
       name: 'Latest Release',
@@ -96,26 +96,27 @@ export default {
 
           return semver.satisfies(mversion?.raw, `>=${lversion?.raw}`);
         } else {
+          // eslint-disable-next-line
           console.log(
             "Can't determine agent release for",
             entity.name,
-            entity.guid,
+            entity.guid
           );
           return false;
         }
-      },
+      }
     },
     {
       name: 'DT Enabled',
-      entityCheck: (entity) =>
-        (entity?.tags || []).find((tag) => tag.key === 'nr.dt.enabled')
-          ?.values?.[0] === 'true',
+      entityCheck: entity =>
+        (entity?.tags || []).find(tag => tag.key === 'nr.dt.enabled')
+          ?.values?.[0] === 'true'
     },
     {
       name: 'Deployments',
-      entityCheck: (entity) =>
-        (entity?.deploymentSearch?.results || []).length > 0,
-    },
+      entityCheck: entity =>
+        (entity?.deploymentSearch?.results || []).length > 0
+    }
     // {
     //   name: 'Custom Attributes',
     //   accountCheck: (account, dataDictionary) => {
@@ -133,5 +134,5 @@ export default {
     //     }
     //   },
     // },
-  ],
+  ]
 };
