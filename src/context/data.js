@@ -23,12 +23,13 @@ import {
 import rules from '../rules';
 import { v4 as uuidv4 } from 'uuid';
 import { chunk, chunkString, generateAccountSummary } from '../utils';
+import { useResourceMonitor } from '../../nerdlets/maturity-nerdlet/ResourceMonitor';
+
 import {
   ACCOUNT_CONFIG_COLLECTION,
   ACCOUNT_HISTORY_COLLECTION,
   NRQL_BATCH_SIZE
 } from '../constants';
-import { useResourceMonitor } from '../../nerdlets/maturity-nerdlet/ResourceMonitor';
 
 const DataContext = createContext();
 const async = require('async');
@@ -37,6 +38,40 @@ export function ProvideData(v) {
   const auth = useProvideData(v.platformContext);
   return <DataContext.Provider value={auth}>{v.children}</DataContext.Provider>;
 }
+
+const ENTITY_COUNT_BLOCK = 50000;
+
+const TAG_WHITELIST_RULES = [
+  // Keep specific tag keys
+  key => key === 'accountId',
+  key => key === 'nr.dt.enabled',
+  key => key === 'instrumentation.provider',
+  key => key === 'privateLocation',
+  key => key.startsWith('instrumentation.')
+];
+const stripEntityTags = entity => {
+  if (entity.tags && Array.isArray(entity.tags)) {
+    const originalLength = entity.tags.length;
+    entity.tags = entity.tags.filter(tag => {
+      // Keep tags that match any whitelist rule
+      return TAG_WHITELIST_RULES.some(rule => rule(tag.key));
+    });
+    // if (entity.tags.length !== originalLength) {
+    //   console.log(
+    //     `Kept ${entity.tags.length} of ${originalLength} tags for entity ${entity.guid}`,
+    //   );
+    // }
+  }
+};
+
+const TYPE_BLACKLIST =
+  "'DASHBOARD','CONTAINER','DESTINATION','CONDITION','HTTPSERVICE','SERVICE','WORKFLOW','POLICY','SERVICE_LEVEL'";
+
+const GLOBAL_CONCURRENCY_LIMIT = 3;
+
+const RETRY_INIT_MS = 1500;
+
+const RETRY_LIMIT = 7;
 
 export default DataContext;
 
@@ -80,7 +115,8 @@ export function useProvideData(props) {
     view: { page: 'CreateView', title: 'Create New View' },
     sortBy: 'Lowest score',
     savingView: false,
-    userSettings: null
+    userSettings: null,
+    entityCount: 0
   });
 
   // for testing
@@ -366,6 +402,47 @@ export function useProvideData(props) {
   };
 
   const runView = async (
+    selectedView,
+    selectedReport,
+    doSaveView,
+    saveHistory,
+    setAsDefault
+  ) => {
+    const { totalEntities, summarizedData } = await checkEntityCount({
+      accounts: selectedReport?.document?.accounts,
+      allAccounts: selectedReport?.document?.allAccounts,
+      entitySearchQuery: selectedReport?.document?.entitySearchQuery,
+      accountsFilter: selectedReport?.document?.accountsFilterEnabled
+        ? selectedReport?.document?.accountsFilter
+        : '',
+      accountsFilterEnabled: selectedReport?.document?.accountsFilterEnabled,
+      allProducts: selectedReport?.document?.allProducts,
+      products: selectedReport?.document?.products,
+      hideNotReporting: selectedReport?.document?.hideNotReporting,
+      selectedView
+    });
+
+    setDataState({ entityCount: totalEntities });
+
+    if (totalEntities > ENTITY_COUNT_BLOCK) {
+      console.log(
+        `blocked run, ${totalEntities} entities exceed ${ENTITY_COUNT_BLOCK} `
+      );
+      // setRunParams(runParams);
+    } else {
+      console.log('total ent', totalEntities);
+
+      runViewWrapper(
+        selectedView,
+        selectedReport,
+        doSaveView,
+        saveHistory,
+        setAsDefault
+      );
+    }
+  };
+
+  const runViewWrapper = async (
     selectedView,
     selectedReport,
     doSaveView,
@@ -715,7 +792,7 @@ export function useProvideData(props) {
             callback();
           })
           .catch(err => callback(err));
-      }, 5);
+      }, GLOBAL_CONCURRENCY_LIMIT);
 
       q.push(batches);
 
@@ -738,10 +815,9 @@ export function useProvideData(props) {
     );
 
   const getAccounts = () =>
-    NerdGraphQuery.query({ query: accountsQuery }).then(res => {
-      console.log('getAccounts', res?.data?.actor?.accounts);
-      return res?.data?.actor?.accounts || [];
-    });
+    NerdGraphQuery.query({ query: accountsQuery }).then(
+      res => res?.data?.actor?.accounts || []
+    );
 
   const checkUser = owner => {
     if (owner?.id !== dataState.user?.id) {
@@ -1061,7 +1137,7 @@ export function useProvideData(props) {
             callback();
           }
         );
-      }, 5);
+      }, GLOBAL_CONCURRENCY_LIMIT);
 
       q.push(accounts);
 
@@ -1247,19 +1323,37 @@ export function useProvideData(props) {
           ? `AND ${entitySearchQuery}`
           : '';
 
+        const infraTypes = [];
+
         const productDomains = products
-          .map(p => rules[p]?.domain)
-          .filter(p => p);
+          .map(p => {
+            if (rules[p]?.domain === 'INFRA') {
+              infraTypes.push(rules[p].type);
+            }
+
+            return rules[p]?.domain;
+          })
+          .filter(p => {
+            return p && p !== 'INFRA';
+          });
+
+        const infraClause = infraTypes
+          ? ` OR type IN ('${infraTypes.join("','")}')`
+          : '';
 
         const domainClause = productDomains
           ? ` AND domain IN ('${productDomains.join("','")}')`
           : '';
-        const searchClause = ` AND type NOT IN ('DASHBOARD') ${domainClause} ${entityClause}`;
+
+        const searchClause = ` AND type NOT IN (${TYPE_BLACKLIST}) AND type NOT LIKE 'KUBERNETES_%' ${domainClause} ${infraClause} ${entityClause}`;
+
+        // console.log('!!! CLAUSE -> ', searchClause);
+        // console.log('!!! INFRA CLAUSE -> ', infraClause);
 
         async.retry(
           {
-            times: 5, // Number of retries
-            interval: retryCount => 100 * Math.pow(2, retryCount) // Exponential backoff formula
+            times: RETRY_LIMIT,
+            interval: retryCount => RETRY_INIT_MS * Math.pow(2, retryCount) // Exponential backoff formula
           },
           retryCallback => {
             NerdGraphQuery.query({
@@ -1268,20 +1362,24 @@ export function useProvideData(props) {
             })
               .then(res => {
                 if (res.error) {
-                  Toast.showToast({
-                    title: 'Failed to fetch entities, retrying',
-                    description: res.error.message,
-                    type: Toast.TYPE.CRITICAL
-                  });
+                  // Toast.showToast({
+                  //   title: 'Failed to fetch entities, retrying',
+                  //   description: res.error.message,
+                  //   type: Toast.TYPE.CRITICAL,
+                  // });
                   retryCallback(res.error, null); // Pass error to retry, will trigger retry
                 } else {
                   const entitySearch = res?.data?.actor?.entitySearch || {};
 
                   totalEntityCount = entitySearch.count;
-                  completedEntities = [
-                    ...completedEntities,
-                    ...(entitySearch?.results?.entities || [])
-                  ];
+                  for (
+                    let i = 0;
+                    i < (entitySearch?.results?.entities || []).length;
+                    i++
+                  ) {
+                    completedEntities.push(entitySearch.results.entities[i]);
+                  }
+
                   completedPercentage =
                     (completedEntities.length / totalEntityCount) * 100;
 
@@ -1309,7 +1407,7 @@ export function useProvideData(props) {
             callback(); // Continue queue
           }
         );
-      }, 5);
+      }, GLOBAL_CONCURRENCY_LIMIT);
 
       q.push({ cursor: null });
 
@@ -1319,7 +1417,7 @@ export function useProvideData(props) {
         );
         clearInterval(pollJobStatus);
 
-        decorateEntities(completedEntities).then(decoratedEntities => {
+        decorateEntitiesOld(completedEntities).then(decoratedEntities => {
           resolve(decoratedEntities);
         });
       });
@@ -1451,14 +1549,16 @@ export function useProvideData(props) {
         const nrqlQueue = async.queue((batch, callback) => {
           processBatchedNrqlQueries(batch)
             .then(batchResults => {
-              entityNrqlData = [...entityNrqlData, ...batchResults];
+              for (let i = 0; i < batchResults.length; i++) {
+                entityNrqlData.push(batchResults[i]);
+              }
               callback();
             })
             .catch(error => {
               console.error('Error processing NRQL batch:', error);
               callback(error);
             });
-        }, 3); // Reduced concurrency since each batch processes multiple entities
+        }, GLOBAL_CONCURRENCY_LIMIT);
 
         nrqlQueue.push(batches);
 
@@ -1466,14 +1566,6 @@ export function useProvideData(props) {
         console.log(
           `${new Date().toLocaleTimeString()} - fetch entity nrql data end`
         );
-
-        // Merge results back to entities
-        entities.forEach((entity, i) => {
-          const foundEntity = entityNrqlData.find(e => e.guid === entity.guid);
-          if (foundEntity) {
-            entities[i] = { ...foundEntity, ...entity };
-          }
-        });
       }
 
       if (entityTypesToQuery.length > 0) {
@@ -1482,12 +1574,30 @@ export function useProvideData(props) {
         console.log(
           `${new Date().toLocaleTimeString()} - entity type queue start`
         );
+        // const entityTypeQueue = async.queue((task, callback) => {
+        //   getEntityData(task).then((data) => {
+        //     data.forEach((item) => entityData.push(item));
+        //     callback();
+        //   });
+        // }, 1);
+
         const entityTypeQueue = async.queue((task, callback) => {
           getEntityData(task).then(data => {
-            entityData = [...entityData, ...data];
+            // Process data immediately and update entities
+            data.forEach(item => {
+              const entityIndex = entities.findIndex(e => e.guid === item.guid);
+
+              if (entityIndex !== -1) {
+                Object.assign(
+                  entities[entityIndex],
+                  item,
+                  entities[entityIndex]
+                );
+              }
+            });
             callback();
           });
-        }, 5);
+        }, GLOBAL_CONCURRENCY_LIMIT);
 
         entityTypeQueue.push(entityTypesToQuery);
 
@@ -1497,19 +1607,17 @@ export function useProvideData(props) {
           );
 
           // merge entity data
-          entities.forEach((entity, i) => {
-            const foundEntity = entityData.find(e => e.guid === entity.guid);
-            if (foundEntity) {
-              entities[i] = { ...foundEntity, ...entity };
-            }
-          });
+          // entities.forEach((entity, i) => {
+          //   const foundEntity = entityData.find((e) => e.guid === entity.guid);
+          //   if (foundEntity) {
+          //     Object.assign(entities[i], foundEntity, entity);
+          //   }
+          // });
+
+          entityData.length = 0;
 
           resolve(entities);
         });
-      }
-
-      if (entityTypesToQuery.length === 0 && entityNrqlQueries.length === 0) {
-        resolve(entities);
       }
     });
   };
@@ -1531,7 +1639,10 @@ export function useProvideData(props) {
           if (foundEntities.length > 0) {
             entityTypesToQuery.push({
               entities: foundEntities,
-              graphql: rule.graphql
+              graphql: rule.graphql,
+              type: rule?.type,
+              domain: rule?.domain,
+              entityType: rule?.entityType
             });
           }
         }
@@ -1582,7 +1693,7 @@ export function useProvideData(props) {
 
             callback();
           });
-        }, 5);
+        }, GLOBAL_CONCURRENCY_LIMIT);
 
         nrqlQueue.push(entityNrqlQueries);
 
@@ -1592,9 +1703,12 @@ export function useProvideData(props) {
         );
 
         entities.forEach((entity, i) => {
-          const foundEntity = entityNrqlData.find(e => e.guid === entity.guid);
-          if (foundEntity) {
-            entities[i] = { ...foundEntity, ...entity };
+          const foundIndex = entityNrqlData.findIndex(
+            e => e.guid === entity.guid
+          );
+
+          if (entityIndex !== -1) {
+            Object.assign(entities[i], entityNrqlData[foundIndex], entity);
           }
         });
       }
@@ -1602,15 +1716,20 @@ export function useProvideData(props) {
       if (entityTypesToQuery.length > 0) {
         let entityData = [];
 
-        console.log(
-          `${new Date().toLocaleTimeString()} - entity type queue start`
-        );
+        // console.log(
+        //   `${new Date().toLocaleTimeString()} - entity type queue start`,
+        // );
         const entityTypeQueue = async.queue((task, callback) => {
+          console.log(
+            `${new Date().toLocaleTimeString()} - start entity type: ${task?.domain ||
+              ''} ${task?.entityType || ''} ${task?.type || ''}`
+          );
+
           getEntityData(task).then(data => {
-            entityData = [...entityData, ...data];
+            data.forEach(item => entityData.push(item));
             callback();
           });
-        }, 5);
+        }, GLOBAL_CONCURRENCY_LIMIT);
 
         entityTypeQueue.push(entityTypesToQuery);
 
@@ -1619,19 +1738,34 @@ export function useProvideData(props) {
             `${new Date().toLocaleTimeString()} - entity type queue end`
           );
 
-          // merge entity data
+          // Merge data without keeping references
+          // const resultEntities = entities.map((entity) => {
+          //   const foundEntity = entityData.find((e) => e.guid === entity.guid);
+          //   return foundEntity ? { ...foundEntity, ...entity } : entity;
+          // });
+
           entities.forEach((entity, i) => {
-            const foundEntity = entityData.find(e => e.guid === entity.guid);
-            if (foundEntity) {
-              entities[i] = { ...foundEntity, ...entity };
+            const foundIndex = entityData.findIndex(
+              e => e.guid === entity.guid
+            );
+
+            if (foundIndex !== -1) {
+              Object.assign(entities[i], entityData[foundIndex], entity);
             }
+
+            // perform strip ops
+            if ((entity?.deploymentSearch?.results || []).length === 0) {
+              delete entity.deploymentSearch;
+            }
+
+            stripEntityTags(entity);
           });
+
+          entityData = null;
 
           resolve(entities);
         });
-      }
-
-      if (entityTypesToQuery.length === 0 && entityNrqlQueries.length === 0) {
+      } else {
         resolve(entities);
       }
     });
@@ -1650,8 +1784,8 @@ export function useProvideData(props) {
       const taskQueue = async.queue((guids, callback) => {
         async.retry(
           {
-            times: 5, // Retry up to 5 times
-            interval: retryCount => 100 * Math.pow(2, retryCount) // Exponential backoff, starting at 100ms
+            times: RETRY_LIMIT,
+            interval: retryCount => RETRY_INIT_MS * Math.pow(2, retryCount) // Exponential backoff
           },
           retryCallback => {
             NerdGraphQuery.query({
@@ -1663,10 +1797,11 @@ export function useProvideData(props) {
                   console.error('Error fetching data, retrying...', res.error);
                   retryCallback(res.error);
                 } else {
-                  entityData = [
-                    ...entityData,
-                    ...(res?.data?.actor?.entities || [])
-                  ];
+                  const newEntities = res?.data?.actor?.entities || [];
+                  for (let i = 0; i < newEntities.length; i++) {
+                    entityData.push(newEntities[i]);
+                  }
+
                   retryCallback(null);
                 }
               })
@@ -1685,7 +1820,7 @@ export function useProvideData(props) {
             }
           }
         );
-      }, 5);
+      }, GLOBAL_CONCURRENCY_LIMIT);
 
       taskQueue.push(guidChunks);
 
@@ -1744,6 +1879,97 @@ export function useProvideData(props) {
       setDataState(prepareState);
     }
   };
+
+  const checkEntityCount = async data => {
+    let {
+      accounts,
+      products,
+      allProducts,
+      hideNotReporting,
+      selectedView
+    } = data;
+    // setRunParams(null);
+
+    const reporting = hideNotReporting ? `reporting = 'true' and ` : '';
+
+    if (selectedView.name === `All Data`) {
+      accounts = dataState.accounts.map(a => a.id);
+      allProducts = true;
+    }
+
+    const accountEntityData = accounts.map(id => {
+      return NerdGraphQuery.query({
+        query: `{
+              actor {
+                entitySearch(query: "${reporting} tags.accountId = '${id}'") {
+                  types {
+                    count
+                    domain
+                    entityType
+                    type
+                  }
+                }
+              }
+            }`
+      });
+    });
+
+    const accountData = await Promise.all(accountEntityData);
+    const summarizedData = summarizeTypesWithRules(
+      accountData,
+      products,
+      allProducts
+    );
+
+    const totalEntities = summarizedData.reduce(
+      (total, type) => total + type.count,
+      0
+    );
+
+    setDataState({ entityCount: totalEntities });
+
+    return { totalEntities, summarizedData };
+  };
+
+  function summarizeTypesWithRules(data, products, allProducts) {
+    const summary = {};
+
+    data.forEach(item => {
+      const types = item?.data?.actor?.entitySearch?.types || [];
+
+      types.forEach(type => {
+        const key = `${type.domain}_${type.entityType}_${type.type}`;
+
+        if (summary[key]) {
+          summary[key].count += type.count;
+        } else {
+          summary[key] = { ...type };
+        }
+      });
+    });
+
+    let summarizedArray = Object.values(summary);
+
+    const selectedProducts = allProducts ? Object.keys(rules) : products;
+
+    summarizedArray = summarizedArray.filter(type => {
+      return selectedProducts.some(product => {
+        const rule = rules[product];
+        if (rule) {
+          if (rule.entityType && rule.type) {
+            return (
+              type.entityType === rule.entityType && type.type === rule.type
+            );
+          } else if (rule.entityType) {
+            return type.entityType === rule.entityType;
+          }
+        }
+        return false;
+      });
+    });
+
+    return summarizedArray;
+  }
 
   return {
     ...dataState,

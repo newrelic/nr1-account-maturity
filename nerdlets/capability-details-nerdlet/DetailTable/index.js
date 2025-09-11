@@ -1,9 +1,7 @@
-// eslint-disable-next-line eslint-comments/disable-enable-pair
-/* eslint-disable prettier/prettier */
-import React, { useEffect } from 'react';
+/* eslint-disable */
+import React, { useEffect, useState } from 'react';
 import { Button, Card, CardHeader, CardBody } from 'nr1';
 import { ProgressBar } from '@newrelic/nr-labs-components';
-import { useSetState } from '@mantine/hooks';
 import EntityTable from './entityTable';
 import { percentageToStatus, scoreToColor } from '../../../src/utils';
 import rules from '../../../src/rules';
@@ -11,26 +9,28 @@ import csvDownload from 'json-to-csv-export';
 
 export default function DetailsTable(props) {
   const { sortBy, elementScores, title } = props;
-  const [dataState, setDataState] = useSetState({});
+
+  const [dataState, setDataState] = useState({
+    categories: []
+  });
 
   useEffect(() => {
-    let categories = [];
-
-    const state = { categories: elementScores };
+    let categories = elementScores || [];
 
     if (sortBy === 'Lowest score') {
-      categories = (elementScores || []).sort(
-        (a, b) => parseInt(a.score) - parseInt(b.score)
+      categories = [...elementScores].sort(
+        (a, b) => parseInt(a.score, 10) - parseInt(b.score, 10)
       );
     } else if (sortBy === 'Highest score') {
-      categories = (elementScores || []).sort(
-        (a, b) => parseInt(b.score) - parseInt(a.score)
+      categories = [...elementScores].sort(
+        (a, b) => parseInt(b.score, 10) - parseInt(a.score, 10)
       );
     }
 
-    state.categories = categories;
-
-    setDataState(state);
+    setDataState(prev => ({
+      ...prev,
+      categories
+    }));
   }, [elementScores, sortBy]);
 
   return (
@@ -39,11 +39,11 @@ export default function DetailsTable(props) {
         paddingLeft: '15px',
         paddingTop: '10px',
         paddingBottom: '10px',
-        paddingRight: '15px',
+        paddingRight: '15px'
       }}
     >
       <div>
-        {(dataState.categories || []).map(cat => {
+        {(dataState.categories || []).map((cat, index) => {
           const ruleSet = rules[title];
           const tdWidth = (1 / (ruleSet.scores || []).length) * 100;
 
@@ -56,7 +56,7 @@ export default function DetailsTable(props) {
             const value = cat.entities[guid];
             allEntities.push({
               guid,
-              ...value,
+              ...value
             });
           });
 
@@ -64,7 +64,7 @@ export default function DetailsTable(props) {
             const value = cat.entitiesPassing[guid];
             allEntities.push({
               guid,
-              ...value,
+              ...value
             });
           });
 
@@ -83,21 +83,24 @@ export default function DetailsTable(props) {
 
           return (
             <div
-              key={cat.name}
+              key={index}
               style={{ paddingTop: '10px', paddingBottom: '10px' }}
             >
               <ProgressBar
                 height="5px"
-                value={parseInt(cat.score)}
+                value={parseInt(cat.score, 10)}
                 max={100}
-                status={percentageToStatus(parseInt(cat.score))}
+                status={percentageToStatus(parseInt(cat.score, 10))}
               />
               <Card
                 collapsible={allEntities.length > 0}
                 defaultCollapsed
-                collapsed={!dataState[cat.name]}
+                collapsed={!dataState[cat.name]} // ✅ reads dynamic key
                 onChange={() =>
-                  setDataState({ [cat.name]: !dataState[cat.name] })
+                  setDataState(prev => ({
+                    ...prev,
+                    [cat.name]: !prev[cat.name] // ✅ functional toggle
+                  }))
                 }
                 style={{ border: '1px solid #f4f6f6' }}
               >
@@ -108,7 +111,10 @@ export default function DetailsTable(props) {
                       <div
                         style={{ cursor: 'pointer' }}
                         onClick={() =>
-                          setDataState({ [cat.name]: !dataState[cat.name] })
+                          setDataState(prev => ({
+                            ...prev,
+                            [cat.name]: !prev[cat.name] // ✅ functional toggle
+                          }))
                         }
                       >
                         {cat.name}{' '}
@@ -119,11 +125,11 @@ export default function DetailsTable(props) {
                         </span>
                         <span
                           style={{
-                            color: scoreToColor(parseInt(cat.score))?.color,
-                            fontSize: '14px',
+                            color: scoreToColor(parseInt(cat.score, 10))?.color,
+                            fontSize: '14px'
                           }}
                         >
-                          &nbsp;{Math.round(parseInt(cat.score))}%
+                          &nbsp;{Math.round(parseInt(cat.score, 10))}%
                         </span>
                       </div>
                       <div style={{ float: 'right', paddingRight: '0px' }}>
@@ -137,7 +143,7 @@ export default function DetailsTable(props) {
                               filename: `${new Date().getTime()}-${
                                 cat.name
                               }-export.csv`,
-                              delimiter: ',',
+                              delimiter: ','
                             })
                           }
                           type={Button.TYPE.PRIMARY}
@@ -152,7 +158,7 @@ export default function DetailsTable(props) {
                           style={{
                             width: '5%',
                             float: 'left',
-                            paddingTop: '2px',
+                            paddingTop: '2px'
                           }}
                         >
                           <span style={{ fontSize: '16px' }}>
@@ -174,7 +180,7 @@ export default function DetailsTable(props) {
                                 const {
                                   entityCheck,
                                   accountCheck,
-                                  valueCheck,
+                                  valueCheck
                                 } = score;
 
                                 const { passed = 0, failed = 0 } =
@@ -198,9 +204,8 @@ export default function DetailsTable(props) {
                                     key={score.name}
                                     style={{
                                       width: `${tdWidth}%`,
-                                      // maxWidth:"150px",
                                       display: 'inline-block',
-                                      padding: '10px',
+                                      padding: '10px'
                                     }}
                                   >
                                     <ProgressBar

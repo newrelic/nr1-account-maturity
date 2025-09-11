@@ -1,5 +1,4 @@
-// eslint-disable-next-line eslint-comments/disable-enable-pair
-/* eslint-disable prettier/prettier */
+/* eslint-disable */
 import React, { useEffect } from 'react';
 import { Button, Card, CardHeader, CardBody } from 'nr1';
 import { ProgressBar } from '@newrelic/nr-labs-components';
@@ -23,7 +22,7 @@ export default function DetailsTable(props) {
       ) {
         categories.push({
           name: key,
-          score: accountSummary[key],
+          score: accountSummary[key]
         });
       }
     });
@@ -50,7 +49,7 @@ export default function DetailsTable(props) {
         paddingLeft: '15px',
         paddingTop: '10px',
         paddingBottom: '10px',
-        paddingRight: '15px',
+        paddingRight: '15px'
       }}
     >
       <div>
@@ -69,7 +68,7 @@ export default function DetailsTable(props) {
               guid,
               accountId: accountSummary.id,
               accountName: accountSummary.name,
-              ...value,
+              ...value
             });
           });
 
@@ -80,7 +79,7 @@ export default function DetailsTable(props) {
                 guid,
                 accountId: accountSummary.id,
                 accountName: accountSummary.name,
-                ...value,
+                ...value
               });
             }
           );
@@ -137,7 +136,7 @@ export default function DetailsTable(props) {
                         <span
                           style={{
                             color: scoreToColor(cat.score)?.color,
-                            fontSize: '14px',
+                            fontSize: '14px'
                           }}
                         >
                           &nbsp;{Math.round(cat.score)}%
@@ -154,7 +153,7 @@ export default function DetailsTable(props) {
                               filename: `${new Date().getTime()}-${
                                 cat.name
                               }-export.csv`,
-                              delimiter: ',',
+                              delimiter: ','
                             })
                           }
                           type={Button.TYPE.PRIMARY}
@@ -169,7 +168,7 @@ export default function DetailsTable(props) {
                           style={{
                             width: '5%',
                             float: 'left',
-                            paddingTop: '2px',
+                            paddingTop: '2px'
                           }}
                         >
                           <span style={{ fontSize: '16px' }}>
@@ -191,7 +190,7 @@ export default function DetailsTable(props) {
                                 const {
                                   entityCheck,
                                   accountCheck,
-                                  valueCheck,
+                                  valueCheck
                                 } = score;
 
                                 const { passed = 0, failed = 0 } =
@@ -219,7 +218,7 @@ export default function DetailsTable(props) {
                                       width: `${tdWidth}%`,
                                       // maxWidth:"150px",
                                       display: 'inline-block',
-                                      padding: '10px',
+                                      padding: '10px'
                                     }}
                                   >
                                     <ProgressBar

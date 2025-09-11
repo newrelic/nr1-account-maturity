@@ -1,5 +1,5 @@
-// eslint-disable-next-line eslint-comments/disable-enable-pair
-/* eslint-disable prettier/prettier */
+/* eslint-disable */
+
 import { ngql } from 'nr1';
 
 export const accountsQuery = ngql`{
@@ -45,7 +45,8 @@ export const nrqlGqlQuery = (accountId, entityQueries) => {
   }`;
 };
 
-export const nrqlGqlQueryOld = (accountId, query) => ngql`{
+// eslint-disable-next-line
+export const nrqlGqlQueryOld = (accountId, query, alias) => ngql`{
   actor {
     account(id: ${accountId}) {
       nrql(query: "${query}", timeout: 120) {
@@ -54,6 +55,15 @@ export const nrqlGqlQueryOld = (accountId, query) => ngql`{
     }
   }
 }`;
+
+//  entityInfo: entitySearch(query: "tags.accountId = '${id}'") {
+//     types {
+//       count
+//       entityType
+//       type
+//       domain
+//     }
+//   }
 
 export const batchAccountQuery = accounts => {
   const fragments = accounts.map(account => {
@@ -74,9 +84,6 @@ export const batchAccountQuery = accounts => {
               }
             }
           }
-          awsBilling: nrql(query: "SELECT count(*) as 'count' FROM FinanceSample", timeout: 120) {
-            results
-          }
           logMessageCount: nrql(query: "SELECT count(*) as 'count' FROM Log since 12 hours ago ", timeout: 120) {
             results
           }
@@ -84,23 +91,6 @@ export const batchAccountQuery = accounts => {
             nrqlConditionsSearch(searchCriteria: {queryLike: "FROM log"}) {
               totalCount
             }
-          }
-          slmAlertCount:alerts {
-            nrqlConditionsSearch(searchCriteria: {queryLike: "newrelic.sli"}) {
-              totalCount
-            }
-          }
-          npmNoEntityDefinitionDevices: nrql(query: "SELECT uniqueCount(device_name) from Metric where entity.name is null and instrumentation.provider = 'kentik' and instrumentation.name != 'heartbeat'", timeout: 120) {
-            results
-          }
-          npmSnmpPollingFailures: nrql(query: "SELECT uniqueCount(device_name) From Metric where PollingHealth = 'BAD' SINCE 1 day ago", timeout: 120) {
-            results
-          }
-          npmKtranslateSyslogDevices: nrql(query: "SELECT uniqueCount(device_name) from Log where plugin.type = 'ktranslate-syslog' since 1 day ago", timeout: 120) {
-            results
-          }  
-          programDeployCount: nrql(query: "SELECT count(*) FROM NrAuditEvent  WHERE targetType = 'nerdpack' and actionIdentifier ='nerdpack.subscribe' SINCE 7 days ago", timeout: 120) {
-            results
           }
           KeySet_Transaction: nrql(query: "SELECT keyset() FROM Transaction") {
             results
@@ -142,33 +132,13 @@ export const accountDataQuery = accountId => ngql`{
           }
         }
       }
-      awsBilling: nrql(query: "SELECT count(*) as 'count' FROM FinanceSample", timeout: 120) {
-        results
-      }
-      logMessageCount: nrql(query: "SELECT count(*) as 'count' FROM Log since 12 hours ago ", timeout: 120) {
+      logMessageCount: nrql(query: "SELECT latest(timestamp) FROM Log since 12 hours ago ", timeout: 120) {
         results
       }
       nrqlLoggingAlertCount:alerts {
         nrqlConditionsSearch(searchCriteria: {queryLike: "FROM log"}) {
           totalCount
         }
-      }
-      slmAlertCount:alerts {
-        nrqlConditionsSearch(searchCriteria: {queryLike: "newrelic.sli"}) {
-          totalCount
-        }
-      }
-      npmNoEntityDefinitionDevices: nrql(query: "SELECT uniqueCount(device_name) from Metric where entity.name is null and instrumentation.provider = 'kentik' and instrumentation.name != 'heartbeat'", timeout: 120) {
-        results
-      }
-      npmSnmpPollingFailures: nrql(query: "SELECT uniqueCount(device_name) From Metric where PollingHealth = 'BAD' SINCE 1 day ago", timeout: 120) {
-        results
-      }
-      npmKtranslateSyslogDevices: nrql(query: "SELECT uniqueCount(device_name) from Log where plugin.type = 'ktranslate-syslog' since 1 day ago", timeout: 120) {
-        results
-      }  
-      programDeployCount: nrql(query: "SELECT count(*) FROM NrAuditEvent  WHERE targetType = 'nerdpack' and actionIdentifier ='nerdpack.subscribe' SINCE 7 days ago", timeout: 120) {
-        results
       }
       KeySet_Transaction: nrql(query: "SELECT keyset() FROM Transaction") {
         results
@@ -202,10 +172,6 @@ export const entitySearchQueryByAccount = (
           account {
             id
             name
-          }
-          tags {
-            key
-            values
           }
           reporting
         }

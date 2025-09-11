@@ -38,6 +38,9 @@ export default function ViewSelector() {
 
     const currentViewConfig = viewConfigs.find(vc => vc.id === selectedView.id);
 
+    // // eslint-disable-next-line
+    // console.log('view sel', selectedView, currentViewConfig);
+
     return (
       <div style={{ paddingRight: '5px' }}>
         <Dropdown
@@ -48,6 +51,20 @@ export default function ViewSelector() {
           search={viewSearch}
           onSearch={e => setViewSearch(e.target.value)}
         >
+          <DropdownSection title="">
+            <DropdownItem
+              onClick={() =>
+                setDataState({
+                  view: { page: 'ViewList' },
+                  loadedDefaultView: true
+                })
+              }
+            >
+              <div style={{ float: 'left' }}>{items.length} total views</div>
+              <div style={{ float: 'right', color: 'blue' }}>See all views</div>
+            </DropdownItem>
+          </DropdownSection>
+
           <DropdownSection title="Views">
             {filteredItems
               .sort(
@@ -157,20 +174,6 @@ export default function ViewSelector() {
                 );
               })}
           </DropdownSection>
-
-          <DropdownSection title="">
-            <DropdownItem
-              onClick={() =>
-                setDataState({
-                  view: { page: 'ViewList' },
-                  loadedDefaultView: true
-                })
-              }
-            >
-              <div style={{ float: 'left' }}>{items.length} total views</div>
-              <div style={{ float: 'right', color: 'blue' }}>See all views</div>
-            </DropdownItem>
-          </DropdownSection>
         </Dropdown>
         {unsavedRun === true && (
           <>
@@ -209,7 +212,9 @@ export default function ViewSelector() {
                 setDataState({
                   selectedReport,
                   view: { page: 'EditView' },
-                  prevView: view
+                  prevView: view,
+                  prevSelectedReport: selectedReport,
+                  prevSelectedView: selectedView
                 });
               }
             }}

@@ -28,19 +28,19 @@ export default {
   scores: [
     {
       name: 'Reporting',
-      entityCheck: entity => entity.reporting
+      entityCheck: (entity) => entity.reporting,
     },
     {
       name: 'Alerts',
-      entityCheck: entity => entity?.alertSeverity !== 'NOT_CONFIGURED'
+      entityCheck: (entity) => entity?.alertSeverity !== 'NOT_CONFIGURED',
     },
-    {
-      name: 'Alerts Using SLIs',
-      accountCheck: account =>
-        (account?.data?.slmAlertCount?.nrqlConditionsSearch?.totalCount || 0) >
-        0
-    }
+    // {
+    //   name: 'Alerts Using SLIs',
+    //   accountCheck: (account) =>
+    //     (account?.data?.slmAlertCount?.nrqlConditionsSearch?.totalCount || 0) >
+    //     0,
+    // },
     // the "has owner check" just looks for a team tag, this has arguable value since it is not communicated to end users on how to resolve it
     // have chosen not to add that check
-  ]
+  ],
 };

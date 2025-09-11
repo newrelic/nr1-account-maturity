@@ -1,5 +1,4 @@
-// eslint-disable-next-line eslint-comments/disable-enable-pair
-/* eslint-disable prettier/prettier */
+/* eslint-disable */
 import React, { useState, useContext } from 'react';
 import {
   Button,
@@ -9,7 +8,7 @@ import {
   TableHeader,
   TableHeaderCell,
   TableRow,
-  TableRowCell,
+  TableRowCell
 } from 'nr1';
 import rules from '../../src/rules';
 import csvDownload from 'json-to-csv-export';
@@ -17,10 +16,16 @@ import csvDownload from 'json-to-csv-export';
 export default function ExtendedDetailsTable(props) {
   const { limit, noMeta, hideDownload } = props;
   const nerdletContext = useContext(NerdletStateContext);
-  const {
-    allEntities = props?.allEntities,
-    categoryName = props?.categoryName,
-  } = nerdletContext;
+
+  const allEntities =
+    props.allEntities !== undefined
+      ? props.allEntities
+      : nerdletContext.allEntities;
+
+  const categoryName =
+    props.categoryName !== undefined
+      ? props.categoryName
+      : nerdletContext.categoryName;
 
   const [column, setColumn] = useState(0);
   const [sortingType, setSortingType] = useState(
@@ -40,25 +45,25 @@ export default function ExtendedDetailsTable(props) {
 
   let tagMetaHeaders = [];
   if (!noMeta) {
-    tagMetaHeaders = (ruleSet?.tagMeta || []).map((t) => ({
+    tagMetaHeaders = (ruleSet?.tagMeta || []).map(t => ({
       key: t.name,
-      value: ({ item }) => item[t.key],
+      value: ({ item }) => item[t.key]
     }));
   }
 
   const headers = [
     { key: 'Name', value: ({ item }) => item.name },
-    ...tagMetaHeaders,
+    ...tagMetaHeaders
   ];
 
   let tempHeaders = [];
 
-  ruleSet.scores.forEach((s) => {
+  ruleSet.scores.forEach(s => {
     if (
       s.name !== 'name' &&
-      !(ruleSet?.tagMeta || []).some((t) => t.key === s.name)
+      !(ruleSet?.tagMeta || []).some(t => t.key === s.name)
     ) {
-      allEntities.forEach((i) => {
+      allEntities.forEach(i => {
         if (i[s.name] === undefined) {
           i[s.name] = true;
         }
@@ -69,10 +74,10 @@ export default function ExtendedDetailsTable(props) {
 
   tempHeaders = [...new Set(tempHeaders)];
 
-  tempHeaders.forEach((header) => {
+  tempHeaders.forEach(header => {
     headers.push({
       key: header,
-      value: ({ item }) => (item[header] !== false),
+      value: ({ item }) => item[header] !== false
     });
   });
 
@@ -94,7 +99,7 @@ export default function ExtendedDetailsTable(props) {
                 csvDownload({
                   data: allEntities,
                   filename: `${new Date().getTime()}-${categoryName}-export.csv`,
-                  delimiter: ',',
+                  delimiter: ','
                 })
               }
               type={Button.TYPE.PRIMARY}
@@ -112,6 +117,9 @@ export default function ExtendedDetailsTable(props) {
             <TableHeaderCell
               {...h}
               sortable
+              alignmentType={
+                i > 0 ? TableRowCell.ALIGNMENT_TYPE.CENTER : undefined
+              }
               sortingType={
                 column === i ? sortingType : TableHeaderCell.SORTING_TYPE.NONE
               }
@@ -130,12 +138,20 @@ export default function ExtendedDetailsTable(props) {
               >
                 {item.name}
               </TableRowCell>
-              {tagMetaHeaders.map((h) => (
-                <TableRowCell key={h.key}>{h.value({ item })}</TableRowCell>
+              {tagMetaHeaders.map(h => (
+                <TableRowCell
+                  alignmentType={TableRowCell.ALIGNMENT_TYPE.CENTER}
+                  key={h.key}
+                >
+                  {h.value({ item })}
+                </TableRowCell>
               ))}
-              {tempHeaders.map((header) => {
+              {tempHeaders.map(header => {
                 return (
-                  <TableRowCell key={header}>
+                  <TableRowCell
+                    alignmentType={TableRowCell.ALIGNMENT_TYPE.CENTER}
+                    key={header}
+                  >
                     {item[header] === false ? '❌' : '✅'}
                   </TableRowCell>
                 );

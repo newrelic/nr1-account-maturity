@@ -1,3 +1,4 @@
+/* eslint-disable */
 import React from 'react';
 import { navigation } from 'nr1';
 import ExtendedDetailsTable from '../../details-table-nerdlet';

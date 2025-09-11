@@ -1,3 +1,4 @@
+/* eslint-disable */
 import React, { useState, useContext, useMemo, useEffect } from 'react';
 import {
   nerdlet,
@@ -26,7 +27,9 @@ export default function ViewList() {
     userSettings,
     toggleFavoriteView,
     email,
-    loadedDefaultView
+    loadedDefaultView,
+    selectedReport,
+    selectedView
   } = useContext(DataContext);
   const [column, setColumn] = useState(0);
   const [sortingType, setSortingType] = useState(
@@ -46,7 +49,7 @@ export default function ViewList() {
         vc => vc.id === userSettings.defaultViewId
       );
 
-      if (viewConfig?.id === `allData+${email}`) {
+      if (viewConfig.id === `allData+${email}`) {
         runView(
           { id: `allData+${email}`, name: 'All data' },
           null,
@@ -155,7 +158,7 @@ export default function ViewList() {
     {
       label: 'Run',
       onClick: (evt, { item }) => {
-        if (item?.id === `allData+${email}`) {
+        if (item.id === `allData+${email}`) {
           runView(
             { id: `allData+${email}`, name: 'All data' },
             null,
@@ -178,10 +181,11 @@ export default function ViewList() {
     {
       label: 'Edit',
       onClick: (evt, { item }) => {
+        console.log(item);
         const documentId =
-          item?.id === 'allData+undefined'
+          item.id === 'allData+undefined'
             ? `allData+${email}`
-            : item.document?.id;
+            : item.document.id;
 
         if (documentId === `allData+${email}`) {
           Toast.showToast({
@@ -192,7 +196,9 @@ export default function ViewList() {
           setDataState({
             selectedReport: item,
             view: { page: 'EditView' },
-            prevView: view
+            prevView: view,
+            prevSelectedReport: selectedReport,
+            prevSelectedView: selectedView
           });
         }
       }
@@ -202,7 +208,9 @@ export default function ViewList() {
       type: TableRow.ACTION_TYPE.DESTRUCTIVE,
       onClick: (evt, { item }) => {
         const documentId =
-          item?.id === 'allData+undefined' ? `allData+${email}` : documentId;
+          item.id === 'allData+undefined'
+            ? `allData+${email}`
+            : item.document.id;
 
         if (documentId === `allData+${email}`) {
           Toast.showToast({
@@ -251,16 +259,16 @@ export default function ViewList() {
               <TableRow actions={actions}>
                 <FavoriteTableRowCell
                   style={{
-                    color: favorites.includes(item?.id) ? '#F0B400' : undefined
+                    color: favorites.includes(item.id) ? '#F0B400' : undefined
                   }}
-                  onChange={() => toggleFavoriteView(item?.id)}
-                  checked={favorites.includes(item?.id)}
+                  onChange={() => toggleFavoriteView(item.id)}
+                  checked={favorites.includes(item.id)}
                 />
 
                 {headers.map(header => {
                   if (header.key === 'View') {
                     const previousResult = item?.history?.[0];
-                    const SEVEN_DAYS_MS = 7 * 24 * 60 * 60 * 1000;
+                    const SEVEN_DAYS_MS = 3 * 24 * 60 * 60 * 1000;
                     const runAtTimestamp = previousResult?.document?.runAt
                       ? new Date(previousResult.document.runAt).getTime()
                       : null;

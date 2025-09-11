@@ -1,5 +1,4 @@
 /* eslint-disable */
-import semver from 'semver';
 
 export default {
   short: 'Apps',
@@ -12,7 +11,7 @@ export default {
       actor {
         entities(guids: $guids) {
           guid
-          deploymentSearch {
+          deploymentSearch(filter: {limit: 1}) {
             results {
               commit
             }
@@ -22,15 +21,8 @@ export default {
             applicationId
             name
             language
-            apmSummary {
-              throughput
-            }
             settings {
               apdexTarget
-            }
-            runningAgentVersions {
-              minVersion
-              maxVersion
             }
             tags {
               key
@@ -46,46 +38,52 @@ export default {
 
   tagMeta: [
     { key: 'language', name: 'Language' },
-    { key: 'agentVersion', name: 'Version' }
+    { key: 'agentVersion', name: 'Version' },
   ],
-  nrqlQueries: entity => ({
-    agentUpdate: `FROM AgentUpdate SELECT latest(currentVersion) as 'currentVersion', latest(recommendedVersion) as 'recVersion' WHERE entity.guid = '${entity.guid}' SINCE 30 hours ago`
-  }),
+  // nrqlQueries: (entity) => ({
+  //   agentUpdate: `FROM AgentUpdate SELECT latest(currentVersion) as 'currentVersion', latest(recommendedVersion) as 'recVersion' WHERE entity.guid = '${entity.guid}' SINCE 30 hours ago`,
+  // }),
   // scores and values to run and display
   scores: [
     {
       name: 'Reporting',
-      entityCheck: entity => entity.reporting
+      entityCheck: (entity) => entity.reporting,
     },
     {
       name: 'Alerts',
-      entityCheck: entity => entity?.alertSeverity !== 'NOT_CONFIGURED'
+      entityCheck: (entity) => entity?.alertSeverity !== 'NOT_CONFIGURED',
     },
     {
       name: 'Custom Apdex',
-      entityCheck: entity => {
+      entityCheck: (entity) => {
         const { language, settings } = entity;
         return (
           (settings?.apdexTarget !== 0.5 && language !== 'nodejs') ||
           (settings?.apdexTarget !== 0.1 && language === 'nodejs')
         );
-      }
+      },
     },
     {
       name: 'Tags', // this was previously the labels check, which is really just checking for non-standard tags (value of this check is questionable)
-      entityCheck: entity =>
-        entity.tags
-          .map(tag => tag.key)
-          .some(
-            key =>
-              ![
-                'account',
-                'accountId',
-                'language',
-                'trustedAccountId',
-                'guid'
-              ].includes(key)
-          )
+      entityCheck: (entity) => {
+        if (!entity.tags) {
+          console.log('no tags', entity);
+          return false;
+        } else {
+          return entity.tags
+            .map((tag) => tag.key)
+            .some(
+              (key) =>
+                ![
+                  'account',
+                  'accountId',
+                  'language',
+                  'trustedAccountId',
+                  'guid',
+                ].includes(key),
+            );
+        }
+      },
     },
     // {
     //   name: 'Latest Release',
@@ -129,39 +127,39 @@ export default {
           }
         } else {
           console.log(
-            `No AgentUpdate available to retrieve for ${entity.guid}`
+            `No AgentUpdate available to retrieve for ${entity.guid}`,
           );
           return false;
         }
-      }
+      },
     },
     {
       name: 'DT Enabled',
-      entityCheck: entity =>
-        entity.tags.find(tag => tag.key === 'nr.dt.enabled')?.values?.[0] ===
-        'true'
+      entityCheck: (entity) =>
+        entity.tags.find((tag) => tag.key === 'nr.dt.enabled')?.values?.[0] ===
+        'true',
     },
     {
       name: 'Deployments',
-      entityCheck: entity =>
-        (entity?.deploymentSearch?.results || []).length > 0
+      entityCheck: (entity) =>
+        (entity?.deploymentSearch?.results || []).length > 0,
     },
-    {
-      name: 'Custom Attributes',
-      accountCheck: (account, dataDictionary) => {
-        const currentKeySet = account?.data?.KeySet_Transaction?.results || [];
-        const attributes =
-          dataDictionary?.APM_APPLICATION_ENTITY?.[0]?.attributes || [];
+    // {
+    //   name: 'Custom Attributes',
+    //   accountCheck: (account, dataDictionary) => {
+    //     const currentKeySet = account?.data?.KeySet_Transaction?.results || [];
+    //     const attributes =
+    //       dataDictionary?.APM_APPLICATION_ENTITY?.[0]?.attributes || [];
 
-        if (attributes) {
-          return currentKeySet.length > attributes.length;
-        } else {
-          console.log(
-            'unable to determine if data dictionary or attributes exist, returning true'
-          );
-          return true;
-        }
-      }
-    }
-  ]
+    //     if (attributes) {
+    //       return currentKeySet.length > attributes.length;
+    //     } else {
+    //       console.log(
+    //         'unable to determine if data dictionary or attributes exist, returning true',
+    //       );
+    //       return true;
+    //     }
+    //   },
+    // },
+  ],
 };

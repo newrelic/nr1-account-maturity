@@ -11,13 +11,6 @@ export default {
               name
               alertSeverity
               reporting
-              dashboardEntities: relatedEntities(filter: {entityDomainTypes: {include: {domain: "VIZ", type: "DASHBOARD"}}}) {
-                results {
-                  source {
-                    guid
-                  }
-                }  
-              }
               workloadStatus {
                 description
                 statusSource
@@ -34,16 +27,24 @@ export default {
   scores: [
     {
       name: 'Reporting',
-      entityCheck: entity => entity.reporting
+      entityCheck: (entity) => entity.reporting,
     },
     {
       name: 'Alerts',
-      entityCheck: entity => entity?.alertSeverity !== 'NOT_CONFIGURED'
+      entityCheck: (entity) => entity?.alertSeverity !== 'NOT_CONFIGURED',
     },
-    {
-      name: 'Has Dashboards',
-      entityCheck: entity =>
-        (entity?.dashboardEntities?.results || []).length > 0
-    }
-  ]
+    // {
+    //   name: 'Has Dashboards',
+    //   entityCheck: (entity) =>
+    //     (entity?.dashboardEntities?.results || []).length > 0,
+    // },
+  ],
 };
+
+// dashboardEntities: relatedEntities(filter: {entityDomainTypes: {include: {domain: "VIZ", type: "DASHBOARD"}}}) {
+//   results {
+//     source {
+//       guid
+//     }
+//   }
+// }
