@@ -23,7 +23,6 @@ import {
 import rules from '../rules';
 import { v4 as uuidv4 } from 'uuid';
 import { chunk, chunkString, generateAccountSummary } from '../utils';
-// import { useResourceMonitor } from '../../nerdlets/maturity-nerdlet/ResourceMonitor';
 
 import {
   ACCOUNT_CONFIG_COLLECTION,
@@ -76,7 +75,7 @@ const RETRY_LIMIT = 7;
 export default DataContext;
 
 export function useProvideData(props) {
-  // const { startTracking, stopTracking } = useResourceMonitor();
+  const { startTracking, stopTracking } = useResourceMonitor();
   const [dataState, setDataState] = useSetState({
     loadedDefaultView: false,
     showSkipThisStep: true,
@@ -469,7 +468,6 @@ export function useProvideData(props) {
         ? `allData+${dataState?.email}`
         : documentId;
 
-    // startTracking();
     setDataState({
       runningReport: true,
       [`runningReport.${documentId}`]: true,
@@ -590,7 +588,6 @@ export function useProvideData(props) {
 
     console.log(totalScorePercentage, runAt);
 
-    // stopTracking();
     const prepareState = {
       runningReport: false,
       accounts: updatedAccounts,
@@ -704,7 +701,6 @@ export function useProvideData(props) {
 
     await fetchViewHistory();
 
-    // stopTracking();
     setDataState({
       runningReport: false,
       [`runningReport.${selectedReport.id}`]: false,
@@ -1874,7 +1870,7 @@ export function useProvideData(props) {
       if (
         dataState.defaultViewId === (report?.id || dataState.selectedReport.id)
       ) {
-        setDefaultView(dataState.defaultViewId);
+        setDefaultView(dataState?.defaultViewId);
       }
       setDataState(prepareState);
     }

@@ -43,11 +43,13 @@ export default function ViewList() {
       actionControlButtons: [...defaultActions(setDataState)]
     });
 
-    if (loadedDefaultView === false && userSettings.defaultViewId) {
+    const defaultViewConfig = viewConfigs.find(
+      vc => vc.id === userSettings?.defaultViewId
+    );
+
+    if (loadedDefaultView === false && defaultViewConfig) {
       setDataState({ loadedDefaultView: true });
-      const viewConfig = viewConfigs.find(
-        vc => vc.id === userSettings.defaultViewId
-      );
+      const viewConfig = defaultViewConfig;
 
       if (viewConfig.id === `allData+${email}`) {
         runView(

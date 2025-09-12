@@ -288,6 +288,8 @@ export default function ViewSelector() {
     selectedView,
     unsavedRun,
     viewConfigs,
-    toggleFavoriteView
+    toggleFavoriteView,
+    userSettings,
+    userSettings?.defaultViewId
   ]);
 }
