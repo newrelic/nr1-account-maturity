@@ -4,13 +4,13 @@ import React, {
   useContext,
   useState,
   useEffect,
-  useRef
+  useRef,
 } from 'react';
 import { Button, navigation } from 'nr1';
 
 const ResourceMonitorContext = createContext({
   startTracking: () => {},
-  stopTracking: () => {}
+  stopTracking: () => {},
 });
 
 export const useResourceMonitor = () => useContext(ResourceMonitorContext);
@@ -46,9 +46,12 @@ export function ResourceMonitorProvider({ children, timeLimitMinutes = 5 }) {
 
   const startTracking = () => {
     if (!timerRef.current) {
-      timerRef.current = setTimeout(() => {
-        setShowPrompt(true);
-      }, timeLimitMinutes * 60 * 1000);
+      timerRef.current = setTimeout(
+        () => {
+          setShowPrompt(true);
+        },
+        timeLimitMinutes * 60 * 1000,
+      );
     }
   };
 
@@ -121,5 +124,5 @@ const modalStyle = {
   padding: '2rem',
   border: '1px solid #ccc',
   boxShadow: '0 0 10px rgba(0,0,0,0.2)',
-  zIndex: 9999
+  zIndex: 9999,
 };

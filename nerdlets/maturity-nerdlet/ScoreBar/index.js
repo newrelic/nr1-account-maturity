@@ -14,13 +14,13 @@ export default function ScoreBar(props) {
     runView,
     accounts,
     setDataState,
-    entityCount
+    entityCount,
   } = useContext(DataContext);
   const status = percentageToStatus(props?.totalPercentage);
   const scoreColor = scoreToColor(props?.totalPercentage);
 
   // copy data to avoid manipulating original obj
-  const data = JSON.parse(JSON.stringify(props?.data || [])).map(d => {
+  const data = JSON.parse(JSON.stringify(props?.data || [])).map((d) => {
     if ((d?.Account || '').includes(' :: ')) {
       const accountSplit = d.Account.split(' :: ');
       d.accountName = accountSplit[0];
@@ -28,7 +28,7 @@ export default function ScoreBar(props) {
     }
 
     if (d.elementScores) {
-      d.elementScores.forEach(s => {
+      d.elementScores.forEach((s) => {
         d[s.name] = parseFloat(s.score);
       });
     }
@@ -65,7 +65,7 @@ export default function ScoreBar(props) {
   return useMemo(() => {
     const allAccountsAvailable = areAllAccountsAvailable(
       selectedReport?.document?.accounts || [],
-      accounts
+      accounts,
     );
 
     return (
@@ -89,7 +89,7 @@ export default function ScoreBar(props) {
               style={{
                 width: '160px',
                 paddingLeft: '0px',
-                paddingRight: '5px'
+                paddingRight: '5px',
               }}
             >
               <ProgressBar
@@ -105,11 +105,11 @@ export default function ScoreBar(props) {
                 runView(
                   {
                     name: selectedReport.document.name,
-                    account: selectedAccountId
+                    account: selectedAccountId,
                   },
                   { ...selectedReport },
                   false,
-                  true
+                  true,
                 )
               }
             >
@@ -134,9 +134,10 @@ export default function ScoreBar(props) {
                     onClick={() =>
                       csvDownload({
                         data: data,
-                        filename: `${new Date().getTime()}-${props.viewGroupBy ||
-                          'account'}-summary-export.csv`,
-                        delimiter: ','
+                        filename: `${new Date().getTime()}-${
+                          props.viewGroupBy || 'account'
+                        }-summary-export.csv`,
+                        delimiter: ',',
                       })
                     }
                     type={Button.TYPE.PRIMARY}

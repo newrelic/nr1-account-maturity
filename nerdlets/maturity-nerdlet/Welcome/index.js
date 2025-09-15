@@ -1,3 +1,4 @@
+/* eslint-disable */
 import React, { useMemo, useContext } from 'react';
 import { Spacing, BlockText, Link } from 'nr1';
 import DataContext from '../../../src/context/data';

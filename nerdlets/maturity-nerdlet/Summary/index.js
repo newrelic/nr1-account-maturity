@@ -1,3 +1,4 @@
+/* eslint-disable */
 import React, { useMemo, useContext } from 'react';
 import { navigation, HeadingText } from 'nr1';
 import DataContext from '../../../src/context/data';
@@ -76,7 +77,7 @@ export default function Summary(props) {
         </div>
       </>
     );
-  }, [scoredCollection, viewGroupBy, selectedView]);
+  }, [scoredCollection, viewGroupBy, selectedReport, props]);
 }
 
 function sortByRollUpStatusAndScore(arr) {

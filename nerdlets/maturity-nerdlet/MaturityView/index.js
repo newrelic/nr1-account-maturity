@@ -1,3 +1,4 @@
+/* eslint-disable */
 import React, { useContext, useMemo, useEffect } from 'react';
 import { Spinner, nerdlet, Icon } from 'nr1';
 import DataContext from '../../../src/context/data';
@@ -20,7 +21,7 @@ export default function MaturityView(props) {
     view,
     selectedView,
     selectedReport,
-    setDataState
+    setDataState,
   } = useContext(DataContext);
 
   useEffect(() => {
@@ -34,21 +35,23 @@ export default function MaturityView(props) {
           onClick: () =>
             setDataState({
               prevView: view,
+              prevSelectedReport: selectedReport,
+              prevSelectedView: selectedView,
               view: {
                 page: 'CreateView',
-                title: 'Create New View'
+                title: 'Create New View',
               },
-              selectedReport,
-              selectedView: {}
-            })
+              selectedReport: {},
+              selectedView: {},
+            }),
         },
-        ...defaultActions(setDataState)
-      ]
+        ...defaultActions(setDataState),
+      ],
     });
   }, []);
 
-  // eslint-disable-next-line
-  console.log(viewSegment, selectedView, tempAllData);
+  // // eslint-disable-next-line
+  // console.log(viewSegment, selectedView, tempAllData);
 
   let selectedData = null;
 
@@ -61,17 +64,17 @@ export default function MaturityView(props) {
   let scoredCollection = [];
 
   if (viewGroupBy === 'account') {
-    scoredCollection = (accountSummaries || []).map(a => {
+    scoredCollection = (accountSummaries || []).map((a) => {
       const elementScores = [];
 
-      Object.keys(rules).forEach(key => {
+      Object.keys(rules).forEach((key) => {
         const value = a[key];
 
         if (value !== undefined && value !== null) {
           const payload = {
             name: key,
             status: percentageToStatus(value),
-            score: `${Math.round(value)}%`
+            score: `${Math.round(value)}%`,
           };
 
           elementScores.push(payload);
@@ -84,7 +87,7 @@ export default function MaturityView(props) {
         rollUpScore: Math.round((a.totalScore / a.maxScore) * 100),
         rollUpStatus: STATUSES.UNKNOWN,
         elementListLabel: 'Capabilities',
-        elementScores
+        elementScores,
       };
 
       payload.rollUpStatus = percentageToStatus(payload.rollUpScore);
@@ -93,16 +96,16 @@ export default function MaturityView(props) {
     });
   } else if (viewGroupBy === 'capability') {
     scoredCollection = Object.keys(rules)
-      .filter(product =>
+      .filter((product) =>
         accountSummaries.find(
-          a => a[product] !== null && a[product] !== undefined
-        )
+          (a) => a[product] !== null && a[product] !== undefined,
+        ),
       )
-      .map(product => {
+      .map((product) => {
         const elementScores = [];
         let totalScore = 0;
 
-        accountSummaries.forEach(account => {
+        accountSummaries.forEach((account) => {
           const value = account[product];
           totalScore += value;
 
@@ -114,7 +117,7 @@ export default function MaturityView(props) {
               score: `${Math.round(value)}%`,
               entities: account[`${product}.entities`],
               entitiesPassing: account[`${product}.entitiesPassing`],
-              scoring: account[`${product}.scoring`]
+              scoring: account[`${product}.scoring`],
             };
 
             elementScores.push(payload);
@@ -125,11 +128,11 @@ export default function MaturityView(props) {
           title: product,
           // subtitle: account.id,
           rollUpScore: Math.round(
-            (totalScore / (accountSummaries.length * 100)) * 100
+            (totalScore / (accountSummaries.length * 100)) * 100,
           ),
           rollUpStatus: STATUSES.UNKNOWN,
           elementListLabel: 'Accounts',
-          elementScores
+          elementScores,
         };
 
         payload.rollUpStatus = percentageToStatus(payload.rollUpScore);
@@ -146,7 +149,7 @@ export default function MaturityView(props) {
             style={{
               textAlign: 'center',
               paddingBottom: '10px',
-              paddingTop: '10px'
+              paddingTop: '10px',
             }}
           >
             Generating View
@@ -203,6 +206,6 @@ export default function MaturityView(props) {
     selectedData,
     scoredCollection,
     viewSegment,
-    selectedReport
+    selectedReport,
   ]);
 }

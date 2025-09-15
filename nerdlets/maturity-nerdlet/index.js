@@ -4,6 +4,7 @@ import { PlatformStateContext, nerdlet, AutoSizer } from 'nr1';
 import { ProvideData } from '../../src/context/data';
 import AccountMaturity from './AccountMaturity';
 import { Messages } from '@newrelic/nr-labs-components';
+import { ResourceMonitorProvider } from './ResourceMonitor';
 
 export default function AccountMaturityRoot() {
   const platformContext = useContext(PlatformStateContext);
@@ -12,7 +13,7 @@ export default function AccountMaturityRoot() {
     nerdlet.setConfig({
       accountPicker: true,
       timePicker: false,
-      actionControls: true
+      actionControls: true,
     });
   }, []);
 

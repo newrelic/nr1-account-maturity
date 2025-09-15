@@ -1,3 +1,4 @@
+/* eslint-disable */
 import React, { useMemo } from 'react';
 import { HeadingText } from 'nr1';
 import { ProgressBar } from '@newrelic/nr-labs-components';
@@ -9,7 +10,7 @@ export default function SummaryCard({
   rollUpStatus,
   rollUpScore,
   maxScore = 100,
-  elementListLabel
+  elementListLabel,
 }) {
   return useMemo(() => {
     const elementSliceIndex =

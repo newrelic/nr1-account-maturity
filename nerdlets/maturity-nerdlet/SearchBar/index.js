@@ -1,3 +1,4 @@
+/* eslint-disable */
 import React, { useContext, useMemo } from 'react';
 
 import { TextField, Button } from 'nr1';
@@ -5,7 +6,8 @@ import DataContext from '../../../src/context/data';
 
 export default function SearchBar(props) {
   const { width } = props;
-  const { search, setDataState, view } = useContext(DataContext);
+  const { search, setDataState, view, selectedReport, selectedView } =
+    useContext(DataContext);
 
   const newViewWidth = 100;
   const textFieldWidth = width - newViewWidth - 30;
@@ -18,16 +20,16 @@ export default function SearchBar(props) {
           paddingTop: '8px',
           paddingLeft: '8px',
           marginBottom: '8px',
-          backgroundColor: 'white'
+          backgroundColor: 'white',
         }}
       >
         <TextField
           type={TextField.TYPE.SEARCH}
           value={search}
-          onChange={e => setDataState({ search: e.target.value })}
+          onChange={(e) => setDataState({ search: e.target.value })}
           style={{
             width: `${textFieldWidth}px`,
-            float: 'left'
+            float: 'left',
           }}
           placeholder="Search for view"
         />
@@ -36,7 +38,7 @@ export default function SearchBar(props) {
           style={{
             width: `${newViewWidth}px`,
             marginRight: '10px',
-            float: 'right'
+            float: 'right',
           }}
           type={Button.TYPE.PRIMARY}
           sizeType={Button.SIZE_TYPE.SMALL}
@@ -44,12 +46,14 @@ export default function SearchBar(props) {
           onClick={() => {
             setDataState({
               prevView: view,
+              prevSelectedReport: selectedReport,
+              prevSelectedView: selectedView,
               view: {
                 page: 'CreateView',
-                title: 'Create View Configuration'
+                title: 'Create View Configuration',
               },
               selectedReport: {},
-              selectedView: {}
+              selectedView: {},
             });
           }}
         >

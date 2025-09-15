@@ -1,3 +1,4 @@
+/* eslint-disable */
 import React, { useMemo, useState } from 'react';
 import MaturityElementList from '../MaturityElementList';
 import { flattenJSON, percentageToStatus } from '../../utils';
@@ -12,31 +13,31 @@ export default function MaturityContainer(props) {
     selected,
     selectedAccountId,
     entitySearchQuery,
-    isUserDefault
+    isUserDefault,
   } = props;
   const [view, setView] = useState('summary');
   const [groupBy, setGroupBy] = useState('account');
 
-  const selectedHistory = history.find(h => h.document.runAt === selected) || [
-    selected
-  ];
+  const selectedHistory = history.find(
+    (h) => h.document.runAt === selected,
+  ) || [selected];
 
   const { accountSummaries } = selectedHistory?.document || {};
 
   let scoredCollection = [];
 
   if (groupBy === 'account') {
-    scoredCollection = (accountSummaries || []).map(a => {
+    scoredCollection = (accountSummaries || []).map((a) => {
       const elementScores = [];
 
-      Object.keys(rules).forEach(key => {
+      Object.keys(rules).forEach((key) => {
         const value = a[key];
 
         if (value !== undefined && value !== null) {
           const payload = {
             name: key,
             status: percentageToStatus(value),
-            score: `${Math.round(value)}%`
+            score: `${Math.round(value)}%`,
           };
 
           elementScores.push(payload);
@@ -49,7 +50,7 @@ export default function MaturityContainer(props) {
         rollUpScore: Math.round((a.totalScore / a.maxScore) * 100),
         rollUpStatus: STATUSES.UNKNOWN,
         elementListLabel: 'Capabilities',
-        elementScores
+        elementScores,
       };
 
       payload.rollUpStatus = percentageToStatus(payload.rollUpScore);
@@ -58,16 +59,16 @@ export default function MaturityContainer(props) {
     });
   } else if (groupBy === 'product') {
     scoredCollection = Object.keys(rules)
-      .filter(product =>
+      .filter((product) =>
         accountSummaries.find(
-          a => a[product] !== null && a[product] !== undefined
-        )
+          (a) => a[product] !== null && a[product] !== undefined,
+        ),
       )
-      .map(product => {
+      .map((product) => {
         const elementScores = [];
         let totalScore = 0;
 
-        accountSummaries.forEach(account => {
+        accountSummaries.forEach((account) => {
           const value = account[product];
           totalScore += value;
 
@@ -76,7 +77,7 @@ export default function MaturityContainer(props) {
               name: account.name,
               id: account.id,
               status: percentageToStatus(value),
-              score: `${Math.round(value)}%`
+              score: `${Math.round(value)}%`,
             };
 
             elementScores.push(payload);
@@ -87,11 +88,11 @@ export default function MaturityContainer(props) {
           title: product,
           // subtitle: account.id,
           rollUpScore: Math.round(
-            (totalScore / (accountSummaries.length * 100)) * 100
+            (totalScore / (accountSummaries.length * 100)) * 100,
           ),
           rollUpStatus: STATUSES.UNKNOWN,
           elementListLabel: 'Capabilities',
-          elementScores
+          elementScores,
         };
 
         payload.rollUpStatus = percentageToStatus(payload.rollUpScore);
@@ -102,13 +103,13 @@ export default function MaturityContainer(props) {
 
   return useMemo(() => {
     const jsonCsvData = (selectedHistory?.document?.accountSummaries || []).map(
-      a => {
+      (a) => {
         let accountData = {
           id: a.id,
-          name: a.name
+          name: a.name,
         };
 
-        Object.keys(rules).forEach(product => {
+        Object.keys(rules).forEach((product) => {
           const scoring = a[`${product}.scoring`];
 
           if (scoring) {
@@ -118,7 +119,7 @@ export default function MaturityContainer(props) {
         });
 
         return accountData;
-      }
+      },
     );
 
     return (

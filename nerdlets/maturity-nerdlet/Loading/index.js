@@ -1,3 +1,4 @@
+/* eslint-disable */
 import React, { useMemo, useContext } from 'react';
 import DataContext from '../../../src/context/data';
 import { EmptyState } from 'nr1';
@@ -8,7 +9,7 @@ export default function Loading() {
     completedPercentage,
     accountTotal,
     completedAccountTotal,
-    completedPercentageTotal
+    completedPercentageTotal,
   } = useContext(DataContext);
 
   const diffPercentage = (100 / accountTotal) * (completedPercentage / 100);
@@ -32,6 +33,6 @@ export default function Loading() {
     completedPercentage,
     completedPercentageTotal,
     accountTotal,
-    completedAccountTotal
+    completedAccountTotal,
   ]);
 }

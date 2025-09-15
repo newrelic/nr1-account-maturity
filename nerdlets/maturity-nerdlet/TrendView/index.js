@@ -1,3 +1,4 @@
+/* eslint-disable */
 import React, { useContext, useEffect, useMemo, useState } from 'react';
 import {
   Grid,
@@ -7,7 +8,7 @@ import {
   CardBody,
   CardHeader,
   Select,
-  SelectItem
+  SelectItem,
 } from 'nr1';
 import DataContext from '../../../src/context/data';
 import rules, { productColors } from '../../../src/rules';
@@ -23,7 +24,7 @@ export default function TrendView(props) {
     viewGroupBy,
     selectedReport,
     selectedView,
-    getAccounts
+    getAccounts,
   } = useContext(DataContext);
 
   useEffect(() => {
@@ -35,22 +36,22 @@ export default function TrendView(props) {
     fetchAccounts();
   }, []);
 
-  const viewConfig = (viewConfigs || []).find(vc => vc.id === documentId);
+  const viewConfig = (viewConfigs || []).find((vc) => vc.id === documentId);
   let { history } = viewConfig || [];
 
   if (selectedTime === 'month') {
     const timeAgoMs = new Date().getTime() - 2.628e9;
-    history = history.filter(h => h.document.runAt >= timeAgoMs);
+    history = history.filter((h) => h.document.runAt >= timeAgoMs);
   } else if (selectedTime === 'week') {
     const timeAgoMs = new Date().getTime() - 6.048e8;
-    history = history.filter(h => h.document.runAt >= timeAgoMs);
+    history = history.filter((h) => h.document.runAt >= timeAgoMs);
   } else if (selectedTime === 'day') {
     const timeAgoMs = new Date().getTime() - 8.64e7;
-    history = history.filter(h => h.document.runAt >= timeAgoMs);
+    history = history.filter((h) => h.document.runAt >= timeAgoMs);
   }
 
   const selectedHistory = history.find(
-    h => h.historyId === selectedView.historyId
+    (h) => h.historyId === selectedView.historyId,
   );
 
   // eslint-disable-next-line
@@ -59,9 +60,9 @@ export default function TrendView(props) {
 
   // standardize the colors used if in product grouping
   const accountColors = {};
-  accounts.forEach(account => {
+  accounts.forEach((account) => {
     accountColors[account.id] = `#${Math.floor(
-      Math.random() * 16777215
+      Math.random() * 16777215,
     ).toString(16)}`;
   });
 
@@ -69,43 +70,43 @@ export default function TrendView(props) {
 
   if (viewGroupBy === 'capability') {
     chartData = Object.keys(rules)
-      .filter(product =>
-        history.find(h =>
+      .filter((product) =>
+        history.find((h) =>
           h.document.accountSummaries.find(
-            a => a[product] !== null && a[product] !== undefined
-          )
-        )
+            (a) => a[product] !== null && a[product] !== undefined,
+          ),
+        ),
       )
-      .map(product => {
+      .map((product) => {
         const lineData = [];
         const chartData = {};
         // eslint-disable-next-line
         let showHistoryMarker = false;
 
-        accounts.forEach(accountId => {
+        accounts.forEach((accountId) => {
           const series = {
             metadata: {
               id: accountId,
               name:
-                accountInfo.find(a => a.id === accountId)?.name || accountId,
+                accountInfo.find((a) => a.id === accountId)?.name || accountId,
               color:
                 accountColors[accountId] ||
                 `#${Math.floor(Math.random() * 16777215).toString(16)}`,
               viz: 'main',
               units_data: {
                 x: 'TIMESTAMP',
-                y: 'COUNT'
-              }
+                y: 'COUNT',
+              },
             },
-            data: []
+            data: [],
           };
 
-          history.forEach(h => {
+          history.forEach((h) => {
             const { document } = h;
             const { accountSummaries, runAt } = document;
             const data = { x: runAt, y: null };
 
-            const summary = accountSummaries.find(a => a.id === accountId);
+            const summary = accountSummaries.find((a) => a.id === accountId);
 
             if (summary) {
               if (summary[product] !== null && summary[product] !== undefined) {
@@ -150,13 +151,13 @@ export default function TrendView(props) {
         return chartData;
       });
   } else if (viewGroupBy === 'account') {
-    chartData = accounts.map(a => {
+    chartData = accounts.map((a) => {
       const lineData = [];
       const chartData = {};
       // eslint-disable-next-line
       let showHistoryMarker = false;
 
-      Object.keys(rules).forEach(key => {
+      Object.keys(rules).forEach((key) => {
         const series = {
           metadata: {
             id: key,
@@ -167,18 +168,18 @@ export default function TrendView(props) {
             viz: 'main',
             units_data: {
               x: 'TIMESTAMP',
-              y: 'COUNT'
-            }
+              y: 'COUNT',
+            },
           },
-          data: []
+          data: [],
         };
 
-        history.forEach(h => {
+        history.forEach((h) => {
           const { document } = h;
           const { accountSummaries, runAt } = document;
           const data = { x: runAt, y: null };
 
-          accountSummaries.forEach(s => {
+          accountSummaries.forEach((s) => {
             if (s[key] !== null && s[key] !== undefined && s.id === a) {
               chartData.accountName = s.name;
               chartData.accountId = s.id;
@@ -240,7 +241,7 @@ export default function TrendView(props) {
           </Select>
         </div>
         <Grid style={{ paddingTop: '10px' }}>
-          {chartData.map(a => {
+          {chartData.map((a) => {
             return (
               <GridItem
                 key={a.accountId || a.productName}
@@ -248,7 +249,7 @@ export default function TrendView(props) {
                 style={{
                   padding: '5px',
                   boxShadow: '1px 1px 2px rgb(243,244,255)',
-                  margin: '6px'
+                  margin: '6px',
                 }}
               >
                 <div className="golden-metrics">

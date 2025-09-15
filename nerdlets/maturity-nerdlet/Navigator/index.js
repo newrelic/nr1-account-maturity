@@ -1,3 +1,4 @@
+/* eslint-disable */
 import React, { useMemo, useContext } from 'react';
 import { navigation, HeadingText } from 'nr1';
 import DataContext from '../../../src/context/data';
@@ -6,7 +7,7 @@ import ScoreBar from '../ScoreBar';
 
 export default function Navigator(props) {
   const { scoredCollection } = props;
-  const { viewGroupBy, selectedReport, accounts } = useContext(DataContext);
+  const { viewGroupBy, selectedReport } = useContext(DataContext);
 
   return useMemo(() => {
     if (!scoredCollection || scoredCollection.length === 0) {
@@ -77,5 +78,5 @@ export default function Navigator(props) {
         </div>
       </>
     );
-  }, [scoredCollection, viewGroupBy, accounts]);
+  }, [scoredCollection, viewGroupBy, selectedReport, props]);
 }
