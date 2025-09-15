@@ -75,7 +75,6 @@ const RETRY_LIMIT = 7;
 export default DataContext;
 
 export function useProvideData(props) {
-  const { startTracking, stopTracking } = useResourceMonitor();
   const [dataState, setDataState] = useSetState({
     loadedDefaultView: false,
     showSkipThisStep: true,
