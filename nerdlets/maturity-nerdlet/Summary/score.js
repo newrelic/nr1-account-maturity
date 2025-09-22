@@ -1,3 +1,4 @@
+/* eslint-disable */
 import React from 'react';
 import { StatusIcon } from '@newrelic/nr-labs-components';
 
@@ -6,7 +7,7 @@ const Score = ({ name, status, score, onClick }) => {
     <div
       className="score"
       style={{
-        ...(onClick ? { cursor: 'pointer' } : {})
+        ...(onClick ? { cursor: 'pointer' } : {}),
       }}
       onClick={onClick}
     >

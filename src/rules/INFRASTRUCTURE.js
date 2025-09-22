@@ -6,6 +6,8 @@ import semver from 'semver';
 
 export default {
   // what entity types to check against
+  domain: 'INFRA',
+  type: 'HOST',
   entityType: 'INFRASTRUCTURE_HOST_ENTITY',
   // some entities require additional data that can only be performed with a direct guid query
   graphql: `query ($guids: [EntityGuid]!) {
@@ -19,9 +21,6 @@ export default {
           }
           reporting
           ... on InfrastructureHostEntity {
-            hostSummary {
-              servicesCount
-            }
             tags {
               key
               values
@@ -37,34 +36,44 @@ export default {
   scores: [
     {
       name: 'Reporting',
-      entityCheck: (entity) => entity.reporting,
+      entityCheck: entity => entity.reporting
     },
     {
       name: 'Alerts',
-      entityCheck: (entity) => entity?.alertSeverity !== 'NOT_CONFIGURED',
+      entityCheck: entity => entity?.alertSeverity !== 'NOT_CONFIGURED'
     },
     {
       name: 'Tags', // this was previously the labels check, which is really just checking for non-standard tags (value of this check is questionable)
-      entityCheck: (entity) =>
-        entity.tags
-          .map((tag) => tag.key)
-          .some(
-            (key) =>
-              ![
-                'account',
-                'accountId',
-                'language',
-                'trustedAccountId',
-                'guid',
-              ].includes(key)
-          ),
+      entityCheck: entity => {
+        if (!entity.tags) {
+          console.log('no tags', entity);
+          return false;
+        } else {
+          return entity.tags
+            .map(tag => tag.key)
+            .some(
+              key =>
+                ![
+                  'account',
+                  'accountId',
+                  'language',
+                  'trustedAccountId',
+                  'guid'
+                ].includes(key)
+            );
+        }
+      }
     },
     {
       name: 'Latest Release',
       entityCheck: (entity, releases) => {
         const { tags } = entity;
 
-        const agentVersion = tags.find((t) => t.key === 'agentVersion')
+        if (!tags) {
+          return false;
+        }
+
+        const agentVersion = tags.find(t => t.key === 'agentVersion')
           ?.values?.[0];
 
         if (releases.infrastructure) {
@@ -78,6 +87,7 @@ export default {
 
           return semver.satisfies(mversion?.raw, `>=${lversion?.raw}`);
         } else {
+          // eslint-disable-next-line
           console.log(
             "Can't determine agent release for",
             entity.name,
@@ -85,39 +95,34 @@ export default {
           );
           return false;
         }
-      },
+      }
     },
     {
       name: 'Deployments',
-      entityCheck: (entity) =>
-        (entity?.deploymentSearch?.results || []).length > 0,
+      entityCheck: entity =>
+        (entity?.deploymentSearch?.results || []).length > 0
     },
-    {
-      name: 'Custom Attributes',
-      accountCheck: (account, dataDictionary) => {
-        const currentKeySet = account?.data?.KeySet_SystemSample?.results || [];
-        const attributes =
-          dataDictionary?.INFRASTRUCTURE_HOST_ENTITY?.[0]?.attributes || [];
+    // {
+    //   name: 'Custom Attributes',
+    //   accountCheck: (account, dataDictionary) => {
+    //     const currentKeySet = account?.data?.KeySet_SystemSample?.results || [];
+    //     const attributes =
+    //       dataDictionary?.INFRASTRUCTURE_HOST_ENTITY?.[0]?.attributes || [];
 
-        if (attributes) {
-          return currentKeySet.length > attributes.length;
-        } else {
-          console.log(
-            'unable to determine if data dictionary or attributes exist, returning true'
-          );
-          return true;
-        }
-      },
-    },
+    //     if (attributes) {
+    //       return currentKeySet.length > attributes.length;
+    //     } else {
+    //       console.log(
+    //         'unable to determine if data dictionary or attributes exist, returning true',
+    //       );
+    //       return true;
+    //     }
+    //   },
+    // },
     {
       name: 'Cloud Integration Enabled',
-      accountCheck: (account) =>
-        (account?.data?.cloud?.linkedAccounts || []).length > 0,
-    },
-    {
-      name: 'AWS Billing Enabled',
-      accountCheck: (account) =>
-        (account?.data?.awsBilling?.results || []).length > 0,
-    },
-  ],
+      accountCheck: account =>
+        (account?.data?.cloud?.linkedAccounts || []).length > 0
+    }
+  ]
 };

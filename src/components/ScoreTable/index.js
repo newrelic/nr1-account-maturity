@@ -11,7 +11,7 @@ import {
   TableRowCell,
   Modal,
   HeadingText,
-  Button,
+  Button
 } from 'nr1';
 import { percentageToStatus, scoreToColor } from '../../utils';
 import { ProgressBar } from '@newrelic/nr-labs-components';
@@ -57,13 +57,13 @@ export default function ScoreTable() {
       {
         name: 'Account',
         // do this to make handling sub values and csv export a touch easier
-        value: a => `${a.name} :: ${a.id}`,
+        value: a => `${a.name} :: ${a.id}`
       },
       {
         name: 'Account Score',
-        value: a => a.scorePercentage,
+        value: a => a.scorePercentage
       },
-      ...productHeaders,
+      ...productHeaders
     ];
 
     const rowData = historyDoc.document.accountSummaries.map(a => {
@@ -167,12 +167,12 @@ export default function ScoreTable() {
                     borderLeft: `5px solid ${
                       scoreToColor(item['Account Score'])?.color
                       // eslint-disable-next-line
-                    }`,
+                    }`
                   }}
                   //
                   onClick={() =>
                     navigation.openStackedNerdlet({
-                      id: 'account-details-nerdlet',
+                      id: 'account-details',
                       urlState: {
                         isUserDefault: view?.page === 'DefaultView',
                         accountName: accountSplit[0],
@@ -181,8 +181,8 @@ export default function ScoreTable() {
                         historyId: historyDoc.id,
                         selectedAccountId,
                         entitySearchQuery:
-                          historyDoc.document?.entitySearchQuery,
-                      },
+                          historyDoc.document?.entitySearchQuery
+                      }
                     })
                   }
                 >
@@ -192,7 +192,7 @@ export default function ScoreTable() {
                   style={{
                     fontWeight: 'bold',
                     fontSize: '15px',
-                    color: scoreToColor(item['Account Score'])?.color,
+                    color: scoreToColor(item['Account Score'])?.color
                   }}
                 >
                   {/* {item['Account Score']} */}
@@ -218,7 +218,7 @@ export default function ScoreTable() {
                     style={{
                       fontWeight: 'bold',
                       fontSize: '15px',
-                      color: scoreToColor(item[h.name])?.color,
+                      color: scoreToColor(item[h.name])?.color
                     }}
                   >
                     {item[h.name] !== undefined && item[h.name] !== null ? (
@@ -235,7 +235,7 @@ export default function ScoreTable() {
                           setModal({
                             name: h.name,
                             ...item,
-                            productSummary,
+                            productSummary
                           });
                         }}
                       >

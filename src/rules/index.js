@@ -4,7 +4,7 @@ import SYNTHETICS from './SYNTHETICS';
 import INFRASTRUCTURE from './INFRASTRUCTURE';
 import KUBERNETES from './KUBERNETES';
 import LOG from './LOG';
-import EXTENSIBILITY from './EXTENSIBILITY';
+// import EXTENSIBILITY from './EXTENSIBILITY';
 import MOBILE from './MOBILE';
 import WORKLOADS from './WORKLOADS';
 import SLM from './SLM';
@@ -18,7 +18,7 @@ export default {
   Infrastructure: INFRASTRUCTURE,
   Kubernetes: KUBERNETES,
   Logs: LOG,
-  Extensibility: EXTENSIBILITY,
+  // Extensibility: EXTENSIBILITY,
   Mobile: MOBILE,
   Workloads: WORKLOADS,
   SLM: SLM,

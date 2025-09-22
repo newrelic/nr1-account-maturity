@@ -1,5 +1,4 @@
-/* eslint-disable eslint-comments/disable-enable-pair */
-/* eslint-disable prettier/prettier */
+/* eslint-disable */
 
 export default {
   scores: [
@@ -14,7 +13,7 @@ export default {
         const passed = account.entities.filter(
           (e) =>
             e.tags.find((t) => t.key === 'instrumentation.provider')
-              ?.values?.[0] === 'kentik'
+              ?.values?.[0] === 'kentik',
         ).length;
 
         const failed = 0;
@@ -28,13 +27,13 @@ export default {
         let totalSnmpEntities = account.entities.filter(
           (e) =>
             e.tags.find((t) => t.key === 'instrumentation.provider')
-              ?.values?.[0] === 'kentik'
+              ?.values?.[0] === 'kentik',
         ).length;
 
         let kentikDefaultEntities = account.entities.filter(
           (e) =>
             e.tags.find((t) => t.key === 'instrumentation.provider')
-              ?.values?.[0] === 'kentik-default'
+              ?.values?.[0] === 'kentik-default',
         ).length;
 
         return { passed: totalSnmpEntities, failed: kentikDefaultEntities };
@@ -46,12 +45,12 @@ export default {
         let totalSnmpEntities = account.entities.filter(
           (e) =>
             e.tags.find((t) => t.key === 'instrumentation.provider')
-              ?.values?.[0] === 'kentik'
+              ?.values?.[0] === 'kentik',
         ).length;
 
         let failed =
           account?.data?.npmNoEntityDefinitionDevices?.results?.[0]?.[
-          'uniqueCount.device_name'
+            'uniqueCount.device_name'
           ] || 0;
 
         let passed = totalSnmpEntities - failed;
@@ -65,12 +64,12 @@ export default {
         let totalSnmpEntities = account.entities.filter(
           (e) =>
             e.tags.find((t) => t.key === 'instrumentation.provider')
-              ?.values?.[0] === 'kentik'
+              ?.values?.[0] === 'kentik',
         ).length;
 
         let failed =
           account?.data?.npmSnmpPollingFailures?.results?.[0]?.[
-          'uniqueCount.device_name'
+            'uniqueCount.device_name'
           ] || 0;
 
         let passed = totalSnmpEntities - failed;

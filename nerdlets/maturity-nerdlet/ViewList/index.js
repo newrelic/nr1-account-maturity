@@ -1,3 +1,4 @@
+/* eslint-disable */
 import React, { useState, useContext, useMemo, useEffect } from 'react';
 import {
   nerdlet,
@@ -7,7 +8,7 @@ import {
   TableRow,
   TableRowCell,
   FavoriteTableRowCell,
-  Toast
+  Toast,
 } from 'nr1';
 
 import DataContext from '../../../src/context/data';
@@ -26,42 +27,46 @@ export default function ViewList() {
     userSettings,
     toggleFavoriteView,
     email,
-    loadedDefaultView
+    loadedDefaultView,
+    selectedReport,
+    selectedView,
   } = useContext(DataContext);
   const [column, setColumn] = useState(0);
   const [sortingType, setSortingType] = useState(
-    TableHeaderCell.SORTING_TYPE.NONE
+    TableHeaderCell.SORTING_TYPE.NONE,
   );
   const favorites = userSettings?.favorites || [];
 
   useEffect(() => {
     nerdlet.setConfig({
       actionControls: true,
-      actionControlButtons: [...defaultActions(setDataState)]
+      actionControlButtons: [...defaultActions(setDataState)],
     });
 
-    if (loadedDefaultView === false && userSettings.defaultViewId) {
-      setDataState({ loadedDefaultView: true });
-      const viewConfig = viewConfigs.find(
-        vc => vc.id === userSettings.defaultViewId
-      );
+    const defaultViewConfig = viewConfigs.find(
+      (vc) => vc.id === userSettings?.defaultViewId,
+    );
 
-      if (viewConfig.id === `allData+${email}`) {
+    if (loadedDefaultView === false && defaultViewConfig) {
+      setDataState({ loadedDefaultView: true });
+      const viewConfig = defaultViewConfig;
+
+      if (viewConfig?.id === `allData+${email}`) {
         runView(
           { id: `allData+${email}`, name: 'All data' },
           null,
           false,
-          true
+          true,
         );
       } else {
         runView(
           {
             name: viewConfig.document.name,
-            account: selectedAccountId
+            account: selectedAccountId,
           },
           { ...viewConfig },
           false,
-          true
+          true,
         );
       }
     }
@@ -86,7 +91,7 @@ export default function ViewList() {
         }
 
         return name;
-      }
+      },
     },
     {
       key: 'Description',
@@ -102,16 +107,16 @@ export default function ViewList() {
             runView(
               {
                 name: item.document.name,
-                account: selectedAccountId
+                account: selectedAccountId,
               },
               { ...item },
               false,
-              true
+              true,
             );
         }
 
         return onClickHandler;
-      }
+      },
     },
     {
       key: 'Last run',
@@ -122,12 +127,12 @@ export default function ViewList() {
         } else {
           return '';
         }
-      }
+      },
     },
     {
       key: 'Last score',
       value: ({ item }) =>
-        Math.round(item?.history?.[0]?.document?.totalPercentage || 0)
+        Math.round(item?.history?.[0]?.document?.totalPercentage || 0),
     },
     {
       key: 'Last % score change',
@@ -142,13 +147,13 @@ export default function ViewList() {
         } else {
           return '';
         }
-      }
+      },
     },
     {
       key: 'Created by',
       value: ({ item }) =>
-        item?.id === `allData+${email}` ? email : item.document?.owner
-    }
+        item?.id === `allData+${email}` ? email : item.document?.owner,
+    },
   ];
 
   const actions = [
@@ -160,65 +165,72 @@ export default function ViewList() {
             { id: `allData+${email}`, name: 'All data' },
             null,
             false,
-            true
+            true,
           );
         } else {
           runView(
             {
               name: item.document.name,
-              account: selectedAccountId
+              account: selectedAccountId,
             },
             { ...item },
             false,
-            true
+            true,
           );
         }
-      }
+      },
     },
     {
       label: 'Edit',
       onClick: (evt, { item }) => {
+        console.log(item);
         const documentId =
-          item.id === 'allData+undefined' ? `allData+${email}` : documentId;
+          item.id === 'allData+undefined'
+            ? `allData+${email}`
+            : item.document.id;
 
         if (documentId === `allData+${email}`) {
           Toast.showToast({
             title: 'All Data is a reserved view and cannot be edited',
-            type: Toast.TYPE.NORMAL
+            type: Toast.TYPE.NORMAL,
           });
         } else {
           setDataState({
             selectedReport: item,
             view: { page: 'EditView' },
-            prevView: view
+            prevView: view,
+            prevSelectedReport: selectedReport,
+            prevSelectedView: selectedView,
           });
         }
-      }
+      },
     },
     {
       label: 'Delete',
       type: TableRow.ACTION_TYPE.DESTRUCTIVE,
       onClick: (evt, { item }) => {
         const documentId =
-          item.id === 'allData+undefined' ? `allData+${email}` : documentId;
+          item.id === 'allData+undefined'
+            ? `allData+${email}`
+            : item.document.id;
 
         if (documentId === `allData+${email}`) {
           Toast.showToast({
             title: 'All Data is a reserved view and cannot be deleted',
-            type: Toast.TYPE.NORMAL
+            type: Toast.TYPE.NORMAL,
           });
         } else {
           setDataState({ deleteViewModalOpen: item });
         }
-      }
-    }
+      },
+    },
   ];
 
   const filteredConfigs = viewConfigs
-    .filter(c =>
+    .filter((c) =>
       (c?.document?.name || '')
         .toLowerCase()
-        .includes((search || '').toLowerCase())
+        .includes((search || '').toLowerCase()),
     )
     .sort((a, b) => favorites.includes(b.id) - favorites.includes(a.id));
 
@@ -249,16 +261,16 @@ export default function ViewList() {
               <TableRow actions={actions}>
                 <FavoriteTableRowCell
                   style={{
-                    color: favorites.includes(item.id) ? '#F0B400' : undefined
+                    color: favorites.includes(item.id) ? '#F0B400' : undefined,
                   }}
                   onChange={() => toggleFavoriteView(item.id)}
                   checked={favorites.includes(item.id)}
                 />
 
-                {headers.map(header => {
+                {headers.map((header) => {
                   if (header.key === 'View') {
                     const previousResult = item?.history?.[0];
-                    const SEVEN_DAYS_MS = 7 * 24 * 60 * 60 * 1000;
+                    const SEVEN_DAYS_MS = 3 * 24 * 60 * 60 * 1000;
                     const runAtTimestamp = previousResult?.document?.runAt
                       ? new Date(previousResult.document.runAt).getTime()
                       : null;
@@ -277,11 +289,11 @@ export default function ViewList() {
                         runView(
                           {
                             name: item.document.name,
-                            account: selectedAccountId
+                            account: selectedAccountId,
                           },
                           { ...item },
                           false,
-                          true
+                          true,
                         );
                     }
 

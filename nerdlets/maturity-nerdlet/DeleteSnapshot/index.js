@@ -1,3 +1,4 @@
+/* eslint-disable */
 import React, { useContext, useMemo } from 'react';
 
 import { Modal, HeadingText, Button } from 'nr1';
@@ -9,7 +10,7 @@ export default function DeleteSnapshot() {
     deleteSnapshotModalOpen,
     deletingSnapshot,
     deleteSnapshot,
-    setDataState
+    setDataState,
   } = useContext(DataContext);
 
   return useMemo(() => {
@@ -30,7 +31,7 @@ export default function DeleteSnapshot() {
             onClick={() =>
               deleteSnapshot(
                 deleteSnapshotModalOpen?.id,
-                deleteSnapshotModalOpen?.historyId
+                deleteSnapshotModalOpen?.historyId,
               )
             }
             type={Button.TYPE.DESTRUCTIVE}

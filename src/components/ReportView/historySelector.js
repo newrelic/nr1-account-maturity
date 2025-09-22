@@ -6,7 +6,7 @@ import {
   Button,
   AccountStorageMutation,
   UserStorageMutation,
-  Toast,
+  Toast
 } from 'nr1';
 import { ACCOUNT_USER_HISTORY_COLLECTION } from '../../constants';
 
@@ -19,7 +19,7 @@ export default function HistorySelector(props) {
     viewHistory,
     userViewHistory,
     fetchViewHistory,
-    fetchUserViewHistory,
+    fetchUserViewHistory
   } = useContext(DataContext);
   const isUserDefault = props?.isUserDefault || view?.props?.isUserDefault;
   const history =
@@ -27,38 +27,38 @@ export default function HistorySelector(props) {
     (isUserDefault
       ? userViewHistory
       : viewHistory.filter(
-          (r) => r.document.reportId === (view?.id || view.props.id) // eslint-disable-line
+          r => r.document.reportId === (view?.id || view.props.id) // eslint-disable-line
         )); // eslint-disable-line
 
   const [deleting, setDeleting] = useState(false);
 
-  const deleteHistory = (runAt) => {
+  const deleteHistory = runAt => {
     setDeleting(true);
-    const documentId = history.find((h) => h.document?.runAt === runAt)?.id;
+    const documentId = history.find(h => h.document?.runAt === runAt)?.id;
 
     if (documentId) {
       if (isUserDefault) {
         UserStorageMutation.mutate({
           actionType: UserStorageMutation.ACTION_TYPE.DELETE_DOCUMENT,
           collection: ACCOUNT_USER_HISTORY_COLLECTION,
-          documentId,
-        }).then(async (res) => {
+          documentId
+        }).then(async res => {
           setDeleting(false);
 
           if (res.error) {
             Toast.showToast({
               title: 'Failed to delete',
-              type: Toast.TYPE.CRITICAL,
+              type: Toast.TYPE.CRITICAL
             });
           } else {
             await fetchUserViewHistory();
             Toast.showToast({
               title: 'Successfully deleted',
-              type: Toast.TYPE.NORMAL,
+              type: Toast.TYPE.NORMAL
             });
 
             const newHistory = (history || []).filter(
-              (h) => h.document?.runAt !== runAt
+              h => h.document?.runAt !== runAt
             );
 
             const selected = newHistory?.[0]?.document?.runAt;
@@ -78,12 +78,12 @@ export default function HistorySelector(props) {
           accountId,
           actionType: AccountStorageMutation.ACTION_TYPE.DELETE_DOCUMENT,
           collection: ACCOUNT_USER_HISTORY_COLLECTION,
-          documentId,
-        }).then(async (res) => {
+          documentId
+        }).then(async res => {
           if (res.error) {
             Toast.showToast({
               title: 'Failed to delete',
-              type: Toast.TYPE.CRITICAL,
+              type: Toast.TYPE.CRITICAL
             });
             setDeleting(false);
           } else {
@@ -91,13 +91,13 @@ export default function HistorySelector(props) {
 
             Toast.showToast({
               title: 'Successfully deleted',
-              type: Toast.TYPE.NORMAL,
+              type: Toast.TYPE.NORMAL
             });
 
             setDeleting(false);
 
             const newHistory = (history || []).filter(
-              (h) => h.document?.runAt !== runAt
+              h => h.document?.runAt !== runAt
             );
 
             const selected = newHistory?.[0]?.document?.runAt;
@@ -127,6 +127,7 @@ export default function HistorySelector(props) {
         });
       }
     } else {
+      // eslint-disable-next-line
       console.log('documentId not found');
       setDeleting(false);
     }
@@ -143,14 +144,14 @@ export default function HistorySelector(props) {
           <Select
             disabled={runningReport}
             value={view?.props?.selected || undefined}
-            label={'History'}
+            label="History"
             labelInline
             onChange={(e, value) => {
               view.props.selected = value;
               setDataState({ view });
             }}
           >
-            {(history || []).map((h) => {
+            {(history || []).map(h => {
               const { document } = h;
               const dateStr = new Date(document.runAt).toLocaleString();
 

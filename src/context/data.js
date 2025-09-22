@@ -1,3 +1,4 @@
+/* eslint-disable */
 import React, { createContext, useEffect } from 'react';
 import { useSetState } from '@mantine/hooks';
 import {
@@ -7,23 +8,26 @@ import {
   UserStorageQuery,
   UserStorageMutation,
   AccountStorageQuery,
-  AccountStorageMutation,
+  AccountStorageMutation
 } from 'nr1';
 import {
   accountDataQuery,
   accountsQuery,
   agentReleasesQuery,
+  batchAccountQuery,
   dataDictionaryQuery,
   entitySearchQueryByAccount,
   nrqlGqlQuery,
-  userQuery,
+  userQuery
 } from '../queries/data';
 import rules from '../rules';
 import { v4 as uuidv4 } from 'uuid';
 import { chunk, chunkString, generateAccountSummary } from '../utils';
+
 import {
   ACCOUNT_CONFIG_COLLECTION,
   ACCOUNT_HISTORY_COLLECTION,
+  NRQL_BATCH_SIZE
 } from '../constants';
 
 const DataContext = createContext();
@@ -33,6 +37,40 @@ export function ProvideData(v) {
   const auth = useProvideData(v.platformContext);
   return <DataContext.Provider value={auth}>{v.children}</DataContext.Provider>;
 }
+
+const ENTITY_COUNT_BLOCK = 50000;
+
+const TAG_WHITELIST_RULES = [
+  // Keep specific tag keys
+  key => key === 'accountId',
+  key => key === 'nr.dt.enabled',
+  key => key === 'instrumentation.provider',
+  key => key === 'privateLocation',
+  key => key.startsWith('instrumentation.')
+];
+const stripEntityTags = entity => {
+  if (entity.tags && Array.isArray(entity.tags)) {
+    const originalLength = entity.tags.length;
+    entity.tags = entity.tags.filter(tag => {
+      // Keep tags that match any whitelist rule
+      return TAG_WHITELIST_RULES.some(rule => rule(tag.key));
+    });
+    // if (entity.tags.length !== originalLength) {
+    //   console.log(
+    //     `Kept ${entity.tags.length} of ${originalLength} tags for entity ${entity.guid}`,
+    //   );
+    // }
+  }
+};
+
+const TYPE_BLACKLIST =
+  "'DASHBOARD','CONTAINER','DESTINATION','CONDITION','HTTPSERVICE','SERVICE','WORKFLOW','POLICY','SERVICE_LEVEL'";
+
+const GLOBAL_CONCURRENCY_LIMIT = 3;
+
+const RETRY_INIT_MS = 1500;
+
+const RETRY_LIMIT = 7;
 
 export default DataContext;
 
@@ -76,6 +114,7 @@ export function useProvideData(props) {
     sortBy: 'Lowest score',
     savingView: false,
     userSettings: null,
+    entityCount: 0
   });
 
   // for testing
@@ -85,13 +124,13 @@ export function useProvideData(props) {
     const userView = await UserStorageMutation.mutate({
       actionType: UserStorageMutation.ACTION_TYPE.DELETE_DOCUMENT,
       collection: 'userViews',
-      documentId: 'default',
+      documentId: 'default'
     });
 
     // wipe user history
     const userHistory = await UserStorageMutation.mutate({
       actionType: UserStorageMutation.ACTION_TYPE.DELETE_DOCUMENT,
-      collection: ACCOUNT_HISTORY_COLLECTION,
+      collection: ACCOUNT_HISTORY_COLLECTION
     });
 
     console.log(userView, userHistory);
@@ -101,7 +140,7 @@ export function useProvideData(props) {
     const res = await AccountStorageMutation.mutate({
       accountId: props?.accountId || dataState?.selectedAccountId,
       actionType: AccountStorageMutation.ACTION_TYPE.DELETE_COLLECTION,
-      collection: ACCOUNT_HISTORY_COLLECTION,
+      collection: ACCOUNT_HISTORY_COLLECTION
     });
     console.log('account history deleted resp =>', res);
   };
@@ -114,7 +153,7 @@ export function useProvideData(props) {
       actionType: UserStorageMutation.ACTION_TYPE.WRITE_DOCUMENT,
       collection: 'userSettings',
       documentId: 'main',
-      document: userSettings,
+      document: userSettings
     });
 
     setDataState({ userSettings });
@@ -123,131 +162,121 @@ export function useProvideData(props) {
   };
 
   // handle initial load
-  useEffect(async () => {
-    // await wipeUserDetails();
-    // eslint-disable-next-line
-    console.log('DataProvider initialized');
-    // wipeAccountHistory(); // testing
-    const state = {};
-    await getUserEmail();
+  useEffect(() => {
+    const initializeData = async () => {
+      console.log('DataProvider initialized');
+      const state = {};
+      await getUserEmail();
 
-    // const defaultView = await getUserReport(); // needs to be removed
-    const userSettings = await getUserSettings();
-    state.userSettings = userSettings;
-    console.log('userSettings =>', userSettings);
+      const userSettings = await getUserSettings();
+      state.userSettings = userSettings;
+      console.log('userSettings =>', userSettings);
 
-    // there will always be at least one view config because of allData
-    // load list view if welcome has been done
-    if (userSettings?.doneWelcomeTest23) {
-      state.view = {
-        page: 'ViewList',
-      };
-    }
+      // load list view if welcome has been done
+      if (userSettings?.doneWelcomeTest23) {
+        state.view = {
+          page: 'ViewList'
+        };
+      }
 
-    const user = await NerdGraphQuery.query({ query: userQuery });
-    state.user = user?.data?.actor?.user;
+      const user = await NerdGraphQuery.query({ query: userQuery });
+      state.user = user?.data?.actor?.user;
 
-    const viewConfigs = await fetchViewConfigs(null, state.user);
-    const accounts = await getAccounts();
+      const viewConfigs = await fetchViewConfigs(null, state.user);
+      const accounts = await getAccounts();
 
-    state.accounts = accounts;
-    state.selectedAccountId = accounts[0].id;
+      state.accounts = accounts;
+      state.selectedAccountId = accounts[0].id;
 
-    setDataState(state);
+      setDataState(state);
+    };
+
+    initializeData();
   }, []);
 
   // handle account picker changes
-  useEffect(async () => {
-    const { accountId } = props;
-    const state = {};
+  useEffect(() => {
+    const handleAccountChange = async () => {
+      const { accountId } = props;
+      const state = {};
 
-    console.log('account id changed => ', accountId);
-    if (accountId === 'cross-account') {
-      console.log('cross account should not be selected, reloading...');
-      navigation.openNerdlet({ id: 'maturity-nerdlet' });
-      return;
-    }
-
-    const accountsInit = await getAccounts();
-
-    if (!accountsInit.find(a => a.id === accountId)) {
-      Toast.showToast({
-        title: 'Account Maturity is not subscribed to the selected account',
-        description: `Change account or subscribe account: ${accountId}`,
-        type: Toast.TYPE.CRITICAL,
-      });
-      state.view = { page: 'unavailable-account' };
-      state.viewSegment = 'unavailable-account';
-    } else {
-      state.view = { page: 'ViewList' };
-      state.viewSegment = 'list';
-    }
-
-    await getUserEmail();
-
-    const userSettings = await getUserSettings();
-    state.userSettings = userSettings;
-    console.log('userSettings =>', userSettings);
-    if (userSettings?.doneWelcomeTest23) {
-      state.view = { page: 'ViewList' };
-      state.viewSegment = 'list';
-    }
-
-    const user = await NerdGraphQuery.query({ query: userQuery });
-    state.user = user?.data?.actor?.user;
-
-    setDataState({
-      fetchingData: true,
-      selectedAccountId: accountId,
-      ...state,
-    });
-
-    // if (!state.userSettings.doneWelcome) {
-    //   console.log('Welcome not complete');
-    //   state.view = {
-    //     page: 'Welcome',
-    //   };
-
-    //   setDataState({
-    //     fetchingData: false,
-    //     view: state.view,
-    //   });
-    // } else
-    if (state.viewSegment == 'unavailable-account') {
-      setDataState({
-        selectedAccountId: accountId,
-        fetchingData: false,
-        view: state.view,
-        viewSegment: 'unavailable-account',
-      });
-    } else {
-      const viewConfigs = await fetchViewConfigs(accountId, state.user);
-      const viewHistory = await fetchViewHistory(accountId);
-
-      const [agentReleases, dataDictionary] = await Promise.all([
-        getAgentReleases(),
-        getDataDictionary(),
-      ]);
-
-      const accounts = await decorateAccountData(accountsInit);
-
-      deleteOrphanedReports(viewConfigs, viewHistory, accountId);
-
-      let view = dataState.view;
-      if (userSettings?.doneWelcomeTest23) {
-        view = { page: 'ViewList' };
+      console.log('account id changed => ', accountId);
+      if (accountId === 'cross-account') {
+        console.log('cross account should not be selected, reloading...');
+        navigation.openNerdlet({ id: 'maturity-home' });
+        return;
       }
 
+      const accountsInit = await getAccounts();
+
+      if (!accountsInit.find(a => a.id === accountId)) {
+        Toast.showToast({
+          title: 'Account Maturity is not subscribed to the selected account',
+          description: `Change account or subscribe account: ${accountId}`,
+          type: Toast.TYPE.CRITICAL
+        });
+        state.view = { page: 'unavailable-account' };
+        state.viewSegment = 'unavailable-account';
+      } else {
+        state.view = { page: 'ViewList' };
+        state.viewSegment = 'list';
+      }
+
+      await getUserEmail();
+
+      const userSettings = await getUserSettings();
+      state.userSettings = userSettings;
+      console.log('userSettings =>', userSettings);
+      if (userSettings?.doneWelcomeTest23) {
+        state.view = { page: 'ViewList' };
+        state.viewSegment = 'list';
+      }
+
+      const user = await NerdGraphQuery.query({ query: userQuery });
+      state.user = user?.data?.actor?.user;
+
       setDataState({
+        fetchingData: true,
         selectedAccountId: accountId,
-        accounts,
-        agentReleases,
-        dataDictionary,
-        viewConfigs,
-        fetchingData: false,
-        view,
+        ...state
       });
-    }
+
+      if (state.viewSegment == 'unavailable-account') {
+        setDataState({
+          selectedAccountId: accountId,
+          fetchingData: false,
+          view: state.view,
+          viewSegment: 'unavailable-account'
+        });
+      } else {
+        const viewConfigs = await fetchViewConfigs(accountId, state.user);
+        const viewHistory = await fetchViewHistory(accountId);
+
+        const [agentReleases, dataDictionary] = await Promise.all([
+          getAgentReleases(),
+          getDataDictionary()
+        ]);
+
+        deleteOrphanedReports(viewConfigs, viewHistory, accountId);
+
+        let view = dataState.view;
+        if (userSettings?.doneWelcomeTest23) {
+          view = { page: 'ViewList' };
+        }
+
+        setDataState({
+          selectedAccountId: accountId,
+          accounts: accountsInit,
+          agentReleases,
+          dataDictionary,
+          viewConfigs,
+          fetchingData: false,
+          view
+        });
+      }
+    };
+
+    handleAccountChange();
   }, [props.accountId]);
 
   const loadHistoricalResult = (report, result) => {
@@ -264,10 +293,10 @@ export function useProvideData(props) {
         ...report,
         id: report.id,
         name: report?.document?.name,
-        historyId: result.historyId,
+        historyId: result.historyId
       },
       selectedReport: report,
-      view: { page: 'MaturityView', historyId: result.historyId },
+      view: { page: 'MaturityView', historyId: result.historyId }
     });
   };
 
@@ -280,17 +309,17 @@ export function useProvideData(props) {
         actionType: UserStorageMutation.ACTION_TYPE.WRITE_DOCUMENT,
         collection: 'userSettings',
         documentId: 'main',
-        document: userSettings,
+        document: userSettings
       }).then(res => {
         if (res.error) {
           Toast.showToast({
             title: 'Failed to save',
-            type: Toast.TYPE.CRITICAL,
+            type: Toast.TYPE.CRITICAL
           });
         } else {
           Toast.showToast({
             title: 'Saved successfully',
-            type: Toast.TYPE.NORMAL,
+            type: Toast.TYPE.NORMAL
           });
         }
 
@@ -319,17 +348,17 @@ export function useProvideData(props) {
         actionType: UserStorageMutation.ACTION_TYPE.WRITE_DOCUMENT,
         collection: 'userSettings',
         documentId: 'main',
-        document: userSettings,
+        document: userSettings
       }).then(res => {
         if (res.error) {
           Toast.showToast({
             title: 'Failed to save',
-            type: Toast.TYPE.CRITICAL,
+            type: Toast.TYPE.CRITICAL
           });
         } else {
           Toast.showToast({
             title: 'Updated successfully',
-            type: Toast.TYPE.NORMAL,
+            type: Toast.TYPE.NORMAL
           });
         }
 
@@ -348,7 +377,7 @@ export function useProvideData(props) {
             email
           }
         }
-      }`,
+      }`
       }).then(res => {
         const email = res?.data?.actor?.user?.email;
         setDataState({ email });
@@ -361,7 +390,7 @@ export function useProvideData(props) {
     return new Promise(resolve => {
       UserStorageQuery.query({
         collection: 'userSettings',
-        documentId: 'main',
+        documentId: 'main'
       }).then(res => {
         const userSettings = res?.data || {};
         setDataState({ userSettings });
@@ -371,6 +400,47 @@ export function useProvideData(props) {
   };
 
   const runView = async (
+    selectedView,
+    selectedReport,
+    doSaveView,
+    saveHistory,
+    setAsDefault
+  ) => {
+    const { totalEntities, summarizedData } = await checkEntityCount({
+      accounts: selectedReport?.document?.accounts,
+      allAccounts: selectedReport?.document?.allAccounts,
+      entitySearchQuery: selectedReport?.document?.entitySearchQuery,
+      accountsFilter: selectedReport?.document?.accountsFilterEnabled
+        ? selectedReport?.document?.accountsFilter
+        : '',
+      accountsFilterEnabled: selectedReport?.document?.accountsFilterEnabled,
+      allProducts: selectedReport?.document?.allProducts,
+      products: selectedReport?.document?.products,
+      hideNotReporting: selectedReport?.document?.hideNotReporting,
+      selectedView
+    });
+
+    setDataState({ entityCount: totalEntities });
+
+    if (totalEntities > ENTITY_COUNT_BLOCK) {
+      console.log(
+        `blocked run, ${totalEntities} entities exceed ${ENTITY_COUNT_BLOCK} `
+      );
+      // setRunParams(runParams);
+    } else {
+      console.log('total ent', totalEntities);
+
+      runViewWrapper(
+        selectedView,
+        selectedReport,
+        doSaveView,
+        saveHistory,
+        setAsDefault
+      );
+    }
+  };
+
+  const runViewWrapper = async (
     selectedView,
     selectedReport,
     doSaveView,
@@ -404,7 +474,7 @@ export function useProvideData(props) {
       summarizedScores: null,
       accountSummaries: null,
       selectedView: { ...selectedView, id: documentId },
-      view: { page: 'Loading' },
+      view: { page: 'Loading' }
       // view:
       //   selectedView.id === 'allData' ? { page: 'Loading' } : dataState.view,
     });
@@ -419,8 +489,8 @@ export function useProvideData(props) {
         document: {
           accounts: dataState.accounts.map(a => a.id),
           allAccounts: true,
-          allProducts: true,
-        },
+          allProducts: true
+        }
       };
       console.log(dataState.accounts);
     } else if (selectedView.account && selectedReport) {
@@ -430,7 +500,7 @@ export function useProvideData(props) {
       if (report.document?.accountsFilterEnabled) {
         report.document.accounts = dataState.accounts
           .filter(a =>
-            a.name
+            (a?.name || `UNAUTHORIZED ${a?.id}`)
               .toLowerCase()
               .includes((report.document?.accountsFilter || '').toLowerCase())
           )
@@ -451,11 +521,22 @@ export function useProvideData(props) {
     //
     if (documentId.includes('allData')) {
       report.document.accounts = (dataState?.accounts || []).map(a => a.id);
+      report.document.products = Object.keys(rules);
     }
 
-    const accounts = [...report.document.accounts].map(id => ({
-      ...[...dataState.accounts].find(a => a.id === id),
+    let accountsToDecorate = [...report.document.accounts].map(id => ({
+      ...[...dataState.accounts].find(a => a.id === id)
     }));
+
+    accountsToDecorate = await decorateAccountData(accountsToDecorate);
+
+    // Create a new accounts array with decorated accounts replaced
+    const updatedAccounts = [...dataState.accounts].map(originalAccount => {
+      const decoratedAccount = accountsToDecorate.find(
+        decorated => decorated.id === originalAccount.id
+      );
+      return decoratedAccount || originalAccount;
+    });
 
     // inject hideNotReporting to entitySearchQuery
     let entitySearchQuery = report.document?.entitySearchQuery || '';
@@ -467,15 +548,15 @@ export function useProvideData(props) {
     }
 
     //----------------------------------------------------
-
     const {
       entitiesByAccount,
-      summarizedScores,
+      summarizedScores
     } = await getEntitiesForAccounts(
-      accounts,
+      accountsToDecorate,
       entitySearchQuery || '',
       dataState.agentReleases,
-      dataState.dataDictionary
+      dataState.dataDictionary,
+      report.document.products
     );
 
     console.log(summarizedScores);
@@ -508,6 +589,7 @@ export function useProvideData(props) {
 
     const prepareState = {
       runningReport: false,
+      accounts: updatedAccounts,
       [`runningReport.${report?.id || selectedView.id}`]: true,
       lastRunAt: runAt,
       entitiesByAccount,
@@ -516,7 +598,7 @@ export function useProvideData(props) {
       totalPercentage,
       view: { page: 'MaturityView' },
       selectedReport: report,
-      unsavedRun: selectedView?.unsavedRun,
+      unsavedRun: selectedView?.unsavedRun
     };
 
     prepareState.tempAllData = {
@@ -525,7 +607,7 @@ export function useProvideData(props) {
       summarizedScores,
       accountSummaries,
       totalPercentage,
-      runAt,
+      runAt
     };
 
     if (doSaveView) {
@@ -533,7 +615,7 @@ export function useProvideData(props) {
     } else if (!doSaveView && saveHistory) {
       await saveResult(prepareState.tempAllData, {
         ...selectedView,
-        id: documentId,
+        id: documentId
       });
     }
 
@@ -556,19 +638,20 @@ export function useProvideData(props) {
 
     const report = selectedReport || dataState.selectedReport;
     const accounts = [...report.document.accounts].map(id => ({
-      ...[...dataState.accounts].find(a => a.id === id),
+      ...[...dataState.accounts].find(a => a.id === id)
     }));
 
     console.log('runReport', accounts);
 
     const {
       entitiesByAccount,
-      summarizedScores,
+      summarizedScores
     } = await getEntitiesForAccounts(
       accounts,
       report.document?.entitySearchQuery || '',
       dataState.agentReleases,
-      dataState.dataDictionary
+      dataState.dataDictionary,
+      report.products
     );
 
     const accountSummaries = generateAccountSummary(
@@ -595,21 +678,21 @@ export function useProvideData(props) {
         runAt,
         totalScorePercentage,
         accountSummaries,
-        entitySearchQuery: report.document?.entitySearchQuery,
-      },
+        entitySearchQuery: report.document?.entitySearchQuery
+      }
     });
 
     if (res.error) {
       Toast.showToast({
         title: 'Failed to save',
         description: 'Check your permissions',
-        type: Toast.TYPE.CRITICAL,
+        type: Toast.TYPE.CRITICAL
       });
     } else {
       Toast.showToast({
         title: 'Saved result successfully',
         description: 'Refreshing history...',
-        type: Toast.TYPE.NORMAL,
+        type: Toast.TYPE.NORMAL
       });
     }
 
@@ -623,7 +706,7 @@ export function useProvideData(props) {
       lastRunAt: runAt,
       entitiesByAccount,
       summarizedScores,
-      accountSummaries,
+      accountSummaries
     });
   };
 
@@ -657,8 +740,8 @@ export function useProvideData(props) {
               viewId: data.documentId,
               runAt: data.runAt,
               chunkIndex,
-              chunk,
-            },
+              chunk
+            }
           })
         );
 
@@ -666,8 +749,8 @@ export function useProvideData(props) {
           setDataState({
             selectedView: {
               ...selectedView,
-              historyId,
-            },
+              historyId
+            }
           });
           fetchViewConfigs().then(() => {
             resolve(results);
@@ -680,21 +763,41 @@ export function useProvideData(props) {
   };
 
   // decorate additional account data
-  const decorateAccountData = accounts => {
-    // eslint-disable-next-line
-    return new Promise(async resolve => {
-      const accountData = await Promise.all(
-        accounts.map(account =>
-          NerdGraphQuery.query({ query: accountDataQuery(account.id) })
-        )
-      );
+  const decorateAccountData = async accounts => {
+    return new Promise((resolve, reject) => {
+      // Split into batches of 10
+      const batches = [];
+      for (let i = 0; i < accounts.length; i += 10) {
+        batches.push(accounts.slice(i, i + 10));
+      }
 
-      accountData.forEach((res, index) => {
-        accounts[index].data = res?.data?.actor?.account;
-        accounts[index].entityInfo = res?.data?.actor?.entityInfo;
+      const q = async.queue((batch, callback) => {
+        const query = batchAccountQuery(batch);
+        NerdGraphQuery.query({ query })
+          .then(res => {
+            const data = res?.data || {};
+            for (const account of batch) {
+              const alias = `account_${account.id}`;
+              const result = data[alias];
+              if (result) {
+                account.data = result.account;
+                account.entityInfo = result.entityInfo;
+              }
+            }
+            callback();
+          })
+          .catch(err => callback(err));
+      }, GLOBAL_CONCURRENCY_LIMIT);
+
+      q.push(batches);
+
+      q.drain(() => {
+        resolve(accounts);
       });
 
-      resolve(accounts);
+      q.error(err => {
+        reject(err);
+      });
     });
   };
 
@@ -716,7 +819,7 @@ export function useProvideData(props) {
       Toast.showToast({
         title: 'Failed to deleted',
         description: 'You are not the owner',
-        type: Toast.TYPE.CRITICAL,
+        type: Toast.TYPE.CRITICAL
       });
 
       return false;
@@ -732,13 +835,13 @@ export function useProvideData(props) {
         accountId: dataState?.selectedAccountId,
         actionType: AccountStorageMutation.ACTION_TYPE.DELETE_DOCUMENT,
         collection: ACCOUNT_CONFIG_COLLECTION,
-        documentId: dataState?.deleteViewModalOpen.id,
+        documentId: dataState?.deleteViewModalOpen.id
       }).then(res => {
         fetchViewConfigs().then(() => {
           setDataState({
             deletingView: false,
             deleteViewModalOpen: null,
-            view: { page: 'ViewList' },
+            view: { page: 'ViewList' }
           });
           resolve(res);
         });
@@ -766,7 +869,7 @@ export function useProvideData(props) {
               accountId,
               actionType: AccountStorageMutation.ACTION_TYPE.DELETE_DOCUMENT,
               collection: ACCOUNT_HISTORY_COLLECTION,
-              documentId: id,
+              documentId: id
             })
           )
         )
@@ -800,7 +903,7 @@ export function useProvideData(props) {
           accountId,
           actionType: AccountStorageMutation.ACTION_TYPE.DELETE_DOCUMENT,
           collection: ACCOUNT_HISTORY_COLLECTION,
-          documentId: id,
+          documentId: id
         })
       );
 
@@ -816,7 +919,7 @@ export function useProvideData(props) {
 
             setDataState({
               deletingSnapshot: false,
-              deleteSnapshotModalOpen: null,
+              deleteSnapshotModalOpen: null
             });
             loadHistoricalResult(currentConfig, latestHistory);
             resolve();
@@ -824,7 +927,7 @@ export function useProvideData(props) {
             setDataState({
               deletingSnapshot: false,
               deleteSnapshotModalOpen: null,
-              view: { page: 'ViewList' },
+              view: { page: 'ViewList' }
             });
             resolve();
           }
@@ -845,7 +948,7 @@ export function useProvideData(props) {
         (
           await AccountStorageQuery.query({
             accountId,
-            collection: ACCOUNT_HISTORY_COLLECTION,
+            collection: ACCOUNT_HISTORY_COLLECTION
           })
         )?.data || [];
 
@@ -876,7 +979,7 @@ export function useProvideData(props) {
           const builtDocument = {
             historyId,
             document: mergedChunksJson,
-            mergedChunkIds: chunks.map(c => c.id), // needed to know all chunks to delete from history
+            mergedChunkIds: chunks.map(c => c.id) // needed to know all chunks to delete from history
           };
           viewHistory.push(builtDocument);
         } catch (e) {
@@ -888,7 +991,7 @@ export function useProvideData(props) {
         fetchingViewHistory: false,
         viewHistory: viewHistory.sort(
           (a, b) => b.document.runAt - a.document.runAt
-        ),
+        )
       });
       resolve(viewHistory);
     });
@@ -902,14 +1005,14 @@ export function useProvideData(props) {
       const userViewHistory = (
         (
           await UserStorageQuery.query({
-            collection: ACCOUNT_HISTORY_COLLECTION,
+            collection: ACCOUNT_HISTORY_COLLECTION
           })
         )?.data || []
       ).sort((a, b) => b?.document?.runAt - a?.document?.runAt);
 
       setDataState({
         fetchingViewHistory: false,
-        userViewHistory,
+        userViewHistory
       });
       resolve(userViewHistory);
     });
@@ -930,7 +1033,7 @@ export function useProvideData(props) {
           await AccountStorageQuery.query({
             accountId:
               accountId || dataState.selectedAccountId || props.accountId,
-            collection: ACCOUNT_CONFIG_COLLECTION,
+            collection: ACCOUNT_CONFIG_COLLECTION
           })
         )?.data || [];
 
@@ -950,7 +1053,7 @@ export function useProvideData(props) {
           document: { name: 'All Data' },
           history: viewHistory.filter(
             vh => vh.document.documentId === `allData+${eml}`
-          ),
+          )
         };
 
         viewConfigs.push(allDataConfig);
@@ -961,7 +1064,7 @@ export function useProvideData(props) {
 
       setDataState({
         fetchingReports: false,
-        viewConfigs: [...viewConfigs],
+        viewConfigs: [...viewConfigs]
       });
 
       resolve(viewConfigs);
@@ -973,19 +1076,19 @@ export function useProvideData(props) {
       accountId: dataState.selectedAccountId,
       actionType: AccountStorageMutation.ACTION_TYPE.DELETE_DOCUMENT,
       collection: ACCOUNT_CONFIG_COLLECTION,
-      documentId,
+      documentId
     });
 
     if (res.error) {
       Toast.showToast({
         title: 'Failed to deleted',
         description: 'Check your permissions',
-        type: Toast.TYPE.CRITICAL,
+        type: Toast.TYPE.CRITICAL
       });
     } else {
       Toast.showToast({
         title: 'Deleted successfully',
-        type: Toast.TYPE.NORMAL,
+        type: Toast.TYPE.NORMAL
       });
 
       await fetchViewConfigs();
@@ -996,7 +1099,8 @@ export function useProvideData(props) {
     accounts,
     entitySearchQuery,
     agentReleases,
-    dataDictionary
+    dataDictionary,
+    products
   ) => {
     setDataState({ gettingEntities: true });
 
@@ -1011,22 +1115,24 @@ export function useProvideData(props) {
         setDataState({
           completedPercentageTotal,
           completedAccountTotal,
-          accountTotal: accounts.length,
+          accountTotal: accounts.length
         });
       }, 1000);
 
       console.log(`${new Date().toLocaleTimeString()} - fetch accounts start`);
       const q = async.queue((task, callback) => {
-        getEntitiesByAccount(task, entitySearchQuery).then(entities => {
-          task.entities = entities;
-          completedAccounts.push(task);
+        getEntitiesByAccount(task, entitySearchQuery, products).then(
+          entities => {
+            task.entities = entities;
+            completedAccounts.push(task);
 
-          completedAccountTotal = completedAccounts.length;
-          completedPercentageTotal =
-            (completedAccounts.length / accounts.length) * 100;
-          callback();
-        });
-      }, 5);
+            completedAccountTotal = completedAccounts.length;
+            completedPercentageTotal =
+              (completedAccounts.length / accounts.length) * 100;
+            callback();
+          }
+        );
+      }, GLOBAL_CONCURRENCY_LIMIT);
 
       q.push(accounts);
 
@@ -1048,9 +1154,7 @@ export function useProvideData(props) {
       const summarizedScores = {};
 
       accounts.forEach(account => {
-        if (!account.scores) {
-          account.scores = {};
-        }
+        account.scores = {};
 
         Object.keys(rules).forEach(key => {
           const { scores } = rules[key];
@@ -1089,14 +1193,14 @@ export function useProvideData(props) {
             if (!account.scores[key][name]) {
               account.scores[key][name] = {
                 passed: 0,
-                failed: 0,
+                failed: 0
               };
             }
 
             if (!summarizedScores[key][name]) {
               summarizedScores[key][name] = {
                 passed: 0,
-                failed: 0,
+                failed: 0
               };
             }
 
@@ -1135,7 +1239,7 @@ export function useProvideData(props) {
                     if (!account.scores[key].offendingEntities[entity.guid]) {
                       account.scores[key].offendingEntities[entity.guid] = {
                         name: entity.name,
-                        [name]: false,
+                        [name]: false
                       };
 
                       if (rules[key].tagMeta) {
@@ -1174,7 +1278,7 @@ export function useProvideData(props) {
           foundEntities.forEach(entity => {
             if (!account.scores[key].offendingEntities[entity.guid]) {
               account.scores[key].passingEntities[entity.guid] = {
-                name: entity.name,
+                name: entity.name
               };
 
               if (rules[key].tagMeta) {
@@ -1195,7 +1299,7 @@ export function useProvideData(props) {
     });
   };
 
-  const getEntitiesByAccount = (account, entitySearchQuery) => {
+  const getEntitiesByAccount = (account, entitySearchQuery, products) => {
     return new Promise(resolve => {
       let completedEntities = [];
       let totalEntityCount = 0;
@@ -1213,34 +1317,64 @@ export function useProvideData(props) {
         const entityClause = entitySearchQuery
           ? `AND ${entitySearchQuery}`
           : '';
-        const searchClause = ` AND type NOT IN ('DASHBOARD') ${entityClause}`;
+
+        const infraTypes = [];
+
+        const productDomains = products
+          .map(p => {
+            if (rules[p]?.domain === 'INFRA') {
+              infraTypes.push(rules[p].type);
+            }
+
+            return rules[p]?.domain;
+          })
+          .filter(p => {
+            return p && p !== 'INFRA';
+          });
+
+        const infraClause = infraTypes
+          ? ` OR type IN ('${infraTypes.join("','")}')`
+          : '';
+
+        const domainClause = productDomains
+          ? ` AND domain IN ('${productDomains.join("','")}')`
+          : '';
+
+        const searchClause = ` AND type NOT IN (${TYPE_BLACKLIST}) AND type NOT LIKE 'KUBERNETES_%' ${domainClause} ${infraClause} ${entityClause}`;
+
+        // console.log('!!! CLAUSE -> ', searchClause);
+        // console.log('!!! INFRA CLAUSE -> ', infraClause);
 
         async.retry(
           {
-            times: 5, // Number of retries
-            interval: retryCount => 100 * Math.pow(2, retryCount), // Exponential backoff formula
+            times: RETRY_LIMIT,
+            interval: retryCount => RETRY_INIT_MS * Math.pow(2, retryCount) // Exponential backoff formula
           },
           retryCallback => {
             NerdGraphQuery.query({
               query: entitySearchQueryByAccount(account.id, searchClause),
-              variables: { cursor: task.cursor },
+              variables: { cursor: task.cursor }
             })
               .then(res => {
                 if (res.error) {
-                  Toast.showToast({
-                    title: 'Failed to fetch entities, retrying',
-                    description: res.error.message,
-                    type: Toast.TYPE.CRITICAL,
-                  });
+                  // Toast.showToast({
+                  //   title: 'Failed to fetch entities, retrying',
+                  //   description: res.error.message,
+                  //   type: Toast.TYPE.CRITICAL,
+                  // });
                   retryCallback(res.error, null); // Pass error to retry, will trigger retry
                 } else {
                   const entitySearch = res?.data?.actor?.entitySearch || {};
 
                   totalEntityCount = entitySearch.count;
-                  completedEntities = [
-                    ...completedEntities,
-                    ...(entitySearch?.results?.entities || []),
-                  ];
+                  for (
+                    let i = 0;
+                    i < (entitySearch?.results?.entities || []).length;
+                    i++
+                  ) {
+                    completedEntities.push(entitySearch.results.entities[i]);
+                  }
+
                   completedPercentage =
                     (completedEntities.length / totalEntityCount) * 100;
 
@@ -1268,7 +1402,7 @@ export function useProvideData(props) {
             callback(); // Continue queue
           }
         );
-      }, 5);
+      }, GLOBAL_CONCURRENCY_LIMIT);
 
       q.push({ cursor: null });
 
@@ -1278,14 +1412,212 @@ export function useProvideData(props) {
         );
         clearInterval(pollJobStatus);
 
-        decorateEntities(completedEntities).then(decoratedEntities => {
+        decorateEntitiesOld(completedEntities).then(decoratedEntities => {
           resolve(decoratedEntities);
         });
       });
     });
   };
 
+  const chunkArray = (array, size) => {
+    const chunks = [];
+    for (let i = 0; i < array.length; i += size) {
+      chunks.push(array.slice(i, i + size));
+    }
+    return chunks;
+  };
+
+  // Helper function to process a batch of NRQL queries
+  const processBatchedNrqlQueries = async batch => {
+    // Group by account ID for efficient querying
+    const accountGroups = batch.reduce((acc, entity) => {
+      const accountId = entity.accountId;
+      if (!acc[accountId]) {
+        acc[accountId] = [];
+      }
+      acc[accountId].push(entity);
+      return acc;
+    }, {});
+
+    const results = [];
+
+    // Process each account group
+    for (const [accountId, entities] of Object.entries(accountGroups)) {
+      const entityQueries = entities.map(entity => ({
+        guid: entity.guid,
+        nrqlQueries: entity.nrqlQueries
+      }));
+
+      try {
+        const response = await NerdGraphQuery.query({
+          query: nrqlGqlQuery(accountId, entityQueries)
+        });
+
+        // Parse the aliased results back to individual entities
+        const accountData = response?.data?.actor?.account;
+        if (accountData) {
+          entities.forEach(entity => {
+            const nrqlData = {};
+
+            Object.keys(entity.nrqlQueries).forEach(queryKey => {
+              const alias = `${entity.guid}_${queryKey}`.replace(
+                /[^a-zA-Z0-9_]/g,
+                '_'
+              );
+              nrqlData[queryKey] = accountData[alias]?.results;
+            });
+
+            results.push({
+              guid: entity.guid,
+              nrqlData
+            });
+          });
+        }
+      } catch (error) {
+        console.error(
+          `Error processing batch for account ${accountId}:`,
+          error
+        );
+        // Fallback to individual queries for this batch if needed
+        // You could implement fallback logic here
+      }
+    }
+
+    return results;
+  };
+
   const decorateEntities = entities => {
+    return new Promise(async resolve => {
+      const entityTypesToQuery = [];
+      const entityNrqlQueries = [];
+
+      Object.keys(rules).forEach(key => {
+        const rule = rules[key];
+
+        if (rule.graphql) {
+          const foundEntities = entities.filter(
+            e => e.entityType === rule.entityType
+          );
+
+          if (foundEntities.length > 0) {
+            entityTypesToQuery.push({
+              entities: foundEntities,
+              graphql: rule.graphql
+            });
+          }
+        }
+
+        if (rule.nrqlQueries) {
+          const foundEntities = entities.filter(
+            e =>
+              e.entityType === rule.entityType &&
+              (rule.type ? e.type === rule.type : true)
+          );
+
+          foundEntities.forEach(e => {
+            entityNrqlQueries.push({
+              guid: e.guid,
+              name: e.name,
+              accountId: e.account.id,
+              nrqlQueries: rule.nrqlQueries(e)
+            });
+          });
+        }
+      });
+
+      if (entityNrqlQueries.length > 0) {
+        let entityNrqlData = [];
+
+        console.log(
+          `${new Date().toLocaleTimeString()} - fetch entity nrql data start (${
+            entityNrqlQueries.length
+          } entities)`
+        );
+
+        // Split into batches for processing
+        const batches = chunkArray(entityNrqlQueries, NRQL_BATCH_SIZE);
+        console.log(
+          `Processing ${batches.length} batches of max ${NRQL_BATCH_SIZE} entities each`
+        );
+
+        // Process batches with concurrency control
+        const nrqlQueue = async.queue((batch, callback) => {
+          processBatchedNrqlQueries(batch)
+            .then(batchResults => {
+              for (let i = 0; i < batchResults.length; i++) {
+                entityNrqlData.push(batchResults[i]);
+              }
+              callback();
+            })
+            .catch(error => {
+              console.error('Error processing NRQL batch:', error);
+              callback(error);
+            });
+        }, GLOBAL_CONCURRENCY_LIMIT);
+
+        nrqlQueue.push(batches);
+
+        await nrqlQueue.drain();
+        console.log(
+          `${new Date().toLocaleTimeString()} - fetch entity nrql data end`
+        );
+      }
+
+      if (entityTypesToQuery.length > 0) {
+        let entityData = [];
+
+        console.log(
+          `${new Date().toLocaleTimeString()} - entity type queue start`
+        );
+        // const entityTypeQueue = async.queue((task, callback) => {
+        //   getEntityData(task).then((data) => {
+        //     data.forEach((item) => entityData.push(item));
+        //     callback();
+        //   });
+        // }, 1);
+
+        const entityTypeQueue = async.queue((task, callback) => {
+          getEntityData(task).then(data => {
+            // Process data immediately and update entities
+            data.forEach(item => {
+              const entityIndex = entities.findIndex(e => e.guid === item.guid);
+
+              if (entityIndex !== -1) {
+                Object.assign(
+                  entities[entityIndex],
+                  item,
+                  entities[entityIndex]
+                );
+              }
+            });
+            callback();
+          });
+        }, GLOBAL_CONCURRENCY_LIMIT);
+
+        entityTypeQueue.push(entityTypesToQuery);
+
+        entityTypeQueue.drain(() => {
+          console.log(
+            `${new Date().toLocaleTimeString()} - entity type queue end`
+          );
+
+          // merge entity data
+          // entities.forEach((entity, i) => {
+          //   const foundEntity = entityData.find((e) => e.guid === entity.guid);
+          //   if (foundEntity) {
+          //     Object.assign(entities[i], foundEntity, entity);
+          //   }
+          // });
+
+          entityData.length = 0;
+
+          resolve(entities);
+        });
+      }
+    });
+  };
+
+  const decorateEntitiesOld = entities => {
     //eslint-disable-next-line
     return new Promise(async resolve => {
       const entityTypesToQuery = [];
@@ -1303,6 +1635,9 @@ export function useProvideData(props) {
             entityTypesToQuery.push({
               entities: foundEntities,
               graphql: rule.graphql,
+              type: rule?.type,
+              domain: rule?.domain,
+              entityType: rule?.entityType
             });
           }
         }
@@ -1319,7 +1654,7 @@ export function useProvideData(props) {
               guid: e.guid,
               name: e.name,
               accountId: e.account.id,
-              nrqlQueries: rule.nrqlQueries(e),
+              nrqlQueries: rule.nrqlQueries(e)
             });
           });
         }
@@ -1334,7 +1669,7 @@ export function useProvideData(props) {
         const nrqlQueue = async.queue((task, callback) => {
           const nrqlPromises = Object.keys(task.nrqlQueries).map(q => {
             return NerdGraphQuery.query({
-              query: nrqlGqlQuery(task.accountId, task.nrqlQueries[q]),
+              query: nrqlGqlQuery(task.accountId, task.nrqlQueries[q])
             });
           });
 
@@ -1348,12 +1683,12 @@ export function useProvideData(props) {
 
             entityNrqlData.push({
               guid: task.guid,
-              nrqlData,
+              nrqlData
             });
 
             callback();
           });
-        }, 5);
+        }, GLOBAL_CONCURRENCY_LIMIT);
 
         nrqlQueue.push(entityNrqlQueries);
 
@@ -1363,9 +1698,12 @@ export function useProvideData(props) {
         );
 
         entities.forEach((entity, i) => {
-          const foundEntity = entityNrqlData.find(e => e.guid === entity.guid);
-          if (foundEntity) {
-            entities[i] = { ...foundEntity, ...entity };
+          const foundIndex = entityNrqlData.findIndex(
+            e => e.guid === entity.guid
+          );
+
+          if (entityIndex !== -1) {
+            Object.assign(entities[i], entityNrqlData[foundIndex], entity);
           }
         });
       }
@@ -1373,15 +1711,20 @@ export function useProvideData(props) {
       if (entityTypesToQuery.length > 0) {
         let entityData = [];
 
-        console.log(
-          `${new Date().toLocaleTimeString()} - entity type queue start`
-        );
+        // console.log(
+        //   `${new Date().toLocaleTimeString()} - entity type queue start`,
+        // );
         const entityTypeQueue = async.queue((task, callback) => {
+          console.log(
+            `${new Date().toLocaleTimeString()} - start entity type: ${task?.domain ||
+              ''} ${task?.entityType || ''} ${task?.type || ''}`
+          );
+
           getEntityData(task).then(data => {
-            entityData = [...entityData, ...data];
+            data.forEach(item => entityData.push(item));
             callback();
           });
-        }, 5);
+        }, GLOBAL_CONCURRENCY_LIMIT);
 
         entityTypeQueue.push(entityTypesToQuery);
 
@@ -1390,19 +1733,34 @@ export function useProvideData(props) {
             `${new Date().toLocaleTimeString()} - entity type queue end`
           );
 
-          // merge entity data
+          // Merge data without keeping references
+          // const resultEntities = entities.map((entity) => {
+          //   const foundEntity = entityData.find((e) => e.guid === entity.guid);
+          //   return foundEntity ? { ...foundEntity, ...entity } : entity;
+          // });
+
           entities.forEach((entity, i) => {
-            const foundEntity = entityData.find(e => e.guid === entity.guid);
-            if (foundEntity) {
-              entities[i] = { ...foundEntity, ...entity };
+            const foundIndex = entityData.findIndex(
+              e => e.guid === entity.guid
+            );
+
+            if (foundIndex !== -1) {
+              Object.assign(entities[i], entityData[foundIndex], entity);
             }
+
+            // perform strip ops
+            if ((entity?.deploymentSearch?.results || []).length === 0) {
+              delete entity.deploymentSearch;
+            }
+
+            stripEntityTags(entity);
           });
+
+          entityData = null;
 
           resolve(entities);
         });
-      }
-
-      if (entityTypesToQuery.length === 0 && entityNrqlQueries.length === 0) {
+      } else {
         resolve(entities);
       }
     });
@@ -1421,23 +1779,24 @@ export function useProvideData(props) {
       const taskQueue = async.queue((guids, callback) => {
         async.retry(
           {
-            times: 5, // Retry up to 5 times
-            interval: retryCount => 100 * Math.pow(2, retryCount), // Exponential backoff, starting at 100ms
+            times: RETRY_LIMIT,
+            interval: retryCount => RETRY_INIT_MS * Math.pow(2, retryCount) // Exponential backoff
           },
           retryCallback => {
             NerdGraphQuery.query({
               query: entityTask.graphql,
-              variables: { guids },
+              variables: { guids }
             })
               .then(res => {
                 if (res.error) {
                   console.error('Error fetching data, retrying...', res.error);
                   retryCallback(res.error);
                 } else {
-                  entityData = [
-                    ...entityData,
-                    ...(res?.data?.actor?.entities || []),
-                  ];
+                  const newEntities = res?.data?.actor?.entities || [];
+                  for (let i = 0; i < newEntities.length; i++) {
+                    entityData.push(newEntities[i]);
+                  }
+
                   retryCallback(null);
                 }
               })
@@ -1456,7 +1815,7 @@ export function useProvideData(props) {
             }
           }
         );
-      }, 5);
+      }, GLOBAL_CONCURRENCY_LIMIT);
 
       taskQueue.push(guidChunks);
 
@@ -1477,7 +1836,7 @@ export function useProvideData(props) {
       saveViewModalOpen: false,
       savingView: false,
       unsavedRun: false,
-      selectedView: { ...report, id: documentId, name: document.name },
+      selectedView: { ...report, id: documentId, name: document.name }
     };
 
     const res = await AccountStorageMutation.mutate({
@@ -1485,7 +1844,7 @@ export function useProvideData(props) {
       actionType: AccountStorageMutation.ACTION_TYPE.WRITE_DOCUMENT,
       collection: ACCOUNT_CONFIG_COLLECTION,
       documentId,
-      document,
+      document
     });
 
     // save if this was trigged from a run view
@@ -1498,23 +1857,114 @@ export function useProvideData(props) {
       Toast.showToast({
         title: 'Failed to save',
         description: 'Check your permissions',
-        type: Toast.TYPE.CRITICAL,
+        type: Toast.TYPE.CRITICAL
       });
     } else {
       Toast.showToast({
         title: 'Saved view successfully',
         // description: 'Refreshing...',
-        type: Toast.TYPE.NORMAL,
+        type: Toast.TYPE.NORMAL
       });
 
       if (
         dataState.defaultViewId === (report?.id || dataState.selectedReport.id)
       ) {
-        setDefaultView(dataState.defaultViewId);
+        setDefaultView(dataState?.defaultViewId);
       }
       setDataState(prepareState);
     }
   };
+
+  const checkEntityCount = async data => {
+    let {
+      accounts,
+      products,
+      allProducts,
+      hideNotReporting,
+      selectedView
+    } = data;
+    // setRunParams(null);
+
+    const reporting = hideNotReporting ? `reporting = 'true' and ` : '';
+
+    if (selectedView.name === `All Data`) {
+      accounts = dataState.accounts.map(a => a.id);
+      allProducts = true;
+    }
+
+    const accountEntityData = accounts.map(id => {
+      return NerdGraphQuery.query({
+        query: `{
+              actor {
+                entitySearch(query: "${reporting} tags.accountId = '${id}'") {
+                  types {
+                    count
+                    domain
+                    entityType
+                    type
+                  }
+                }
+              }
+            }`
+      });
+    });
+
+    const accountData = await Promise.all(accountEntityData);
+    const summarizedData = summarizeTypesWithRules(
+      accountData,
+      products,
+      allProducts
+    );
+
+    const totalEntities = summarizedData.reduce(
+      (total, type) => total + type.count,
+      0
+    );
+
+    setDataState({ entityCount: totalEntities });
+
+    return { totalEntities, summarizedData };
+  };
+
+  function summarizeTypesWithRules(data, products, allProducts) {
+    const summary = {};
+
+    data.forEach(item => {
+      const types = item?.data?.actor?.entitySearch?.types || [];
+
+      types.forEach(type => {
+        const key = `${type.domain}_${type.entityType}_${type.type}`;
+
+        if (summary[key]) {
+          summary[key].count += type.count;
+        } else {
+          summary[key] = { ...type };
+        }
+      });
+    });
+
+    let summarizedArray = Object.values(summary);
+
+    const selectedProducts = allProducts ? Object.keys(rules) : products;
+
+    summarizedArray = summarizedArray.filter(type => {
+      return selectedProducts.some(product => {
+        const rule = rules[product];
+        if (rule) {
+          if (rule.entityType && rule.type) {
+            return (
+              type.entityType === rule.entityType && type.type === rule.type
+            );
+          } else if (rule.entityType) {
+            return type.entityType === rule.entityType;
+          }
+        }
+        return false;
+      });
+    });
+
+    return summarizedArray;
+  }
 
   return {
     ...dataState,
@@ -1534,6 +1984,6 @@ export function useProvideData(props) {
     deleteSnapshot,
     getAccounts,
     getUserSettings,
-    clearWelcome,
+    clearWelcome
   };
 }

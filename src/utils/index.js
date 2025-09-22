@@ -18,7 +18,7 @@ export const chunkString = (str, chunkSize) => {
   return chunks;
 };
 
-export const scoreToColor = (value) => {
+export const scoreToColor = value => {
   if (value === null || value === undefined) {
     return { color: '#9ea5a9' };
   } else if (value >= 0 && value <= 50) {
@@ -38,7 +38,7 @@ export const scoreToColor = (value) => {
 // $unknown: #9EA5A9;
 // $blank: transparent;
 
-export const percentageToStatus = (value) => {
+export const percentageToStatus = value => {
   if (value !== null && value !== undefined) {
     if (value <= 50) {
       return STATUSES.CRITICAL;
@@ -55,19 +55,23 @@ export const percentageToStatus = (value) => {
 export const generateAccountSummary = (accounts, sortBy, report) => {
   const accountSummaries = [];
 
-  accounts.forEach((account) => {
+  accounts.forEach(account => {
     const { name, id, scores } = account;
     const summary = { name, id, totalScore: 0, maxScore: 0 };
 
-    Object.keys(scores).forEach((key) => {
+    Object.keys(scores).forEach(key => {
       if (
         report?.document?.allProducts ||
         (report?.document?.products || []).includes(key)
       ) {
-        const { overallScore, maxScore, offendingEntities, passingEntities } =
-          scores[key];
+        const {
+          overallScore,
+          maxScore,
+          offendingEntities,
+          passingEntities
+        } = scores[key];
 
-        (rules[key].scores || []).forEach((scoreKey) => {
+        (rules[key].scores || []).forEach(scoreKey => {
           if (!summary[`${key}.scoring`]) {
             summary[`${key}.scoring`] = {};
           }
@@ -100,6 +104,7 @@ export const generateAccountSummary = (accounts, sortBy, report) => {
 };
 
 export const flattenJSON = (obj = {}, res = {}, extraKey = '') => {
+  // eslint-disable-next-line
   for (let key in obj) {
     if (typeof obj[key] !== 'object') {
       res[extraKey + key] = obj[key];

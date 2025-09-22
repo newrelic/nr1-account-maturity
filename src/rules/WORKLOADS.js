@@ -1,4 +1,5 @@
 export default {
+  domain: 'NR1',
   entityType: 'WORKLOAD_ENTITY',
   // some entities require additional data that can only be performed with a direct guid query
   graphql: `query ($guids: [EntityGuid]!) {
@@ -10,13 +11,6 @@ export default {
               name
               alertSeverity
               reporting
-              dashboardEntities: relatedEntities(filter: {entityDomainTypes: {include: {domain: "VIZ", type: "DASHBOARD"}}}) {
-                results {
-                  source {
-                    guid
-                  }
-                }  
-              }
               workloadStatus {
                 description
                 statusSource
@@ -39,10 +33,18 @@ export default {
       name: 'Alerts',
       entityCheck: (entity) => entity?.alertSeverity !== 'NOT_CONFIGURED',
     },
-    {
-      name: 'Has Dashboards',
-      entityCheck: (entity) =>
-        (entity?.dashboardEntities?.results || []).length > 0,
-    },
+    // {
+    //   name: 'Has Dashboards',
+    //   entityCheck: (entity) =>
+    //     (entity?.dashboardEntities?.results || []).length > 0,
+    // },
   ],
 };
+
+// dashboardEntities: relatedEntities(filter: {entityDomainTypes: {include: {domain: "VIZ", type: "DASHBOARD"}}}) {
+//   results {
+//     source {
+//       guid
+//     }
+//   }
+// }

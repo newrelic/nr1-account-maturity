@@ -80,6 +80,6 @@ Contributions are welcome (and if you submit a Enhancement Request, expect to be
 
 Keep in mind that when you submit your pull request, you'll need to sign the CLA via the click-through using CLA-Assistant. If you'd like to execute our corporate CLA, or if you have any questions, please drop us an email at opensource@newrelic.com.
 
-## Open Source License
+### Open Source License
 
 This project is distributed under the [Apache 2 license](LICENSE).

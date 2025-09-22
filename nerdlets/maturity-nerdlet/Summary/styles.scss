@@ -1,3 +1,4 @@
+/* eslint-disable nr1/color-tokens, nr1/typography-tokens */
 .score {
   display: flex;
   flex-direction: row;
@@ -23,7 +24,8 @@
 
 .score-card {
   padding: 20px;
-  box-shadow: 0px 4px 4px 4px rgba(0, 0, 0, 0.02),
+  box-shadow:
+    0px 4px 4px 4px rgba(0, 0, 0, 0.02),
     0px 8px 16px 8px rgba(2, 3, 3, 0.05);
   border-radius: 4px;
 

@@ -1,8 +1,10 @@
+/* eslint-disable */
 import React, { useContext, useEffect } from 'react';
 import { PlatformStateContext, nerdlet, AutoSizer } from 'nr1';
 import { ProvideData } from '../../src/context/data';
 import AccountMaturity from './AccountMaturity';
 import { Messages } from '@newrelic/nr-labs-components';
+import { ResourceMonitorProvider } from './ResourceMonitor';
 
 export default function AccountMaturityRoot() {
   const platformContext = useContext(PlatformStateContext);
@@ -11,7 +13,7 @@ export default function AccountMaturityRoot() {
     nerdlet.setConfig({
       accountPicker: true,
       timePicker: false,
-      actionControls: true
+      actionControls: true,
     });
   }, []);
 
@@ -26,6 +28,7 @@ export default function AccountMaturityRoot() {
         timeoutPeriod={8 * 7 * 24 * 60 * 60} // 8 weeks
       />
 
+      {/* <ResourceMonitorProvider timeLimitMinutes={5}> */}
       <ProvideData platformContext={platformContext}>
         <AutoSizer>
           {({ width, height }) => (
@@ -33,6 +36,7 @@ export default function AccountMaturityRoot() {
           )}
         </AutoSizer>
       </ProvideData>
+      {/* </ResourceMonitorProvider> */}
     </div>
   );
 }

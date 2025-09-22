@@ -1,3 +1,4 @@
+/* eslint-disable */
 import React, { useMemo, useContext } from 'react';
 import { navigation, HeadingText } from 'nr1';
 import DataContext from '../../../src/context/data';
@@ -38,22 +39,22 @@ export default function Summary(props) {
                       ? () =>
                           /* eslint-disable */
                           navigation.openStackedNerdlet({
-                            id: 'account-details-nerdlet',
+                            id: 'account-details',
                             urlState: {
                               accountName: title,
                               accountId: subtitle,
                               accountPercentage: rollUpScore,
                               accountSummary: (
                                 props.accountSummaries || []
-                              ).find(a => a.id === parseInt(subtitle)),
-                            },
+                              ).find(a => a.id === parseInt(subtitle))
+                            }
                           })
                       : () =>
                           navigation.openStackedNerdlet({
-                            id: 'capability-details-nerdlet',
+                            id: 'capability-details',
                             urlState: {
-                              ...collection,
-                            },
+                              ...collection
+                            }
                           })
                     /* eslint-enable */
                   }
@@ -76,7 +77,7 @@ export default function Summary(props) {
         </div>
       </>
     );
-  }, [scoredCollection, viewGroupBy, selectedView]);
+  }, [scoredCollection, viewGroupBy, selectedReport, props]);
 }
 
 function sortByRollUpStatusAndScore(arr) {

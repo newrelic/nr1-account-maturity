@@ -1,3 +1,4 @@
+/* eslint-disable */
 import React, { useContext } from 'react';
 import {
   EmptyState,
@@ -6,7 +7,12 @@ import {
   HeadingText,
   BlockText,
   Icon,
-  navigation
+  navigation,
+  Modal,
+  Card,
+  CardHeader,
+  CardBody,
+  Button
 } from 'nr1';
 import DataContext from '../../../src/context/data';
 import CreateView from '../CreateView';
@@ -21,6 +27,8 @@ import DeleteSnapshot from '../DeleteSnapshot';
 import Help from '../HelpModal';
 import Welcome from '../Welcome';
 
+const ENTITY_COUNT_BLOCK = 50000;
+
 export const defaultActions = setDataState => {
   return [
     {
@@ -28,7 +36,7 @@ export const defaultActions = setDataState => {
       type: 'secondary',
       hint: 'Launch the old version',
       iconType: Icon.TYPE.INTERFACE__OPERATIONS__EXTERNAL_LINK,
-      onClick: () => navigation.openNerdlet({ id: 'old-maturity-nerdlet' })
+      onClick: () => navigation.openNerdlet({ id: 'old-maturity' })
     },
     {
       label: 'Help',
@@ -41,9 +49,14 @@ export const defaultActions = setDataState => {
 };
 
 export default function AccountMaturity(props) {
-  const { fetchingData, errorMsg, view, selectedAccountId } = useContext(
-    DataContext
-  );
+  const {
+    fetchingData,
+    errorMsg,
+    view,
+    selectedAccountId,
+    setDataState,
+    entityCount
+  } = useContext(DataContext);
 
   const renderView = page => {
     // eslint-disable-next-line prettier/prettier
@@ -114,6 +127,90 @@ export default function AccountMaturity(props) {
       <Help />
       <DeleteView />
       <DeleteSnapshot />
+      <Modal
+        hidden={entityCount <= ENTITY_COUNT_BLOCK}
+        onClose={() => setDataState({ entityCount: 0 })}
+      >
+        {entityCount > ENTITY_COUNT_BLOCK && (
+          <Card style={{ border: '1px solid #d9534f', marginBottom: '20px' }}>
+            <CardHeader
+              style={{
+                display: 'flex',
+                alignItems: 'center',
+                fontSize: '16px',
+                fontWeight: 'bold',
+                color: '#d9534f'
+              }}
+            >
+              <Icon type={Icon.TYPE.INTERFACE__STATE__WARNING} />
+              &nbsp;
+              {/* <EmptyState.Icon
+                              type={
+                                EmptyState.ICON_TYPE.STATUS__ERROR__EXCLAMATION__V_ALARM
+                              }
+                              style={{ marginRight: '10px' }}
+                            /> */}
+              Too many entities!
+            </CardHeader>
+            <CardBody>
+              <BlockText>
+                This query is targeting too many entities (<b>more than 50k</b>
+                ); please set up additional filters to limit the number of
+                entities included and try again.
+              </BlockText>
+              <BlockText style={{ marginTop: '10px' }}>
+                <b>Tips:</b>
+              </BlockText>
+              <ul
+                style={{
+                  marginTop: '5px',
+                  marginBottom: '15px',
+                  marginLeft: '15px'
+                }}
+              >
+                <li>
+                  If you have a large number of infrastructure entities, we
+                  recommend you isolate these into their own <b>View</b>.
+                </li>
+                <br />
+                <li>
+                  If you have many accounts, create views for each individually
+                  or collect them into meaningful smaller groups.
+                </li>
+                <br />
+                <li>
+                  To build highly targeted sets of entities, add a{' '}
+                  <b>tag filter</b> to the view. This supports compound
+                  statements such as{' '}
+                  <code>tags.team = 'labs' and tags.env = 'prod'</code>.
+                </li>
+              </ul>
+
+              <div style={{ display: 'flex', justifyContent: 'flex-end' }}>
+                {/* <Button
+                                type={Button.TYPE.PRIMARY}
+                                onClick={() => {
+                                  setDataState({ entityCount: 0 })};
+                                  runView(
+                                    runParams.selectedView,
+                                    runParams.selectedReport,
+                                    runParams.doSaveView,
+                                    null,
+                                    runParams.setAsDefault,
+                                  );
+                                }}
+                              >
+                                Continue
+                              </Button> */}
+                &nbsp;
+                <Button onClick={() => setDataState({ entityCount: 0 })}>
+                  Close
+                </Button>
+              </div>
+            </CardBody>
+          </Card>
+        )}
+      </Modal>
 
       {fetchingData && (
         <EmptyState title="Fetching data..." type={EmptyState.TYPE.LOADING} />

@@ -13,3 +13,5 @@ export const USER_TEMP_HISTORY = 'user-history-temp';
 
 export const USER_CONFIG_COLLECTION = 'user-configs';
 export const USER_HISTORY_COLLECTION = 'user-history';
+
+export const NRQL_BATCH_SIZE = 20;

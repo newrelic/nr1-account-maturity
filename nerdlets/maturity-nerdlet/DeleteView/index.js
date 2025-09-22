@@ -1,3 +1,4 @@
+/* eslint-disable */
 import React, { useContext, useMemo } from 'react';
 
 import { Modal, HeadingText, Button } from 'nr1';
@@ -5,12 +6,8 @@ import { Modal, HeadingText, Button } from 'nr1';
 import DataContext from '../../../src/context/data';
 
 export default function DeleteView() {
-  const {
-    deleteViewModalOpen,
-    deletingView,
-    deleteView,
-    setDataState
-  } = useContext(DataContext);
+  const { deleteViewModalOpen, deletingView, deleteView, setDataState } =
+    useContext(DataContext);
 
   return useMemo(() => {
     return (

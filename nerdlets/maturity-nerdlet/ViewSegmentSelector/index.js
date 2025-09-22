@@ -1,18 +1,16 @@
+/* eslint-disable */
 import React, { useContext, useMemo } from 'react';
 import { SegmentedControl, SegmentedControlItem } from 'nr1';
 
 import DataContext from '../../../src/context/data';
 
 export default function ViewSegmentSelector() {
-  const {
-    viewSegment,
-    viewGroupBy,
-    viewConfigs,
-    setDataState,
-    selectedView
-  } = useContext(DataContext);
+  const { viewSegment, viewGroupBy, viewConfigs, setDataState, selectedView } =
+    useContext(DataContext);
 
-  const viewConfig = (viewConfigs || []).find(vc => vc.id === selectedView?.id);
+  const viewConfig = (viewConfigs || []).find(
+    (vc) => vc.id === selectedView?.id,
+  );
 
   return useMemo(() => {
     return (
