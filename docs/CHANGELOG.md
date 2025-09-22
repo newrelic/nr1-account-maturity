@@ -1,3 +1,50 @@
+# [2.1.0](https://github.com/newrelic/nr1-account-maturity/compare/v2.0.0...v2.1.0) (2025-09-22)
+
+
+### Bug Fixes
+
+* Def View crash ([6811ae5](https://github.com/newrelic/nr1-account-maturity/commit/6811ae5425a31081cafe8ae924ca2da8d8ab0025))
+* default view crash ([09b2a33](https://github.com/newrelic/nr1-account-maturity/commit/09b2a3355a52a773900100b5f45d35e4d79e78a6))
+
+
+### Features
+
+* account sel patch ([8552141](https://github.com/newrelic/nr1-account-maturity/commit/8552141cb2fd15c467de096ed7bc4fef4e88e40c))
+* account sel patch ([ad3aca8](https://github.com/newrelic/nr1-account-maturity/commit/ad3aca8a4022dd572a976d1b8382124a68490560))
+* account sel patch ([fe81429](https://github.com/newrelic/nr1-account-maturity/commit/fe81429436508b50511d43708715b36c4b883451))
+* account selection update ([26c89fb](https://github.com/newrelic/nr1-account-maturity/commit/26c89fb6aabcafaa515179d6df1e32099b4eca7b))
+* account tweaks ([c8e226f](https://github.com/newrelic/nr1-account-maturity/commit/c8e226fc9d7a0e383336a41c34b20f31630cfc47))
+* backport ([9f926f1](https://github.com/newrelic/nr1-account-maturity/commit/9f926f1a5d8804085fa792dabd46df452442bba0))
+* batchAccountQuery ([19de3b0](https://github.com/newrelic/nr1-account-maturity/commit/19de3b018f1b89c7c0976c09e49b59d31bad08e4))
+* bump ver ([8af65f8](https://github.com/newrelic/nr1-account-maturity/commit/8af65f8492cc80bf699327d654bc8f3c0af2e73e))
+* bump ver ([82a35a7](https://github.com/newrelic/nr1-account-maturity/commit/82a35a734b086accf708042bc17206be66b4e14c))
+* bump ver ([219bf2d](https://github.com/newrelic/nr1-account-maturity/commit/219bf2d1fa755597b64a060f1529f5c3f5236d6f))
+* change OoO ([49734f0](https://github.com/newrelic/nr1-account-maturity/commit/49734f0e18e29ad1e9b49ebce97dd6bffeaf70e0))
+* change OoO ([ecc4bd8](https://github.com/newrelic/nr1-account-maturity/commit/ecc4bd873c36b2464e89f6f883510e71977330b4))
+* change OoO ([4597a5f](https://github.com/newrelic/nr1-account-maturity/commit/4597a5fc437241abdf39bc899879db5ff0a6acf5))
+* Dummy commit ([d89d9c9](https://github.com/newrelic/nr1-account-maturity/commit/d89d9c96862532297ff09c13cb0ef8b3cfbd3357))
+* edit patch ([1959d4d](https://github.com/newrelic/nr1-account-maturity/commit/1959d4d158eeb23265a0d1bf2d46e000a5a67020))
+* filter and score update ([204b46b](https://github.com/newrelic/nr1-account-maturity/commit/204b46bfbe3cf429803fe7b840170eda9131afba))
+* filter update ([6ce5713](https://github.com/newrelic/nr1-account-maturity/commit/6ce5713ccc4462245076de67ad0834acddcdb6b3))
+* fix capabilities ([3be8e79](https://github.com/newrelic/nr1-account-maturity/commit/3be8e791d0cf45fa44ec62fd5c47da5814d7ee5b))
+* maturity-nerdlet bp ([c4681f6](https://github.com/newrelic/nr1-account-maturity/commit/c4681f6283597cf518a921e3a37c2764fa7c45d1))
+* mem monitor ([7b0b5bd](https://github.com/newrelic/nr1-account-maturity/commit/7b0b5bda758d0e13a41af88a9d44779ae5b80518))
+* merge ([f576156](https://github.com/newrelic/nr1-account-maturity/commit/f5761564215aefd3b06d8d934ace8a13997d1219))
+* more batching ([dacb9f1](https://github.com/newrelic/nr1-account-maturity/commit/dacb9f1dece5527ff3f67f308cc57c1a5d4cd8f4))
+* nerdlet adjustments ([0436523](https://github.com/newrelic/nr1-account-maturity/commit/04365234708ffb68bbbddfdc0968abddef7b7194))
+* patch scoring ([015e2e0](https://github.com/newrelic/nr1-account-maturity/commit/015e2e0067ed601523476fd69ca43c8e7b9b6f46))
+* prev patch ([470659d](https://github.com/newrelic/nr1-account-maturity/commit/470659d0d730df0ea6fbf0848ad0a8c6e45f36eb))
+* remove inner async for queue ([d7042f8](https://github.com/newrelic/nr1-account-maturity/commit/d7042f8971c41a0b83cb46acbbef3eae04f1ad1c))
+* remove undef ([4e122c3](https://github.com/newrelic/nr1-account-maturity/commit/4e122c3534c88008f3b4953841708ea8ab1d1089))
+* rename resource usage warning ([699ed45](https://github.com/newrelic/nr1-account-maturity/commit/699ed45f55f72cbf50c23d237739a76d576b5cca))
+* revert names ([834147f](https://github.com/newrelic/nr1-account-maturity/commit/834147f9f92c782554b06773bd07b6808d7ec666))
+* scroll update ([03d142f](https://github.com/newrelic/nr1-account-maturity/commit/03d142fa3ff3f9d530613a160ecbc4bd4a60740d))
+* update data and queries ([731ec63](https://github.com/newrelic/nr1-account-maturity/commit/731ec63a69ff864cfc14e7e1358c479287f0065a))
+* update eslint ([5ad7aba](https://github.com/newrelic/nr1-account-maturity/commit/5ad7abae338959405987a7dffc64f1e06e70e725))
+* update resource time limit ([cfacc07](https://github.com/newrelic/nr1-account-maturity/commit/cfacc070ccc03b5ca998a60ac40dfff478bb2967))
+* update resource time limit ([63e517a](https://github.com/newrelic/nr1-account-maturity/commit/63e517a9b4e91bba5b0625bb5f2a7936c2545976))
+* v18 tweaks ([7812529](https://github.com/newrelic/nr1-account-maturity/commit/78125293eb98254f7320c77b0e0779d2ef489559))
+
 # [2.0.0](https://github.com/newrelic/nr1-account-maturity/compare/v1.0.0...v2.0.0) (2025-06-10)
 
 
