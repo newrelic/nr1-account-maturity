@@ -71,6 +71,8 @@ The `Run` option is always available. Clicking `Run` does not save any changes t
 
 Whether you click `Save and run` or `Run`, you will end up on the **View Summary Page**, presented with the scored results.
 
+**Note** - views are capped at 50k entities. If you have a view that exceeds this target, you will need to apply additional filters to reduce the number of scoped entities. This cap is in place to ensure performance and stability.
+
 ### View Summary Page
 
 The summary page presents the overall score results - either a transient score or a score snapshot - for a View configuration. Let’s walk through this page in detail.
@@ -200,9 +202,11 @@ Views have scores attached to them (see [Score Snapshot](#score-snapshot) for mo
 
 While it is possible to see all data you have access to using the reserved **All Data** view, it is highly recommended to leverage Views to avoid potential performance issues, and to create context-specific views that are relevant to invidual business units or teams.
 
+**Note** - views are capped at 50k entities. If you have a view that exceeds this target, you will need to apply additional filters to reduce the number of scoped entities. This cap is in place to ensure performance and stability.
+
 ### All Data
 
-A special View that targets all data accessible to you. The All Data view is always available, and is the default View loaded if no other saved Views have been created. All Data is scoped specifically to your data - since different users have different “all data” scopes, determined by their individual access permissions, your All Data view can’t be seen by others.
+A special View that targets all data accessible to you. The All Data view is always available, and is the default View loaded if no other saved Views have been created. All Data is scoped specifically to your data - since different users have different “all data” scopes, determined by their individual access permissions, your All Data view can’t be seen by others. If your All Data view exceeds the 50k entity cap, you will not be able to run it; you will need to define View configs that meet the cap criteria.
 
 ### Scoring
 
