@@ -1,5 +1,10 @@
 name: Pull Request
 
+permissions:
+  contents: read
+  pull-requests: write
+  checks: write
+
 on:
   pull_request:
     branches:
@@ -33,7 +38,7 @@ jobs:
             ${{ runner.os }}-node-modules-
 
       - name: Install Dependencies
-        run: npm ci
+        run: npm ci --no-audit
 
       - name: Install NR1 CLI
         run: curl -s https://cli.nr-ext.net/installer.sh | sudo bash
@@ -67,7 +72,7 @@ jobs:
             ${{ runner.os }}-node-modules-
 
       - name: Install Dependencies
-        run: npm ci
+        run: npm ci --no-audit
 
       - name: Run eslint-check and generate report
         id: eslint-check
@@ -113,7 +118,7 @@ jobs:
             ${{ runner.os }}-node-modules-
 
       - name: Install Dependencies
-        run: npm ci
+        run: npm ci --no-audit
 
       - name: Run npm test
         run: npm test
