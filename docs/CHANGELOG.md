@@ -1,3 +1,11 @@
+## [2.1.1](https://github.com/newrelic/nr1-account-maturity/compare/v2.1.0...v2.1.1) (2026-08-27)
+
+
+### Bug Fixes
+
+* **ci:** skip audit during npm ci to unblock install ([a4a7bb0](https://github.com/newrelic/nr1-account-maturity/commit/a4a7bb06bcab69dd1106e560c2a94d08f74a74cb))
+* **deps:** drop unpublished nr1 peer from lockfile ([365aeda](https://github.com/newrelic/nr1-account-maturity/commit/365aeda3ad067b624026031a7ba7c6b993980edc))
+
 # [2.1.0](https://github.com/newrelic/nr1-account-maturity/compare/v2.0.0...v2.1.0) (2025-09-22)
 
 
